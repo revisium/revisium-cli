@@ -1,7 +1,7 @@
 [
   {
     "tableId": "test",
-    "date": "2025-07-30T05:42:14.805Z",
+    "date": "2025-07-30T17:03:37.790Z",
     "hash": "9fb329b07bc9244b7cb9d04525777ce482db99f8",
     "patches": [
       {
@@ -10,9 +10,110 @@
         "value": {
           "type": "object",
           "required": ["test"],
-          "properties": { "test": { "type": "string", "default": "" } },
+          "properties": {
+            "test": {
+              "type": "string",
+              "default": ""
+            }
+          },
           "additionalProperties": false
         }
+      }
+    ]
+  },
+  {
+    "tableId": "post",
+    "date": "2025-07-30T17:16:53.734Z",
+    "hash": "451ecf9a7e492865eceee72e9f3b73a8d250e9b3",
+    "patches": [
+      {
+        "op": "add",
+        "path": "",
+        "value": {
+          "type": "object",
+          "required": ["firstName", "lastName"],
+          "properties": {
+            "lastName": {
+              "type": "string",
+              "default": ""
+            },
+            "firstName": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    ]
+  },
+  {
+    "tableId": "user",
+    "date": "2025-07-30T17:17:13.624Z",
+    "hash": "2492ea129f7f4f4519482f092fb9c0370291cdda",
+    "patches": [
+      {
+        "op": "add",
+        "path": "",
+        "value": {
+          "type": "object",
+          "required": ["firstName", "post"],
+          "properties": {
+            "post": {
+              "type": "string",
+              "default": "",
+              "foreignKey": "post"
+            },
+            "firstName": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    ]
+  },
+  {
+    "tableId": "post",
+    "date": "2025-07-30T17:17:25.202Z",
+    "hash": "c1dd5379d756ec000f3b98b781ed8fc75a33282e",
+    "patches": [
+      {
+        "op": "move",
+        "from": "/properties/lastName",
+        "path": "/properties/title"
+      }
+    ]
+  },
+  {
+    "tableId": "post",
+    "date": "2025-07-30T17:17:33.593Z",
+    "hash": "7d1f2ad69e5e380bb673d4d962a8f18514f8adc8",
+    "patches": [
+      {
+        "op": "remove",
+        "path": "/properties/firstName"
+      },
+      {
+        "op": "add",
+        "path": "/properties/description",
+        "value": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    ]
+  },
+  {
+    "tableId": "test",
+    "date": "2025-07-30T17:18:26.947Z",
+    "hash": "2d148fb2e66a2cc0ddb985c3403f334efa75146e",
+    "patches": [
+      {
+        "op": "move",
+        "from": "/properties/test",
+        "path": "/properties/test2"
       }
     ]
   }
