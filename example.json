@@ -1,0 +1,19 @@
+[
+  {
+    "tableId": "test",
+    "date": "2025-07-30T05:42:14.805Z",
+    "hash": "9fb329b07bc9244b7cb9d04525777ce482db99f8",
+    "patches": [
+      {
+        "op": "add",
+        "path": "",
+        "value": {
+          "type": "object",
+          "required": ["test"],
+          "properties": { "test": { "type": "string", "default": "" } },
+          "additionalProperties": false
+        }
+      }
+    ]
+  }
+]
