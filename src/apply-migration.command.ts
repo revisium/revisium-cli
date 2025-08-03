@@ -1,11 +1,11 @@
-import { Command, CommandRunner, Option } from 'nest-commander';
+import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { readFile } from 'fs/promises';
 import { CoreApiService } from 'src/core-api.service';
 import { JsonValidatorService } from 'src/json-validator.service';
 import { Migration } from 'src/types/migration.types';
 
-@Command({
-  name: 'migrate',
+@SubCommand({
+  name: 'apply',
   description: 'Validate and process migration files',
 })
 export class ApplyMigrationsCommand extends CommandRunner {
