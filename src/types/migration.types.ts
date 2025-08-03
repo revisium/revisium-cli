@@ -1,8 +1,12 @@
-import { JsonPatch } from 'src/types/json-patch.types';
+import {
+  InitMigrationDto,
+  RemoveMigrationDto,
+  RenameMigrationDto,
+  UpdateMigrationDto,
+} from 'src/__generated__/api';
 
-export type Migration = {
-  tableId: string;
-  date: string;
-  hash: string;
-  patches: JsonPatch[];
-};
+export type Migration =
+  | InitMigrationDto
+  | RenameMigrationDto
+  | UpdateMigrationDto
+  | RemoveMigrationDto;
