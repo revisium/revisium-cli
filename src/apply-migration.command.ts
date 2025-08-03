@@ -1,26 +1,19 @@
 import { Command, CommandRunner, Option } from 'nest-commander';
 import { readFile } from 'fs/promises';
-import Ajv from 'ajv';
-import { jsonPatchSchema } from 'src/config/json-patch-schema';
-import { metaSchema } from 'src/config/meta-schema';
-import { migrationSchema } from 'src/config/migration.schema';
-import { tableMigrationsSchema } from 'src/config/table-migrations-schema';
 import { CoreApiService } from 'src/core-api.service';
+import { JsonValidatorService } from 'src/json-validator.service';
 import { Migration } from 'src/types/migration.types';
 
 @Command({
   name: 'migrate',
   description: 'Validate and process migration files',
 })
-export class TaskRunner extends CommandRunner {
-  private readonly ajv = new Ajv();
-
-  constructor(private readonly coreApiService: CoreApiService) {
+export class ApplyMigrationsCommand extends CommandRunner {
+  constructor(
+    private readonly coreApiService: CoreApiService,
+    private readonly jsonValidatorService: JsonValidatorService,
+  ) {
     super();
-
-    this.ajv.compile(metaSchema);
-    this.ajv.compile(jsonPatchSchema);
-    this.ajv.compile(tableMigrationsSchema);
   }
 
   async run(_inputs: string[], options: Record<string, string>): Promise<void> {
@@ -38,19 +31,7 @@ export class TaskRunner extends CommandRunner {
       const fileContent = await readFile(filePath, 'utf-8');
       const data: unknown = JSON.parse(fileContent);
 
-      const validate = this.ajv.compile<Migration[]>(migrationSchema);
-      const valid = validate(data);
-
-      if (valid) {
-        console.log('✅ JSON file is valid');
-        console.log(`Validated ${data.length} items`);
-      } else {
-        console.log('❌ JSON file validation failed:');
-        console.log(validate.errors);
-        process.exit(1);
-      }
-
-      return data;
+      return this.jsonValidatorService.validate(data);
     } catch (error) {
       console.error(
         'Error reading or parsing file:',
@@ -80,10 +61,6 @@ export class TaskRunner extends CommandRunner {
 
     try {
       for (const localMigration of migrations) {
-        console.log(
-          `🔄 Processing migration for table ${localMigration.tableId}`,
-        );
-
         const result = await this.api.applyMigrations(revisionId, [
           localMigration,
         ]);
@@ -109,8 +86,7 @@ export class TaskRunner extends CommandRunner {
 
   @Option({
     flags: '-f, --file <file>',
-    description:
-      'JSON file to validate with schema: { date: string, hash: string, patches: object[] }[]',
+    description: 'JSON file to validate',
     required: true,
   })
   parseFile(val: string) {
