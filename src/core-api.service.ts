@@ -7,7 +7,7 @@ export class CoreApiService extends Api<unknown> {
 
   constructor() {
     super({
-      baseUrl: 'http://localhost:8081',
+      baseUrl: 'http://localhost:8080',
     });
   }
 

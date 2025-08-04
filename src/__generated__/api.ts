@@ -194,6 +194,67 @@ export interface CreateRevisionDto {
   comment?: string;
 }
 
+export interface RemoveMigrationDto {
+  /**
+   * Indicates a remove migration
+   * @example "remove"
+   */
+  changeType: "remove";
+  /** Timestamp when the table was removed (ISO 8601) */
+  id: string;
+  /** Current table identifier */
+  tableId: string;
+}
+
+export interface RenameMigrationDto {
+  /**
+   * Indicates a rename migration
+   * @example "rename"
+   */
+  changeType: "rename";
+  /** Timestamp when the table was renamed (ISO 8601) */
+  id: string;
+  /** Current table identifier */
+  tableId: string;
+  /** New table identifier after renaming */
+  nextTableId: string;
+}
+
+export interface UpdateMigrationDto {
+  /**
+   * Indicates an update migration
+   * @example "update"
+   */
+  changeType: "update";
+  /** Identifier of the table */
+  tableId: string;
+  /** Checksum of the patch set */
+  hash: string;
+  /** Timestamp when the update was applied (ISO 8601) */
+  id: string;
+  /** Array of JSON Patch operations */
+  patches: object[];
+}
+
+export interface InitMigrationDto {
+  /**
+   * Indicates an initialization migration
+   * @example "init"
+   */
+  changeType: "init";
+  /** Identifier of the newly created table */
+  tableId: string;
+  /** Checksum of the initial schema */
+  hash: string;
+  /**
+   * Timestamp when the table was created (ISO 8601)
+   * @example "2025-07-31T12:34:56Z"
+   */
+  id: string;
+  /** JSON Schema definition of the table */
+  schema: object;
+}
+
 export interface ChildBranchResponse {
   branch: Id;
   revision: Id;
@@ -228,14 +289,6 @@ export interface EndpointModel {
   type: "GRAPHQL" | "REST_API";
 }
 
-export interface MigrationsModel {
-  tableId: string;
-  hash: string;
-  date: string;
-  /** Array of JSON patch operations */
-  patches: object[];
-}
-
 export interface CreateBranchByRevisionDto {
   branchName: string;
 }
@@ -252,6 +305,15 @@ export interface CreateTableDto {
 export interface CreateTableResponse {
   branch: BranchModel;
   table: TableModel;
+}
+
+export interface ApplyMigrationsResponseDto {
+  /** The ID of the migration */
+  id: string;
+  /** The migration application status */
+  status: "applied" | "failed" | "skipped";
+  /** Error message if the migration failed */
+  error?: string;
 }
 
 export interface OrderByDto {
@@ -817,7 +879,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Revisium API
- * @version 1.5.0-alpha.3
+ * @version 2.0.0-alpha.1
  * @contact
  */
 export class Api<
@@ -1569,10 +1631,46 @@ export class Api<
      * @secure
      */
     migrations: (revisionId: string, params: RequestParams = {}) =>
-      this.request<MigrationsModel[], any>({
+      this.request<
+        (
+          | InitMigrationDto
+          | UpdateMigrationDto
+          | RenameMigrationDto
+          | RemoveMigrationDto
+        )[],
+        any
+      >({
         path: `/api/revision/${revisionId}/migrations`,
         method: "GET",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name ApplyMigrations
+     * @request POST:/api/revision/{revisionId}/apply-migrations
+     * @secure
+     */
+    applyMigrations: (
+      revisionId: string,
+      data: (
+        | InitMigrationDto
+        | UpdateMigrationDto
+        | RenameMigrationDto
+        | RemoveMigrationDto
+      )[],
+      params: RequestParams = {},
+    ) =>
+      this.request<ApplyMigrationsResponseDto[], any>({
+        path: `/api/revision/${revisionId}/apply-migrations`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
