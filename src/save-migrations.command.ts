@@ -1,13 +1,17 @@
 import { writeFile } from 'fs/promises';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { CoreApiService } from 'src/core-api.service';
+import { DraftRevisionService } from 'src/draft-revision.service';
 
 @SubCommand({
   name: 'save',
   description: 'Save migrations to file',
 })
 export class SaveMigrationsCommand extends CommandRunner {
-  constructor(private readonly coreApiService: CoreApiService) {
+  constructor(
+    private readonly coreApiService: CoreApiService,
+    private readonly draftRevisionService: DraftRevisionService,
+  ) {
     super();
   }
 
@@ -17,6 +21,7 @@ export class SaveMigrationsCommand extends CommandRunner {
       process.exit(1);
     }
 
+    await this.coreApiService.login();
     const revisionId = await this.getRevisionId();
     await this.saveFile(revisionId, options.file);
   }
@@ -38,15 +43,7 @@ export class SaveMigrationsCommand extends CommandRunner {
   }
 
   private async getRevisionId() {
-    await this.coreApiService.login();
-
-    const result = await this.api.draftRevision('admin', 'test', 'master');
-
-    if (result.error) {
-      throw new Error(String(result.error));
-    }
-
-    return result.data.id;
+    return await this.draftRevisionService.getDraftRevisionId();
   }
 
   @Option({
