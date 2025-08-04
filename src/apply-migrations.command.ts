@@ -1,6 +1,7 @@
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { readFile } from 'fs/promises';
 import { CoreApiService } from 'src/core-api.service';
+import { DraftRevisionService } from 'src/draft-revision.service';
 import { JsonValidatorService } from 'src/json-validator.service';
 import { Migration } from 'src/types/migration.types';
 
@@ -12,6 +13,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly jsonValidatorService: JsonValidatorService,
+    private readonly draftRevisionService: DraftRevisionService,
   ) {
     super();
   }
@@ -22,6 +24,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
       process.exit(1);
     }
 
+    await this.coreApiService.login();
     const jsonData = await this.validateJsonFile(options.file);
     await this.applyMigration(jsonData);
   }
@@ -42,15 +45,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
   }
 
   private async applyMigration(migrations: Migration[]) {
-    await this.coreApiService.login();
-
-    const result = await this.api.draftRevision('admin', 'test', 'master');
-
-    if (result.error) {
-      throw new Error(String(result.error));
-    }
-
-    const revisionId = result.data.id;
+    const revisionId = await this.draftRevisionService.getDraftRevisionId();
 
     if (migrations.length === 0) {
       console.log('✅ No migrations to apply - all migrations are up to date');
