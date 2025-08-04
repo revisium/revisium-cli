@@ -1,12 +1,13 @@
 {
-  "name": "revisium-cli",
-  "version": "0.0.1",
+  "name": "revisium",
+  "version": "0.1.0",
   "description": "",
   "author": "",
-  "private": true,
+  "private": false,
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "prepublishOnly": "npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -19,6 +20,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generate:api": "npx swagger-typescript-api generate -p http://localhost:8080/api-json -o src/__generated__ -n api.ts --extract-request-params --disable-throw-on-error"
+  },
+  "bin": {
+    "revisium": "dist/main.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
