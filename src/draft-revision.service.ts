@@ -9,11 +9,18 @@ export class DraftRevisionService {
     private readonly coreApiService: CoreApiService,
   ) {}
 
-  public async getDraftRevisionId() {
+  public async getDraftRevisionId(
+    options: {
+      organization?: string;
+      project?: string;
+      branch?: string;
+    } = {},
+  ) {
     const result = await this.api.draftRevision(
-      this.configService.get('REVISIUM_ORGANIZATION', ''),
-      this.configService.get('REVISIUM_PROJECT', ''),
-      this.configService.get('REVISIUM_BRANCH', ''),
+      options?.organization ??
+        this.configService.get('REVISIUM_ORGANIZATION', ''),
+      options?.project ?? this.configService.get('REVISIUM_PROJECT', ''),
+      options?.branch ?? this.configService.get('REVISIUM_BRANCH', ''),
     );
 
     if (result.error) {

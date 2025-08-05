@@ -3,6 +3,13 @@ import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { CoreApiService } from 'src/core-api.service';
 import { DraftRevisionService } from 'src/draft-revision.service';
 
+type Options = {
+  file: string;
+  organization?: string;
+  project?: string;
+  branch?: string;
+};
+
 @SubCommand({
   name: 'save',
   description: 'Save migrations to file',
@@ -15,15 +22,20 @@ export class SaveMigrationsCommand extends CommandRunner {
     super();
   }
 
-  async run(_inputs: string[], options: Record<string, string>): Promise<void> {
-    if (!options.file) {
-      console.error('Error: --file option is required');
-      process.exit(1);
-    }
+  async run(_inputs: string[], options: Options): Promise<void> {
+    try {
+      if (!options.file) {
+        console.error('Error: --file option is required');
+        process.exit(1);
+      }
 
-    await this.coreApiService.login();
-    const revisionId = await this.getRevisionId();
-    await this.saveFile(revisionId, options.file);
+      await this.coreApiService.login();
+      const revisionId =
+        await this.draftRevisionService.getDraftRevisionId(options);
+      await this.saveFile(revisionId, options.file);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async saveFile(revisionId: string, filePath: string) {
@@ -42,10 +54,6 @@ export class SaveMigrationsCommand extends CommandRunner {
     }
   }
 
-  private async getRevisionId() {
-    return await this.draftRevisionService.getDraftRevisionId();
-  }
-
   @Option({
     flags: '-f, --file <file>',
     description: 'file to save migrations',
@@ -57,5 +65,32 @@ export class SaveMigrationsCommand extends CommandRunner {
 
   private get api() {
     return this.coreApiService.api;
+  }
+
+  @Option({
+    flags: '-o, --organization <organization>',
+    description: 'organization name',
+    required: false,
+  })
+  parseOrganization(val: string) {
+    return val;
+  }
+
+  @Option({
+    flags: '-p, --project <project>',
+    description: 'project name',
+    required: false,
+  })
+  parseProject(val: string) {
+    return val;
+  }
+
+  @Option({
+    flags: '-b, --branch <branch>',
+    description: 'branch name',
+    required: false,
+  })
+  parseBranch(val: string) {
+    return val;
   }
 }
