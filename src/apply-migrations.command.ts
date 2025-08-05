@@ -5,6 +5,13 @@ import { DraftRevisionService } from 'src/draft-revision.service';
 import { JsonValidatorService } from 'src/json-validator.service';
 import { Migration } from 'src/types/migration.types';
 
+type Options = {
+  file: string;
+  organization?: string;
+  project?: string;
+  branch?: string;
+};
+
 @SubCommand({
   name: 'apply',
   description: 'Validate and process migration files',
@@ -18,15 +25,19 @@ export class ApplyMigrationsCommand extends CommandRunner {
     super();
   }
 
-  async run(_inputs: string[], options: Record<string, string>): Promise<void> {
-    if (!options.file) {
-      console.error('Error: --file option is required');
-      process.exit(1);
-    }
+  async run(_inputs: string[], options: Options): Promise<void> {
+    try {
+      if (!options.file) {
+        console.error('Error: --file option is required');
+        process.exit(1);
+      }
 
-    await this.coreApiService.login();
-    const jsonData = await this.validateJsonFile(options.file);
-    await this.applyMigration(jsonData);
+      await this.coreApiService.login();
+      const jsonData = await this.validateJsonFile(options.file);
+      await this.applyMigration(options, jsonData);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async validateJsonFile(filePath: string) {
@@ -44,8 +55,9 @@ export class ApplyMigrationsCommand extends CommandRunner {
     }
   }
 
-  private async applyMigration(migrations: Migration[]) {
-    const revisionId = await this.draftRevisionService.getDraftRevisionId();
+  private async applyMigration(options: Options, migrations: Migration[]) {
+    const revisionId =
+      await this.draftRevisionService.getDraftRevisionId(options);
 
     if (migrations.length === 0) {
       console.log('✅ No migrations to apply - all migrations are up to date');
@@ -79,6 +91,10 @@ export class ApplyMigrationsCommand extends CommandRunner {
     }
   }
 
+  private get api() {
+    return this.coreApiService.api;
+  }
+
   @Option({
     flags: '-f, --file <file>',
     description: 'JSON file to validate',
@@ -88,7 +104,30 @@ export class ApplyMigrationsCommand extends CommandRunner {
     return val;
   }
 
-  private get api() {
-    return this.coreApiService.api;
+  @Option({
+    flags: '-o, --organization <organization>',
+    description: 'organization name',
+    required: false,
+  })
+  parseOrganization(val: string) {
+    return val;
+  }
+
+  @Option({
+    flags: '-p, --project <project>',
+    description: 'project name',
+    required: false,
+  })
+  parseProject(val: string) {
+    return val;
+  }
+
+  @Option({
+    flags: '-b, --branch <branch>',
+    description: 'branch name',
+    required: false,
+  })
+  parseBranch(val: string) {
+    return val;
   }
 }

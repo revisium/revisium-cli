@@ -1,4 +1,4 @@
-import { Command, CommandRunner } from 'nest-commander';
+import { Command, CommandRunner, Option } from 'nest-commander';
 import { ApplyMigrationsCommand } from 'src/apply-migrations.command';
 import { SaveMigrationsCommand } from 'src/save-migrations.command';
 
