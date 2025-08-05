@@ -10,8 +10,8 @@ Create a `.env` file in your project root and set the following variables:
 
 ```dotenv
 REVISIUM_API_URL=http://localhost:8080       # Base URL of Revisium API
-REVISIUM_USERNAME=                           # Your Revisium username (if using basic auth)
-REVISIUM_PASSWORD=                           # Your Revisium password (if using basic auth)
+REVISIUM_USERNAME=                           # Your Revisium username
+REVISIUM_PASSWORD=                           # Your Revisium password
 REVISIUM_ORGANIZATION=                       # Target organization name
 REVISIUM_PROJECT=                            # Target project name
 REVISIUM_BRANCH=                             # Target branch name (e.g., 'master', 'draft')
