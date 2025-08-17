@@ -1,3 +1,5 @@
+<div align="center">
+
 # Revisium CLI
 
 [![GitHub Release](https://img.shields.io/github/v/release/revisium/revisium-cli)](https://github.com/revisium/revisium-cli/releases)
@@ -6,7 +8,9 @@
 [![NestJS](https://img.shields.io/badge/NestJS-11.0-red.svg)](https://nestjs.com/)
 [![npm version](https://img.shields.io/npm/v/revisium.svg)](https://www.npmjs.com/package/revisium)
 
-Command-line interface for managing Revisium projects.
+**Command-line interface for managing Revisium projects**
+
+</div>
 
 ## Overview
 
