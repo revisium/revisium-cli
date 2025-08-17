@@ -8,6 +8,8 @@ import { MigrationCommand } from 'src/migration.command';
 import { SaveMigrationsCommand } from 'src/save-migrations.command';
 import { SchemaCommand } from 'src/schema.command';
 import { SaveSchemaCommand } from 'src/save-schema.command';
+import { RowsCommand } from 'src/rows.command';
+import { SaveRowsCommand } from 'src/save-rows.command';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
@@ -17,6 +19,8 @@ import { SaveSchemaCommand } from 'src/save-schema.command';
     SaveMigrationsCommand,
     SchemaCommand,
     SaveSchemaCommand,
+    RowsCommand,
+    SaveRowsCommand,
     JsonValidatorService,
     CoreApiService,
     DraftRevisionService,
