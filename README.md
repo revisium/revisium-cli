@@ -1,166 +1,164 @@
-## Revisium CLI README
+<div align="center">
 
-This document describes how to configure and use the `revisium` command-line tool for saving and applying migrations.
+# Revisium CLI
 
----
+[![GitHub Release](https://img.shields.io/github/v/release/revisium/revisium-cli)](https://github.com/revisium/revisium-cli/releases)
+[![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/supergraph-builder/blob/master/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11.0-red.svg)](https://nestjs.com/)
+[![npm version](https://img.shields.io/npm/v/revisium.svg)](https://www.npmjs.com/package/revisium)
 
-### Configuration via `.env`
+**Command-line interface for managing Revisium projects**
 
-Create a `.env` file in your project root and set the following variables:
+</div>
 
-```dotenv
-REVISIUM_API_URL=http://localhost:8080       # Base URL of Revisium API
-REVISIUM_USERNAME=                           # Your Revisium username
-REVISIUM_PASSWORD=                           # Your Revisium password
-REVISIUM_ORGANIZATION=                       # Target organization name
-REVISIUM_PROJECT=                            # Target project name
-REVISIUM_BRANCH=                             # Target branch name (e.g., 'master', 'draft')
+## Overview
+
+A CLI tool for interacting with Revisium instances, providing migration management, schema export, and data export capabilities.
+
+## Features
+
+- 🚀 **Migration Management** - Save and apply database migrations
+- 📋 **Schema Export** - Export table schemas to JSON files
+- 📊 **Data Export** - Export table rows to JSON files
+- 🔧 **Flexible Configuration** - Environment variables or command-line options
+
+## Quick Start
+
+### Installation
+
+```bash
+# Install globally
+npm install -g revisium
+
+# Or use with npx
+npx revisium --help
 ```
 
-> **Note:** You don’t need an API key for now; authentication is handled via username/password or existing session.
+### Configuration
 
----
+Create a `.env` file in your project root:
 
-### Commands
-
-Revisium CLI provides migration and schema management commands.
-
-## Migration Commands
-
-The `migrate` namespace provides commands for managing database migrations. **The `--file` option is required** for both commands.
-
-#### 1. Save Migrations
-
-Fetches current migrations from Revisium and saves them to a JSON file.
-
-```shell
-npx revisium migrate save --file ./migrations.json
+```env
+REVISIUM_API_URL=http://localhost:8080
+REVISIUM_USERNAME=your_username
+REVISIUM_PASSWORD=your_password
+REVISIUM_ORGANIZATION=your_organization
+REVISIUM_PROJECT=your_project
+REVISIUM_BRANCH=master
 ```
 
-**Options:**
+### Basic Usage
 
-| Flag                         | Description         | Required         |
-| ---------------------------- | ------------------- | ---------------- |
-| `-f`, `--file <path>`        | Path to output file | yes              |
-| `-o`, `--organization <org>` | Organization name   | no (env default) |
-| `-p`, `--project <proj>`     | Project name        | no (env default) |
-| `-b`, `--branch <branch>`    | Branch name         | no (env default) |
+```bash
+# View all available commands
+revisium --help
 
-Usage:
+# Export table schemas
+revisium schema save --folder ./schemas
 
-```shell
-# must specify --file
-npx revisium migrate save --file=./custom.json
-# you can also override org/project/branch
-npx revisium migrate save --file=./migrations.json --project=my-project --branch=dev
+# Export table data
+revisium rows save --folder ./data
+
+# Manage migrations
+revisium migrate save --file ./migrations.json
+revisium migrate apply --file ./migrations.json
 ```
 
-#### 2. Apply Migrations
+## Commands
 
-Validates and applies migrations from a JSON file to the target Revisium instance.
+### Migration Commands
 
-```shell
-npx revisium migrate apply --file ./migrations.json
-```
+#### `migrate save`
+Export migrations to a JSON file.
 
-**Options:**
-
-| Flag                         | Description        | Required         |
-| ---------------------------- | ------------------ | ---------------- |
-| `-f`, `--file <path>`        | Path to input file | yes              |
-| `-o`, `--organization <org>` | Organization name  | no (env default) |
-| `-p`, `--project <proj>`     | Project name       | no (env default) |
-| `-b`, `--branch <branch>`    | Branch name        | no (env default) |
-
-Usage:
-
-```shell
-# must specify --file
-npx revisium migrate apply --file=./prod-migrations.json
-# you can also override org/project/branch
-npx revisium migrate apply --file=./migrations.json --organization=acme --branch=prod
-```
-
-## Schema Commands
-
-The `schema` namespace provides commands for managing table schemas.
-
-#### Save All Table Schemas
-
-Fetches all table schemas from a Revisium project and saves each schema to individual JSON files named by table ID.
-
-```shell
-npx revisium schema save --folder ./schemas
+```bash
+revisium migrate save --file ./migrations.json [options]
 ```
 
 **Options:**
 
-| Flag                         | Description                | Required         |
-| ---------------------------- | -------------------------- | ---------------- |
-| `-f`, `--folder <path>`      | Folder path to save files  | yes              |
-| `-o`, `--organization <org>` | Organization name          | no (env default) |
-| `-p`, `--project <proj>`     | Project name               | no (env default) |
-| `-b`, `--branch <branch>`    | Branch name                | no (env default) |
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-f, --file <path>` | Output file path | ✓ | - |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
 
-Usage:
+#### `migrate apply`
+Apply migrations from a JSON file.
 
-```shell
-# Save all table schemas to ./schemas folder
-npx revisium schema save --folder=./schemas
-
-# Override project/branch
-npx revisium schema save --folder=./schemas --project=my-project --branch=dev
-```
-
-The command will:
-1. Create the specified folder if it doesn't exist
-2. Fetch all tables from the project (with pagination of 100 tables per request)
-3. For each table, fetch its schema using the `/api/revision/{revisionId}/tables/{tableId}/schema` endpoint
-4. Save each schema as `{tableId}.json` in the specified folder
-
-## Rows Commands
-
-The `rows` namespace provides commands for managing table row data.
-
-#### Save Table Rows
-
-Fetches all rows from tables and saves each row to individual JSON files organized by table.
-
-```shell
-npx revisium rows save --folder ./data
+```bash
+revisium migrate apply --file ./migrations.json [options]
 ```
 
 **Options:**
 
-| Flag                         | Description                           | Required         |
-| ---------------------------- | ------------------------------------- | ---------------- |
-| `-f`, `--folder <path>`      | Folder path to save row files         | yes              |
-| `-t`, `--tables <tables>`    | Comma-separated table IDs to process  | no (all tables)  |
-| `-o`, `--organization <org>` | Organization name                     | no (env default) |
-| `-p`, `--project <proj>`     | Project name                          | no (env default) |
-| `-b`, `--branch <branch>`    | Branch name                           | no (env default) |
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-f, --file <path>` | Input file path | ✓ | - |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
 
-Usage:
+### Schema Commands
 
-```shell
-# Save all rows from all tables
-npx revisium rows save --folder=./data
+#### `schema save`
+Export table schemas to JSON files.
 
-# Save rows from specific tables only
-npx revisium rows save --folder=./data --tables=users,posts,comments
-
-# Override project/branch
-npx revisium rows save --folder=./data --tables=users --project=my-project --branch=dev
+```bash
+revisium schema save --folder ./schemas [options]
 ```
 
-The command will:
-1. Create the specified folder if it doesn't exist
-2. If `--tables` is specified, process only those tables; otherwise fetch all tables from the project
-3. For each table, create a subfolder `{tableId}` within the main folder
-4. Fetch all rows from each table (with pagination of 100 rows per request)
-5. Save each row as `{row.id}.json` within the table's subfolder
+**Options:**
 
-**File Structure Example:**
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-f, --folder <path>` | Output folder path | ✓ | - |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+
+**Output:**
+```
+schemas/
+├── table-1.json
+├── table-2.json
+└── table-n.json
+```
+
+### Rows Commands
+
+#### `rows save`
+Export table rows to JSON files.
+
+```bash
+revisium rows save --folder ./data [options]
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-f, --folder <path>` | Output folder path | ✓ | - |
+| `-t, --tables <ids>` | Comma-separated table IDs | - | All tables |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+
+**Examples:**
+```bash
+# Export all tables
+revisium rows save --folder ./data
+
+# Export specific tables
+revisium rows save --folder ./data --tables users,posts,comments
+
+# Override project settings
+revisium rows save --folder ./data --project my-project --branch dev
+```
+
+**Output:**
 ```
 data/
 ├── users/
@@ -169,73 +167,40 @@ data/
 │   └── ...
 ├── posts/
 │   ├── post-789.json
-│   ├── post-abc.json
 │   └── ...
 └── comments/
     ├── comment-def.json
     └── ...
 ```
 
----
+## Configuration
 
-### CLI Help Output
+Create a `.env` file:
 
-To see the full command reference, run:
-
-```shell
-npx revisium --help
+```env
+REVISIUM_API_URL=http://localhost:8080
+REVISIUM_USERNAME=your_username  
+REVISIUM_PASSWORD=your_password
+REVISIUM_ORGANIZATION=your_organization
+REVISIUM_PROJECT=your_project
+REVISIUM_BRANCH=master
 ```
 
-Example:
+You can also use command-line options:
 
-```
-$ npx revisium migrate -h
-Usage: revisium migrate [options] [command]
-
-Options:
-  -h, --help            display help for command
-
-Commands:
-  apply [options]       Validate and process migration files
-  save [options]        Save migrations to file
+```bash
+revisium schema save --folder ./schemas --organization acme --project website
 ```
 
-Detailed help for sub-commands:
+## Development
 
-```shell
-npx revisium migrate apply -h
+```bash
+git clone https://github.com/revisium/revisium-cli.git
+cd revisium-cli
+npm install
+npm run build
 ```
 
-```
-Usage: revisium migrate apply [options]
+## License
 
-Validate and process migration files
-
-Options:
-  -f, --file <file>                  JSON file to validate (required)
-  -o, --organization <organization>  organization name (env: $REVISIUM_ORGANIZATION)
-  -p, --project <project>            project name (env: $REVISIUM_PROJECT)
-  -b, --branch <branch>              branch name (env: $REVISIUM_BRANCH)
-  -h, --help                         display help for command
-```
-
-```shell
-npx revisium migrate save -h
-```
-
-```
-Usage: revisium migrate save [options]
-
-Save migrations to file
-
-Options:
-  -f, --file <file>                  file to save migrations (required)
-  -o, --organization <organization>  organization name (env: $REVISIUM_ORGANIZATION)
-  -p, --project <project>            project name (env: $REVISIUM_PROJECT)
-  -b, --branch <branch>              branch name (env: $REVISIUM_BRANCH)
-  -h, --help                         display help for command
-```
-
----
-
-> *Make sure to keep your `.env` out of version control by adding it to `.gitignore`.*
+MIT License - see [LICENSE](LICENSE) file for details.

@@ -1,11 +1,11 @@
 {
   "name": "revisium",
   "version": "0.3.0",
-  "description": "",
-  "private": false,
-  "license": "UNLICENSED",
   "homepage": "https://revisium.io",
+  "description": "A CLI tool for interacting with Revisium instances, providing migration management, schema export, and data export capabilities.",
   "author": "Anton Kashirov",
+  "private": false,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/revisium/revisium-cli.git"
