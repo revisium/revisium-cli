@@ -118,6 +118,64 @@ The command will:
 3. For each table, fetch its schema using the `/api/revision/{revisionId}/tables/{tableId}/schema` endpoint
 4. Save each schema as `{tableId}.json` in the specified folder
 
+## Rows Commands
+
+The `rows` namespace provides commands for managing table row data.
+
+#### Save Table Rows
+
+Fetches all rows from tables and saves each row to individual JSON files organized by table.
+
+```shell
+npx revisium rows save --folder ./data
+```
+
+**Options:**
+
+| Flag                         | Description                           | Required         |
+| ---------------------------- | ------------------------------------- | ---------------- |
+| `-f`, `--folder <path>`      | Folder path to save row files         | yes              |
+| `-t`, `--tables <tables>`    | Comma-separated table IDs to process  | no (all tables)  |
+| `-o`, `--organization <org>` | Organization name                     | no (env default) |
+| `-p`, `--project <proj>`     | Project name                          | no (env default) |
+| `-b`, `--branch <branch>`    | Branch name                           | no (env default) |
+
+Usage:
+
+```shell
+# Save all rows from all tables
+npx revisium rows save --folder=./data
+
+# Save rows from specific tables only
+npx revisium rows save --folder=./data --tables=users,posts,comments
+
+# Override project/branch
+npx revisium rows save --folder=./data --tables=users --project=my-project --branch=dev
+```
+
+The command will:
+1. Create the specified folder if it doesn't exist
+2. If `--tables` is specified, process only those tables; otherwise fetch all tables from the project
+3. For each table, create a subfolder `{tableId}` within the main folder
+4. Fetch all rows from each table (with pagination of 100 rows per request)
+5. Save each row as `{row.id}.json` within the table's subfolder
+
+**File Structure Example:**
+```
+data/
+├── users/
+│   ├── user-123.json
+│   ├── user-456.json
+│   └── ...
+├── posts/
+│   ├── post-789.json
+│   ├── post-abc.json
+│   └── ...
+└── comments/
+    ├── comment-def.json
+    └── ...
+```
+
 ---
 
 ### CLI Help Output
