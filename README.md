@@ -23,7 +23,11 @@ REVISIUM_BRANCH=                             # Target branch name (e.g., 'master
 
 ### Commands
 
-Revisium CLI provides two main commands under the `migrate` namespace. **The `--file` option is required** for both commands.
+Revisium CLI provides migration and schema management commands.
+
+## Migration Commands
+
+The `migrate` namespace provides commands for managing database migrations. **The `--file` option is required** for both commands.
 
 #### 1. Save Migrations
 
@@ -76,6 +80,43 @@ npx revisium migrate apply --file=./prod-migrations.json
 # you can also override org/project/branch
 npx revisium migrate apply --file=./migrations.json --organization=acme --branch=prod
 ```
+
+## Schema Commands
+
+The `schema` namespace provides commands for managing table schemas.
+
+#### Save All Table Schemas
+
+Fetches all table schemas from a Revisium project and saves each schema to individual JSON files named by table ID.
+
+```shell
+npx revisium schema save --folder ./schemas
+```
+
+**Options:**
+
+| Flag                         | Description                | Required         |
+| ---------------------------- | -------------------------- | ---------------- |
+| `-f`, `--folder <path>`      | Folder path to save files  | yes              |
+| `-o`, `--organization <org>` | Organization name          | no (env default) |
+| `-p`, `--project <proj>`     | Project name               | no (env default) |
+| `-b`, `--branch <branch>`    | Branch name                | no (env default) |
+
+Usage:
+
+```shell
+# Save all table schemas to ./schemas folder
+npx revisium schema save --folder=./schemas
+
+# Override project/branch
+npx revisium schema save --folder=./schemas --project=my-project --branch=dev
+```
+
+The command will:
+1. Create the specified folder if it doesn't exist
+2. Fetch all tables from the project (with pagination of 100 tables per request)
+3. For each table, fetch its schema using the `/api/revision/{revisionId}/tables/{tableId}/schema` endpoint
+4. Save each schema as `{tableId}.json` in the specified folder
 
 ---
 
