@@ -21,6 +21,7 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - 🚀 **Migration Management** - Save and apply database migrations
 - 📋 **Schema Export** - Export table schemas to JSON files
 - 📊 **Data Export** - Export table rows to JSON files
+- ⬆️ **Data Upload** - Upload table rows with schema validation and smart updates
 - 🔧 **Flexible Configuration** - Environment variables or command-line options
 
 ## Quick Start
@@ -59,6 +60,9 @@ revisium schema save --folder ./schemas
 
 # Export table data
 revisium rows save --folder ./data
+
+# Upload table data  
+revisium rows upload --folder ./data
 
 # Manage migrations
 revisium migrate save --file ./migrations.json
@@ -172,6 +176,42 @@ data/
     ├── comment-def.json
     └── ...
 ```
+
+#### `rows upload`
+Upload table rows from JSON files to Revisium.
+
+```bash
+revisium rows upload --folder ./data [options]
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-f, --folder <path>` | Folder path containing row files | ✓ | - |
+| `-t, --tables <ids>` | Comma-separated table IDs | - | All tables found in folder |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+
+**Examples:**
+```bash
+# Upload all tables from folder
+revisium rows upload --folder ./data
+
+# Upload specific tables only
+revisium rows upload --folder ./data --tables users,posts,comments
+
+# Override project settings
+revisium rows upload --folder ./data --project my-project --branch dev
+```
+
+**Features:**
+- **Schema Validation**: Validates data fields against table schema
+- **Smart Upload**: Creates new rows or updates changed rows
+- **Duplicate Detection**: Skips rows with identical data
+- **Statistics Reporting**: Shows uploaded/updated/skipped/error counts
+- **Folder Structure**: Uses same structure as `rows save` command
 
 ## Configuration
 

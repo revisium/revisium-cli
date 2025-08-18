@@ -1,4 +1,4 @@
-import Ajv, { ValidateFunction } from 'ajv/dist/2020';
+import Ajv, { Schema, ValidateFunction } from 'ajv/dist/2020';
 import { jsonPatchSchema } from 'src/config/json-patch-schema';
 import { metaSchema } from 'src/config/meta-schema';
 import { migrationSchema } from 'src/config/migration.schema';
@@ -6,7 +6,7 @@ import { tableMigrationsSchema } from 'src/config/table-migrations-schema';
 import { Migration } from 'src/types/migration.types';
 
 export class JsonValidatorService {
-  private readonly ajv = new Ajv();
+  public readonly ajv = new Ajv();
 
   private readonly validator: ValidateFunction<Migration[]>;
 
@@ -33,7 +33,7 @@ export class JsonValidatorService {
     this.validator = this.ajv.compile(migrationSchema);
   }
 
-  public validate(data: unknown): Migration[] {
+  public validateMigration(data: unknown): Migration[] {
     const valid = this.validator(data);
 
     if (valid) {
@@ -46,5 +46,9 @@ export class JsonValidatorService {
     }
 
     return data;
+  }
+
+  public validateSchema(schema: unknown) {
+    return this.ajv.compile(schema as Schema);
   }
 }
