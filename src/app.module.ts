@@ -11,6 +11,7 @@ import { SaveSchemaCommand } from 'src/save-schema.command';
 import { RowsCommand } from 'src/rows.command';
 import { SaveRowsCommand } from 'src/save-rows.command';
 import { UploadRowsCommand } from 'src/upload-rows.command';
+import { TableDependencyService } from 'src/table-dependency.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
@@ -23,6 +24,7 @@ import { UploadRowsCommand } from 'src/upload-rows.command';
     RowsCommand,
     SaveRowsCommand,
     UploadRowsCommand,
+    TableDependencyService,
     JsonValidatorService,
     CoreApiService,
     DraftRevisionService,

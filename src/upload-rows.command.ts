@@ -4,6 +4,7 @@ import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { CoreApiService } from 'src/core-api.service';
 import { DraftRevisionService } from 'src/draft-revision.service';
 import { JsonValidatorService } from 'src/json-validator.service';
+import { TableDependencyService } from 'src/table-dependency.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
 
@@ -41,6 +42,7 @@ export class UploadRowsCommand extends CommandRunner {
     private readonly coreApiService: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
     private readonly jsonValidatorService: JsonValidatorService,
+    private readonly tableDependencyService: TableDependencyService,
   ) {
     super();
   }
@@ -67,12 +69,47 @@ export class UploadRowsCommand extends CommandRunner {
     tableFilter?: string,
   ) {
     try {
-      const tablesToProcess = await this.getTargetTables(
+      const originalTables = await this.getTargetTables(
         folderPath,
         tableFilter,
       );
 
-      console.log(`📊 Found ${tablesToProcess.length} tables to process`);
+      console.log(`📊 Found ${originalTables.length} tables to process`);
+
+      // Get schemas for dependency analysis
+      const tableSchemas: Record<string, JsonSchema> = {};
+      for (const tableId of originalTables) {
+        try {
+          const schemaResult = await this.api.tableSchema(revisionId, tableId);
+          tableSchemas[tableId] = schemaResult.data as JsonSchema;
+        } catch (error) {
+          console.warn(
+            `⚠️  Could not fetch schema for table ${tableId}:`,
+            error,
+          );
+        }
+      }
+
+      // Analyze dependencies and sort tables
+      const dependencyResult =
+        this.tableDependencyService.analyzeDependencies(tableSchemas);
+
+      // Show dependency information
+      console.log(
+        this.tableDependencyService.formatDependencyInfo(
+          dependencyResult,
+          originalTables,
+        ),
+      );
+
+      // Log warnings for circular dependencies
+      for (const warning of dependencyResult.warnings) {
+        console.warn(warning);
+      }
+
+      const tablesToProcess = dependencyResult.sortedTables.filter((tableId) =>
+        originalTables.includes(tableId),
+      );
 
       const totalStats: UploadStats = {
         totalRows: 0,
