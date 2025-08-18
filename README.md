@@ -21,7 +21,7 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - 🚀 **Migration Management** - Save and apply database migrations
 - 📋 **Schema Export** - Export table schemas to JSON files
 - 📊 **Data Export** - Export table rows to JSON files
-- ⬆️ **Data Upload** - Upload table rows with schema validation and smart updates
+- ⬆️ **Data Upload** - Upload table rows with dependency sorting and smart updates
 - 🔧 **Flexible Configuration** - Environment variables or command-line options
 
 ## Quick Start
@@ -210,8 +210,35 @@ revisium rows upload --folder ./data --project my-project --branch dev
 - **Schema Validation**: Validates data fields against table schema
 - **Smart Upload**: Creates new rows or updates changed rows
 - **Duplicate Detection**: Skips rows with identical data
+- **Dependency Sorting**: Automatically sorts tables by foreign key dependencies
+- **Circular Dependency Detection**: Warns about circular foreign key references
 - **Statistics Reporting**: Shows uploaded/updated/skipped/error counts
 - **Folder Structure**: Uses same structure as `rows save` command
+
+## Foreign Key Dependencies
+
+Revisium supports foreign key relationships between tables using the `foreignKey` field in table schemas. When uploading data with the CLI, tables are automatically sorted based on these dependencies to prevent foreign key constraint errors.
+
+### How it works:
+
+1. **Dependency Analysis**: CLI fetches all table schemas and analyzes `foreignKey` fields
+2. **Topological Sorting**: Tables are reordered so dependencies are uploaded first
+3. **Circular Detection**: Warns about circular dependencies that can't be automatically resolved
+
+### Example:
+
+Given tables with these relationships:
+- `users` table has foreign key to `posts` 
+- `posts` table has foreign key to `images`
+
+The CLI will automatically upload in this order: `images` → `posts` → `users`
+
+### Circular Dependencies:
+
+If two tables reference each other (e.g., `users` ↔ `posts`), the CLI will:
+- ⚠️  Log warnings about circular dependencies
+- 💡 Suggest uploading in multiple passes or breaking the circular reference
+- Continue with upload but foreign key errors may occur
 
 ## Configuration
 
