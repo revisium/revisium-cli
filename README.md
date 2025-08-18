@@ -58,6 +58,9 @@ revisium --help
 # Export table schemas
 revisium schema save --folder ./schemas
 
+# Convert schemas to migrations
+revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
+
 # Export table data
 revisium rows save --folder ./data
 
