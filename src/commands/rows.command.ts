@@ -1,6 +1,6 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { SaveRowsCommand } from 'src/save-rows.command';
-import { UploadRowsCommand } from 'src/upload-rows.command';
+import { SaveRowsCommand } from 'src/commands/save-rows.command';
+import { UploadRowsCommand } from 'src/commands/upload-rows.command';
 
 @Command({
   name: 'rows',

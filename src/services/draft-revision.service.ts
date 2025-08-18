@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CoreApiService } from 'src/core-api.service';
+import { CoreApiService } from 'src/services/core-api.service';
 
 @Injectable()
 export class DraftRevisionService {

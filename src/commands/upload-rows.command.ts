@@ -1,10 +1,10 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
-import { CoreApiService } from 'src/core-api.service';
-import { DraftRevisionService } from 'src/draft-revision.service';
-import { JsonValidatorService } from 'src/json-validator.service';
-import { TableDependencyService } from 'src/table-dependency.service';
+import { CoreApiService } from 'src/services/core-api.service';
+import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { JsonValidatorService } from 'src/services/json-validator.service';
+import { TableDependencyService } from 'src/services/table-dependency.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
 

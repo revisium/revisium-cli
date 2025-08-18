@@ -1,6 +1,6 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { ApplyMigrationsCommand } from 'src/apply-migrations.command';
-import { SaveMigrationsCommand } from 'src/save-migrations.command';
+import { ApplyMigrationsCommand } from 'src/commands/apply-migrations.command';
+import { SaveMigrationsCommand } from 'src/commands/save-migrations.command';
 
 @Command({
   name: 'migrate',

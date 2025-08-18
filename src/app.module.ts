@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { CoreApiService } from 'src/core-api.service';
-import { DraftRevisionService } from 'src/draft-revision.service';
-import { JsonValidatorService } from 'src/json-validator.service';
-import { ApplyMigrationsCommand } from 'src/apply-migrations.command';
-import { MigrationCommand } from 'src/migration.command';
-import { SaveMigrationsCommand } from 'src/save-migrations.command';
-import { SchemaCommand } from 'src/schema.command';
-import { SaveSchemaCommand } from 'src/save-schema.command';
-import { RowsCommand } from 'src/rows.command';
-import { SaveRowsCommand } from 'src/save-rows.command';
-import { UploadRowsCommand } from 'src/upload-rows.command';
-import { TableDependencyService } from 'src/table-dependency.service';
+import { ApplyMigrationsCommand } from 'src/commands/apply-migrations.command';
+import { MigrationCommand } from 'src/commands/migration.command';
+import { RowsCommand } from 'src/commands/rows.command';
+import { SaveMigrationsCommand } from 'src/commands/save-migrations.command';
+import { SaveRowsCommand } from 'src/commands/save-rows.command';
+import { SaveSchemaCommand } from 'src/commands/save-schema.command';
+import { SchemaCommand } from 'src/commands/schema.command';
+import { UploadRowsCommand } from 'src/commands/upload-rows.command';
+import { CoreApiService } from 'src/services/core-api.service';
+import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { JsonValidatorService } from 'src/services/json-validator.service';
+import { TableDependencyService } from 'src/services/table-dependency.service';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
