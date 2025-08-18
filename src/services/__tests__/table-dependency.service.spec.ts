@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TableDependencyService } from './table-dependency.service';
-import { JsonSchema, JsonSchemaTypeName } from './types/schema.types';
+import { TableDependencyService } from '../table-dependency.service';
+import { JsonSchema, JsonSchemaTypeName } from '../../types/schema.types';
 
 describe('TableDependencyService', () => {
   it('should be defined', () => {

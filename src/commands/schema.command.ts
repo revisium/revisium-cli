@@ -1,5 +1,5 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { SaveSchemaCommand } from 'src/save-schema.command';
+import { SaveSchemaCommand } from 'src/commands/save-schema.command';
 
 @Command({
   name: 'schema',

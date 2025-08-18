@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CoreApiService } from 'src/core-api.service';
+import { CoreApiService } from 'src/services/core-api.service';
 
 @Injectable()
 export class DraftRevisionService {
@@ -25,7 +25,7 @@ export class DraftRevisionService {
 
     if (result.error) {
       console.error(result.error);
-      throw new Error(result.error);
+      throw new Error(result.error as string);
     }
 
     return result.data.id;

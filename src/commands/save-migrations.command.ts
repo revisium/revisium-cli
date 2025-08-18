@@ -1,7 +1,7 @@
 import { writeFile } from 'fs/promises';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
-import { CoreApiService } from 'src/core-api.service';
-import { DraftRevisionService } from 'src/draft-revision.service';
+import { CoreApiService } from 'src/services/core-api.service';
+import { DraftRevisionService } from 'src/services/draft-revision.service';
 
 type Options = {
   file: string;

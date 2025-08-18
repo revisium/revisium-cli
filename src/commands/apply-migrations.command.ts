@@ -1,8 +1,8 @@
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { readFile } from 'fs/promises';
-import { CoreApiService } from 'src/core-api.service';
-import { DraftRevisionService } from 'src/draft-revision.service';
-import { JsonValidatorService } from 'src/json-validator.service';
+import { CoreApiService } from 'src/services/core-api.service';
+import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { JsonValidatorService } from 'src/services/json-validator.service';
 import { Migration } from 'src/types/migration.types';
 
 type Options = {

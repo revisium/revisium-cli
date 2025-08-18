@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
-import { CoreApiService } from 'src/core-api.service';
-import { DraftRevisionService } from 'src/draft-revision.service';
+import { CoreApiService } from 'src/services/core-api.service';
+import { DraftRevisionService } from 'src/services/draft-revision.service';
 
 type Options = {
   folder: string;
