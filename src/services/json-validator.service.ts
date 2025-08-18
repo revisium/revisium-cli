@@ -2,6 +2,17 @@ import Ajv, { Schema, ValidateFunction } from 'ajv/dist/2020';
 import { jsonPatchSchema } from 'src/config/json-patch-schema';
 import { metaSchema } from 'src/config/meta-schema';
 import { migrationSchema } from 'src/config/migration.schema';
+import {
+  ajvFileSchema,
+  ajvRowCreatedAtSchema,
+  ajvRowCreatedIdSchema,
+  ajvRowHashSchema,
+  ajvRowIdSchema,
+  ajvRowPublishedAtSchema,
+  ajvRowSchemaHashSchema,
+  ajvRowUpdatedAtSchema,
+  ajvRowVersionIdSchema,
+} from 'src/config/plugins';
 import { tableMigrationsSchema } from 'src/config/table-migrations-schema';
 import { Migration } from 'src/types/migration.types';
 
@@ -27,6 +38,7 @@ export class JsonValidatorService {
       },
     });
 
+    this.compilePluginSchemas();
     this.ajv.compile(metaSchema);
     this.ajv.compile(jsonPatchSchema);
     this.ajv.compile(tableMigrationsSchema);
@@ -50,5 +62,17 @@ export class JsonValidatorService {
 
   public validateSchema(schema: unknown) {
     return this.ajv.compile(schema as Schema);
+  }
+
+  private compilePluginSchemas(): void {
+    this.ajv.compile(ajvRowIdSchema);
+    this.ajv.compile(ajvRowCreatedIdSchema);
+    this.ajv.compile(ajvRowVersionIdSchema);
+    this.ajv.compile(ajvRowCreatedAtSchema);
+    this.ajv.compile(ajvRowPublishedAtSchema);
+    this.ajv.compile(ajvRowUpdatedAtSchema);
+    this.ajv.compile(ajvRowHashSchema);
+    this.ajv.compile(ajvRowSchemaHashSchema);
+    this.ajv.compile(ajvFileSchema);
   }
 }
