@@ -45,7 +45,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
       const fileContent = await readFile(filePath, 'utf-8');
       const data: unknown = JSON.parse(fileContent);
 
-      return this.jsonValidatorService.validate(data);
+      return this.jsonValidatorService.validateMigration(data);
     } catch (error) {
       console.error(
         'Error reading or parsing file:',

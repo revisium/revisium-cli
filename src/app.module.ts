@@ -10,6 +10,7 @@ import { SchemaCommand } from 'src/schema.command';
 import { SaveSchemaCommand } from 'src/save-schema.command';
 import { RowsCommand } from 'src/rows.command';
 import { SaveRowsCommand } from 'src/save-rows.command';
+import { UploadRowsCommand } from 'src/upload-rows.command';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true })],
@@ -21,6 +22,7 @@ import { SaveRowsCommand } from 'src/save-rows.command';
     SaveSchemaCommand,
     RowsCommand,
     SaveRowsCommand,
+    UploadRowsCommand,
     JsonValidatorService,
     CoreApiService,
     DraftRevisionService,
