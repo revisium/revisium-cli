@@ -58,6 +58,9 @@ revisium --help
 # Export table schemas
 revisium schema save --folder ./schemas
 
+# Convert schemas to migrations
+revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
+
 # Export table data
 revisium rows save --folder ./data
 
@@ -129,6 +132,40 @@ schemas/
 ├── table-1.json
 ├── table-2.json
 └── table-n.json
+```
+
+#### `schema create-migrations`
+Convert saved schemas to migration files.
+
+```bash
+revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `--schemas-folder <path>` | Folder containing schema JSON files | ✓ | - |
+| `-f, --file <path>` | Output file for generated migrations | ✓ | - |
+
+**Features:**
+- **Dependency Analysis**: Automatically analyzes table dependencies based on foreign keys
+- **Topological Sorting**: Orders migrations to respect foreign key constraints
+- **Circular Dependency Detection**: Warns about circular dependencies
+- **Schema Validation**: Validates generated migrations against JSON schema
+- **Unique Timestamps**: Generates unique ISO date strings for migration IDs
+- **Hash Generation**: Creates SHA256 hashes for schema integrity
+
+**Example Workflow:**
+```bash
+# 1. Export schemas from Revisium
+revisium schema save --folder ./schemas
+
+# 2. Convert schemas to migrations
+revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
+
+# 3. Apply migrations to another environment
+revisium migrate apply --file ./migrations.json
 ```
 
 ### Rows Commands

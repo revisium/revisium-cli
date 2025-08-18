@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ApplyMigrationsCommand } from 'src/commands/apply-migrations.command';
+import { CreateMigrationsCommand } from 'src/commands/create-migrations.command';
 import { MigrationCommand } from 'src/commands/migration.command';
 import { RowsCommand } from 'src/commands/rows.command';
 import { SaveMigrationsCommand } from 'src/commands/save-migrations.command';
@@ -21,6 +22,7 @@ import { TableDependencyService } from 'src/services/table-dependency.service';
     SaveMigrationsCommand,
     SchemaCommand,
     SaveSchemaCommand,
+    CreateMigrationsCommand,
     RowsCommand,
     SaveRowsCommand,
     UploadRowsCommand,
