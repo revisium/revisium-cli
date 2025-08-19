@@ -286,6 +286,7 @@ export class UploadRowsCommand extends CommandRunner {
             rowData.id,
             {
               data: rowData.data as object,
+              isRestore: true,
             },
           );
 
@@ -319,6 +320,7 @@ export class UploadRowsCommand extends CommandRunner {
       const createResult = await this.api.createRow(revisionId, tableId, {
         rowId: rowData.id,
         data: rowData.data as object,
+        isRestore: true,
       });
 
       if (createResult.error) {

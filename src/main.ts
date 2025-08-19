@@ -6,4 +6,6 @@ async function bootstrap() {
   await CommandFactory.run(AppModule);
 }
 
-bootstrap().then(console.log).catch(console.error);
+bootstrap()
+  .then(() => {})
+  .catch(console.error);
