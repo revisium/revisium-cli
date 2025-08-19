@@ -460,6 +460,7 @@ export interface RowsConnection {
 export interface CreateRowDto {
   rowId: string;
   data: Record<string, any>;
+  isRestore?: boolean;
 }
 
 export interface CreateRowResponse {
@@ -491,6 +492,7 @@ export interface RemoveRowResponse {
 
 export interface UpdateRowDto {
   data: Record<string, any>;
+  isRestore?: boolean;
 }
 
 export interface UpdateRowResponse {
@@ -879,7 +881,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Revisium API
- * @version 2.0.0-alpha.1
+ * @version 2.0.0
  * @contact
  */
 export class Api<
