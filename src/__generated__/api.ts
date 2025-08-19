@@ -881,7 +881,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Revisium API
- * @version 2.0.0
+ * @version 2.1.0
  * @contact
  */
 export class Api<
@@ -2201,78 +2201,6 @@ export class Api<
      * No description
      *
      * @tags health
-     * @name Liveness
-     * @request GET:/health/liveness
-     */
-    liveness: (params: RequestParams = {}) =>
-      this.request<
-        {
-          /** @example "ok" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        },
-        {
-          /** @example "error" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        }
-      >({
-        path: `/health/liveness`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags health
      * @name Readiness
      * @request GET:/health/readiness
      */
@@ -2336,6 +2264,78 @@ export class Api<
         }
       >({
         path: `/health/readiness`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags health
+     * @name Liveness
+     * @request GET:/health/liveness
+     */
+    liveness: (params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example "ok" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        },
+        {
+          /** @example "error" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        }
+      >({
+        path: `/health/liveness`,
         method: "GET",
         format: "json",
         ...params,
