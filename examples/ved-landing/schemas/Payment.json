@@ -1,0 +1,361 @@
+{
+  "type": "object",
+  "required": [
+    "agentPlatformSection",
+    "applicationScenarios",
+    "description",
+    "implementWays",
+    "infoDescription",
+    "infoDescriptionSection",
+    "paymentProcedure",
+    "questions",
+    "questionsInfo",
+    "registration",
+    "SEO",
+    "solvingInvoiceProblem",
+    "title",
+    "userInputFields"
+  ],
+  "properties": {
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": {
+      "type": "string",
+      "default": "",
+      "contentMediaType": "text/markdown"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "text",
+          "title",
+          "value"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "default": "",
+            "contentMediaType": "text/markdown"
+          },
+          "title": {
+            "type": "string",
+            "default": ""
+          },
+          "value": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "registration": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "implementWays": {
+      "type": "object",
+      "required": [
+        "content",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "subText",
+              "subTextBgColor",
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": ""
+              },
+              "subText": {
+                "type": "string",
+                "default": ""
+              },
+              "subTextBgColor": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "questionsInfo": {
+      "type": "string",
+      "default": ""
+    },
+    "infoDescription": {
+      "type": "object",
+      "required": [
+        "content",
+        "title"
+      ],
+      "deprecated": true,
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "description": " изменено согласно требованиям, использовать infoDescriptionSection",
+      "additionalProperties": false
+    },
+    "userInputFields": {
+      "type": "object",
+      "required": [
+        "text",
+        "title"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": ""
+        },
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "paymentProcedure": {
+      "type": "object",
+      "required": [
+        "paymentProcedureItems",
+        "texts"
+      ],
+      "properties": {
+        "texts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": ""
+          },
+          "deprecated": true,
+          "description": "необходимо добавить title и description. Используйте поле 'paymentProcedureItem'"
+        },
+        "paymentProcedureItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentPlatformSection": {
+      "type": "object",
+      "required": [
+        "agentPlatformScenarios",
+        "description",
+        "documentManagement",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "documentManagement": {
+          "type": "object",
+          "required": [
+            "description",
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": ""
+            },
+            "description": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "agentPlatformScenarios": {
+          "type": "object",
+          "required": [
+            "content",
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": ""
+            },
+            "content": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": ""
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "applicationScenarios": {
+      "type": "object",
+      "required": [
+        "texts",
+        "title"
+      ],
+      "properties": {
+        "texts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "solvingInvoiceProblem": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "client",
+          "description",
+          "summa",
+          "title"
+        ],
+        "properties": {
+          "summa": {
+            "type": "string",
+            "default": ""
+          },
+          "title": {
+            "type": "string",
+            "default": ""
+          },
+          "client": {
+            "type": "string",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "default": "",
+            "contentMediaType": "text/markdown"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "infoDescriptionSection": {
+      "type": "object",
+      "required": [
+        "descriptionBlocks",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "descriptionBlocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "content": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

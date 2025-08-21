@@ -1,0 +1,26 @@
+{
+  "createdId": "7R_VyyEHIhbKxo0C2d4nt",
+  "id": "australia",
+  "versionId": "bUDiE589pQMTJAQ4esG2L",
+  "createdAt": "2025-05-24T08:35:09.525Z",
+  "updatedAt": "2025-05-24T08:35:17.149Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "australia",
+    "icon": {
+      "url": "https://cdn.ab.tech/c708d9af3b7848985f4cc749b8e72b89fdda1b51",
+      "hash": "c708d9af3b7848985f4cc749b8e72b89fdda1b51",
+      "size": 2749,
+      "width": 32,
+      "fileId": "KDdIH0Pp0Wn6gOJGnESrs",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "au.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Австралия"
+  }
+}

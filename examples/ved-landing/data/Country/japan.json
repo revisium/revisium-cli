@@ -1,0 +1,26 @@
+{
+  "createdId": "4ze3psLNmunyFO0MzKqu4",
+  "id": "japan",
+  "versionId": "qIQJg0z1rPvfmXf008tTY",
+  "createdAt": "2025-05-15T12:31:15.706Z",
+  "updatedAt": "2025-05-22T14:31:33.897Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "japan",
+    "icon": {
+      "url": "https://cdn.ab.tech/0b006acf19a3224f53328ea7794da5eb63744d7d",
+      "hash": "0b006acf19a3224f53328ea7794da5eb63744d7d",
+      "size": 672,
+      "width": 32,
+      "fileId": "nCtZ9U9jIDBfCNcxOsG70",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "jp.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Япония"
+  }
+}

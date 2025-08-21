@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": [
+    "description",
+    "featureId",
+    "file",
+    "title"
+  ],
+  "properties": {
+    "file": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "featureId": {
+      "$ref": "urn:jsonschema:io:revisium:row-id-schema:1.0.0"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

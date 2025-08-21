@@ -1,0 +1,250 @@
+[
+  {
+    "changeType": "init",
+    "tableId": "case",
+    "hash": "7694303eab0b871edd7843863f71761824fbd047",
+    "id": "2025-08-18T17:50:38.917Z",
+    "schema": {
+      "type": "object",
+      "required": [
+        "caseId",
+        "description",
+        "file",
+        "title"
+      ],
+      "properties": {
+        "file": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "caseId": {
+          "$ref": "urn:jsonschema:io:revisium:row-id-schema:1.0.0"
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "changeType": "init",
+    "tableId": "code",
+    "hash": "b9f2601a35848d9d6b8df181452dc63269701edd",
+    "id": "2025-08-18T17:50:38.927Z",
+    "schema": {
+      "type": "object",
+      "required": [
+        "code",
+        "title"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "changeType": "init",
+    "tableId": "constant",
+    "hash": "c12e06b14dbe03379ade7ac223140615fb9bae6e",
+    "id": "2025-08-18T17:50:38.937Z",
+    "schema": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  {
+    "changeType": "init",
+    "tableId": "feature",
+    "hash": "a9b5e4c04958b558921fe6a6c03ed4fab188f5ba",
+    "id": "2025-08-18T17:50:38.947Z",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "featureId",
+        "file",
+        "title"
+      ],
+      "properties": {
+        "file": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "featureId": {
+          "$ref": "urn:jsonschema:io:revisium:row-id-schema:1.0.0"
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "changeType": "init",
+    "tableId": "main",
+    "hash": "b6f3805f94010c629f7e5717257ef80c805848b0",
+    "id": "2025-08-18T17:50:38.957Z",
+    "schema": {
+      "type": "object",
+      "required": [
+        "cases",
+        "cloud",
+        "code",
+        "docs",
+        "features",
+        "github",
+        "preview",
+        "texts"
+      ],
+      "properties": {
+        "code": {
+          "type": "object",
+          "required": [
+            "docker",
+            "dockerCompose"
+          ],
+          "properties": {
+            "docker": {
+              "type": "string",
+              "default": "",
+              "foreignKey": "code"
+            },
+            "dockerCompose": {
+              "type": "string",
+              "default": "",
+              "foreignKey": "code"
+            }
+          },
+          "additionalProperties": false
+        },
+        "docs": {
+          "type": "object",
+          "required": [
+            "label",
+            "link"
+          ],
+          "properties": {
+            "link": {
+              "type": "string",
+              "default": ""
+            },
+            "label": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "cases": {
+          "type": "object",
+          "required": [
+            "items",
+            "title"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "case"
+              }
+            },
+            "title": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "cloud": {
+          "type": "object",
+          "required": [
+            "label",
+            "link"
+          ],
+          "properties": {
+            "link": {
+              "type": "string",
+              "default": ""
+            },
+            "label": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "texts": {
+          "type": "object",
+          "required": [
+            "description",
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": "",
+              "contentMediaType": "text/markdown"
+            },
+            "description": {
+              "type": "string",
+              "default": "",
+              "contentMediaType": "text/markdown"
+            }
+          },
+          "additionalProperties": false
+        },
+        "github": {
+          "type": "string",
+          "default": ""
+        },
+        "preview": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "features": {
+          "type": "object",
+          "required": [
+            "items",
+            "title"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "feature"
+              }
+            },
+            "title": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+]

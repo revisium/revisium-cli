@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "required": [
+    "articleCategories",
+    "author",
+    "CEO",
+    "coverImage",
+    "createdAt",
+    "markdown",
+    "previewImage",
+    "publishedAt",
+    "title",
+    "updatedAt",
+    "visible"
+  ],
+  "properties": {
+    "CEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "author": {
+      "type": "string",
+      "default": "",
+      "foreignKey": "Author"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": false,
+      "deprecated": true,
+      "description": "To hide the article, use publishedAt with a date from the future."
+    },
+    "markdown": {
+      "type": "string",
+      "default": "",
+      "contentMediaType": "text/markdown"
+    },
+    "createdAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-created-at-schema:1.0.0"
+    },
+    "updatedAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-updated-at-schema:1.0.0"
+    },
+    "coverImage": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "publishedAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-published-at-schema:1.0.0"
+    },
+    "previewImage": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "articleCategories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "default": "",
+        "foreignKey": "ArticleCategory"
+      }
+    }
+  },
+  "additionalProperties": false
+}

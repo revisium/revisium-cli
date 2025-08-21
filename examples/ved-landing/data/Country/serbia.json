@@ -1,0 +1,26 @@
+{
+  "createdId": "gkOQQgvBKFGkDXr-8Juli",
+  "id": "serbia",
+  "versionId": "4o5IxPFcNRFZp7RSAIawR",
+  "createdAt": "2025-06-09T16:02:43.314Z",
+  "updatedAt": "2025-06-27T08:43:10.348Z",
+  "publishedAt": "2025-06-09T16:02:43.314Z",
+  "readonly": true,
+  "data": {
+    "code": "serbia",
+    "icon": {
+      "url": "https://cdn.ab.tech/e7c07d8c20fe7a13dabbe3adfd754a19c2fbd7d7",
+      "hash": "e7c07d8c20fe7a13dabbe3adfd754a19c2fbd7d7",
+      "size": 1885,
+      "width": 512,
+      "fileId": "pJWuGLJZoZg0Uz5aD6iP-",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Сербия"
+  }
+}

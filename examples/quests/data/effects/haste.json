@@ -1,0 +1,27 @@
+{
+  "createdId": "cncdZajhg5dA-KP7MbW-O",
+  "id": "haste",
+  "versionId": "R0pnznyyVpgD32OaotlcN",
+  "createdAt": "2025-05-31T06:06:39.287Z",
+  "updatedAt": "2025-05-31T06:06:39.287Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Haste",
+    "description": "Increases movement speed for a short period.",
+    "effect_data": {
+      "type": "buff",
+      "duration": 10,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": 30,
+          "stat_id": "movement_speed"
+        }
+      ]
+    }
+  }
+}

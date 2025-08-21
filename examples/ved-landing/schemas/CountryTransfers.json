@@ -1,0 +1,343 @@
+{
+  "type": "object",
+  "required": [
+    "agentPaymentBlock",
+    "contactPromptBlock",
+    "FAQ",
+    "InfoBlock",
+    "infoDescriptionBlock",
+    "reliableB2BTransfersBlock",
+    "SEO",
+    "whenVedHelpBlock",
+    "whyVedMasterBlock",
+    "workProcessBlock"
+  ],
+  "properties": {
+    "FAQ": {
+      "type": "object",
+      "required": [
+        "questions",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "title",
+              "value"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": ""
+              },
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "value": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "h1",
+        "h1SubTitle",
+        "title"
+      ],
+      "properties": {
+        "h1": {
+          "type": "string",
+          "default": ""
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "h1SubTitle": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "InfoBlock": {
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "whenVedHelpBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "workProcessBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentPaymentBlock": {
+      "type": "object",
+      "required": [
+        "agentPlatformScenarios",
+        "description",
+        "documentManagement",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "documentManagement": {
+          "type": "object",
+          "required": [
+            "description",
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": ""
+            },
+            "description": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "agentPlatformScenarios": {
+          "type": "object",
+          "required": [
+            "content",
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": ""
+            },
+            "content": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": ""
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "whyVedMasterBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "contactPromptBlock": {
+      "type": "object",
+      "required": [
+        "text",
+        "title"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "infoDescriptionBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "content": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reliableB2BTransfersBlock": {
+      "type": "object",
+      "required": [
+        "description",
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "object",
+          "required": [
+            "title"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

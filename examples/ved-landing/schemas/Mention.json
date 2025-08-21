@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "required": [
+    "createdAt",
+    "icon",
+    "id",
+    "link",
+    "name",
+    "publishedAt"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "urn:jsonschema:io:revisium:row-id-schema:1.0.0"
+    },
+    "icon": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "link": {
+      "type": "string",
+      "default": ""
+    },
+    "name": {
+      "type": "string",
+      "default": "",
+      "deprecated": true,
+      "description": "Не актуально, использовать icon"
+    },
+    "createdAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-created-at-schema:1.0.0"
+    },
+    "publishedAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-published-at-schema:1.0.0"
+    }
+  },
+  "additionalProperties": false
+}

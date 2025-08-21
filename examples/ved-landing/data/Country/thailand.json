@@ -1,0 +1,26 @@
+{
+  "createdId": "gFmIGvAJ704BxIMnM-ljc",
+  "id": "thailand",
+  "versionId": "uYcLRV0wsqj6dsjcT9kvj",
+  "createdAt": "2025-05-24T09:10:42.491Z",
+  "updatedAt": "2025-05-24T09:10:56.473Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "thailand",
+    "icon": {
+      "url": "https://cdn.ab.tech/bead853e0ca7d5a963f372f4a24cb625bc0a98db",
+      "hash": "bead853e0ca7d5a963f372f4a24cb625bc0a98db",
+      "size": 941,
+      "width": 32,
+      "fileId": "ynlwEEsPSeyjMPR6Qw9gD",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "th.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Таиланд"
+  }
+}

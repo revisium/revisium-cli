@@ -1,0 +1,27 @@
+{
+  "createdId": "5eEQZNaIEvIurHjrlc1bj",
+  "id": "poison_cloud",
+  "versionId": "zWewWPP68Jdwpfvp9wWWs",
+  "createdAt": "2025-05-31T06:06:39.528Z",
+  "updatedAt": "2025-05-31T06:06:39.528Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Poison Cloud",
+    "description": "Poisons enemies in the area, dealing damage over time.",
+    "effect_data": {
+      "type": "poison",
+      "duration": 20,
+      "application": {
+        "chance": 90,
+        "target_type": "enemy"
+      },
+      "stat_changes": [
+        {
+          "value": -10,
+          "stat_id": "health"
+        }
+      ]
+    }
+  }
+}

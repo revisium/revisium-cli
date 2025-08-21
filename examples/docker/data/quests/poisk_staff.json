@@ -1,0 +1,84 @@
+{
+  "createdId": "FECCItkFFOTGwtjJQNG4R",
+  "id": "poisk_staff",
+  "versionId": "BRSOh6lLb4HPdmY0MWWRE",
+  "createdAt": "2025-05-31T06:06:45.297Z",
+  "updatedAt": "2025-06-01T14:52:45.311Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Search for the Enchanted Staff",
+    "steps": [
+      {
+        "items": [
+          {
+            "item_id": "healing_potion",
+            "quantity": 2
+          },
+          {
+            "item_id": "enchanted_staff",
+            "quantity": 1
+          }
+        ],
+        "npc_id": "enchanted_druid",
+        "coordinates": {
+          "x": 200,
+          "y": 350
+        },
+        "description": "Find the Enchanted Druid in Whispering Grove and obtain the staff.",
+        "location_id": "whispering_grove",
+        "step_number": 1,
+        "objective_type": "fetch"
+      }
+    ],
+    "preview": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/ca03d315b36bbba1bf3e99919ce4546da6254b71",
+      "hash": "ca03d315b36bbba1bf3e99919ce4546da6254b71",
+      "size": 2043666,
+      "width": 1024,
+      "fileId": "8Y4LoVHw0oGJcxfmLYVgM",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "ChatGPT Image 1 Ð¸ÑÐ½. 2025 Ð³., 17_52_29.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "rewards": {
+      "items": [
+        {
+          "item_id": "flaming_sword",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 100,
+        "silver": 50
+      },
+      "abilities": [
+        "fireball"
+      ],
+      "experience": 500
+    },
+    "description": "Help the druid recover his enchanted staff.",
+    "requirements": {
+      "required_items": [
+        {
+          "item_id": "healing_potion",
+          "quantity": 1
+        }
+      ],
+      "required_level": 5,
+      "required_skills": [
+        "charodeyskiy_i"
+      ],
+      "required_factions": [
+        {
+          "faction_id": "mages_guild",
+          "reputation": "friendly"
+        }
+      ]
+    },
+    "is_repeatable": false,
+    "quest_type_id": "fetch_quest"
+  }
+}

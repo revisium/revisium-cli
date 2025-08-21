@@ -1,0 +1,97 @@
+{
+  "createdId": "D5QPA9UaLkPASW1Vg9-En",
+  "id": "main",
+  "versionId": "5p24MmhJ1ZyP7CLzIb7r1",
+  "createdAt": "2025-06-06T13:27:10.648Z",
+  "updatedAt": "2025-08-18T09:54:40.957Z",
+  "publishedAt": "2025-06-07T16:23:00.000Z",
+  "readonly": true,
+  "data": {
+    "hint": "Выгодные условия для новых клиентов",
+    "media": {
+      "url": "https://cdn.ab.tech/66fa76a6ac83cb325c60c9e8643eed6ed1d4a76e",
+      "hash": "66fa76a6ac83cb325c60c9e8643eed6ed1d4a76e",
+      "size": 666983,
+      "width": 1500,
+      "fileId": "KSG_lgMj1bjEzZsm5JuP3",
+      "height": 1078,
+      "status": "uploaded",
+      "fileName": "Discount30_SITE.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "title": "Скидка -30%<br/>на первый платеж",
+    "video": {
+      "url": "https://cdn.ab.tech/ef2b95c375213bd4be4be8ed1bab4e4d3f82d4d7",
+      "hash": "ef2b95c375213bd4be4be8ed1bab4e4d3f82d4d7",
+      "size": 128263,
+      "width": 0,
+      "fileId": "a26VPFWTanWLEg_Tw0wdb",
+      "height": 0,
+      "status": "uploaded",
+      "fileName": "VED-Discount30_380.mp4",
+      "mimeType": "video/mp4",
+      "extension": "mp4"
+    },
+    "offers": [
+      {
+        "hint": "Платите через 30 дней после\nпоступления средств вашему поставщику",
+        "media": {
+          "url": "https://cdn.ab.tech/7ed3bbd4d8ff5746d813dd88b4f927f241c1fd94",
+          "hash": "7ed3bbd4d8ff5746d813dd88b4f927f241c1fd94",
+          "size": 265407,
+          "width": 640,
+          "fileId": "j4FvH2STt6n7LYcifTNxa",
+          "height": 388,
+          "status": "uploaded",
+          "fileName": "VED-Avance_v2 1.png",
+          "mimeType": "image/png",
+          "extension": "png"
+        },
+        "title": "Авансирование<br/>платежей до 30 дней",
+        "source": "special-offer-advance",
+        "buttonText": "Узнать больше",
+        "additionalInfo": "Не является публичной офертой. Услуга авансирования предоставляется АО «ВЭД-Мастер» на основании индивидуального агентского соглашения. Максимальный срок — 30 дней. Стоимость услуги — 0,1% от суммы перевода за каждый день отсрочки. Предоставление услуги возможно при положительном решении внутренней оценки контрагента и сделки. Подробные условия уточняйте у менеджера."
+      },
+      {
+        "hint": "Выгодные условия для новых клиентов",
+        "media": {
+          "url": "https://cdn.ab.tech/66fa76a6ac83cb325c60c9e8643eed6ed1d4a76e",
+          "hash": "66fa76a6ac83cb325c60c9e8643eed6ed1d4a76e",
+          "size": 666983,
+          "width": 1500,
+          "fileId": "jSJwjdKKZpoNtR3Ztzqs2",
+          "height": 1078,
+          "status": "uploaded",
+          "fileName": "Discount30_SITE.png",
+          "mimeType": "image/png",
+          "extension": "png"
+        },
+        "title": "Скидка -30%<br/>на первый платеж",
+        "source": "special-offer-discount",
+        "buttonText": "Узнать большe",
+        "additionalInfo": ""
+      },
+      {
+        "hint": "Срочная отправка ваших платежей, без задержек",
+        "media": {
+          "url": "https://cdn.ab.tech/976993729560c392aa47b5f400138f3474b39001",
+          "hash": "976993729560c392aa47b5f400138f3474b39001",
+          "size": 129083,
+          "width": 512,
+          "fileId": "CTluyjlYNJrQIDLDUc_5k",
+          "height": 380,
+          "status": "uploaded",
+          "fileName": "",
+          "mimeType": "image/png",
+          "extension": "png"
+        },
+        "title": "Быстрая оплата<br/>в течение 24 часов",
+        "source": "special-offer-urgents-sending",
+        "buttonText": "Узнать больше",
+        "additionalInfo": ""
+      }
+    ],
+    "buttonText": "Узнать больше"
+  }
+}

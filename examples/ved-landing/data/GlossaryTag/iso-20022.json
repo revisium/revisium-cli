@@ -1,0 +1,12 @@
+{
+  "createdId": "D-HIpvOfmf9I1gVX68fDT",
+  "id": "iso-20022",
+  "versionId": "fX32GYPkNqn1YL9P5j1N4",
+  "createdAt": "2025-08-08T11:49:56.767Z",
+  "updatedAt": "2025-08-08T11:49:56.767Z",
+  "publishedAt": "2025-08-08T11:49:56.767Z",
+  "readonly": true,
+  "data": {
+    "name": "ISO 20022"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "createdId": "knZg8A8SZ1yOlKBCRKj-V",
+  "id": "mana_shield",
+  "versionId": "P81Ob7xTrvY2KX6dWWas6",
+  "createdAt": "2025-05-31T06:06:39.514Z",
+  "updatedAt": "2025-05-31T06:06:39.514Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Mana Shield",
+    "description": "Converts damage to mana cost, protecting health.",
+    "effect_data": {
+      "type": "shield",
+      "duration": 15,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": -10,
+          "stat_id": "mana"
+        }
+      ]
+    }
+  }
+}

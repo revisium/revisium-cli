@@ -1,0 +1,13 @@
+{
+  "createdId": "Xw4jmHpWZkU1QGwFRscrl",
+  "id": "docker",
+  "versionId": "bSjWo1l4vJxWktEgk2Zb9",
+  "createdAt": "2025-06-03T15:21:54.270Z",
+  "updatedAt": "2025-06-05T05:35:21.534Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "code": "docker run -d -p 8080:8080 --name revisium --env DATABASE_URL=\"postgresql://<db_user>:<db_password>@host.docker.internal:5432/<database>\" revisium/revisium:{{ version }}",
+    "title": "Run Revisium in a single container"
+  }
+}

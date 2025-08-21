@@ -1,0 +1,26 @@
+{
+  "createdId": "Zllyv9zVjx5sSP8uM_KyW",
+  "id": "migration",
+  "versionId": "tVFs4FzXp2t4sOq8ZZbs7",
+  "createdAt": "2025-06-19T17:35:27.148Z",
+  "updatedAt": "2025-06-19T18:32:22.387Z",
+  "publishedAt": "2025-06-19T17:35:27.148Z",
+  "readonly": true,
+  "data": {
+    "file": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/cba4f724838235d8ab8b66d781271f317cdcc922",
+      "hash": "cba4f724838235d8ab8b66d781271f317cdcc922",
+      "size": 361351,
+      "width": 0,
+      "fileId": "fp_KxrHXAeekYu20rBCyn",
+      "height": 0,
+      "status": "uploaded",
+      "fileName": "Screen Recording 2025-06-19 at 21.30.50.mp4",
+      "mimeType": "video/mp4",
+      "extension": "mp4"
+    },
+    "title": "Schema and Data Migrations",
+    "featureId": "migration",
+    "description": "Add, remove, rename fields, or change types with data transformation — including primitive-to-array conversion, type casting, and moving nested nodes. Schema and data evolve together safely and predictably.\n\n"
+  }
+}

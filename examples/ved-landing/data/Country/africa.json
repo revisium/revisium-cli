@@ -1,0 +1,26 @@
+{
+  "createdId": "NcUMP2rwzWS1j5sJvkFmW",
+  "id": "africa",
+  "versionId": "bXwePbO0-zPDP9ZVkzX67",
+  "createdAt": "2025-05-22T14:39:05.977Z",
+  "updatedAt": "2025-05-24T08:46:48.266Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "africa",
+    "icon": {
+      "url": "https://cdn.ab.tech/b00444465a96b451100f3bfcdeb61257b1521e9f",
+      "hash": "b00444465a96b451100f3bfcdeb61257b1521e9f",
+      "size": 1630,
+      "width": 32,
+      "fileId": "1ZCbRkkEUn51NIgDioyWs",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "rsa.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Африка"
+  }
+}

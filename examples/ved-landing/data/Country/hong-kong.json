@@ -1,0 +1,26 @@
+{
+  "createdId": "o22FNprlXYHFku0vCw4Wg",
+  "id": "hong-kong",
+  "versionId": "8bPfvJY6EnIffFBuGPYzv",
+  "createdAt": "2025-06-09T15:37:12.911Z",
+  "updatedAt": "2025-06-23T05:49:34.478Z",
+  "publishedAt": "2025-06-09T15:37:12.911Z",
+  "readonly": true,
+  "data": {
+    "code": "hong-kong",
+    "icon": {
+      "url": "https://cdn.ab.tech/d7b39800c31f8b891e6d704be15869bd9acab5a5",
+      "hash": "d7b39800c31f8b891e6d704be15869bd9acab5a5",
+      "size": 1568,
+      "width": 512,
+      "fileId": "X-aUspqseiTzh15k4ZijB",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "hong kong.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Гонконг"
+  }
+}

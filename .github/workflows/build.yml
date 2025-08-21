@@ -1,11 +1,8 @@
 name: Build
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [master]
-    tags:
-      - 'v*'
+  release:
+    types: [published]
 
 env:
   IMAGE_NAME: ${{ github.event.repository.name }}
@@ -18,25 +15,52 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo at tag
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
-      - name: Log in to the Container registry
+      - name: Extract version from tag
+        id: ver
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          V="${TAG#v}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Version: $V"
+
+      - name: Wait until npm has revisium@${{ steps.ver.outputs.version }}
+        run: |
+          set -e
+          for i in {1..30}; do
+            if npm view "revisium@${{ steps.ver.outputs.version }}" version >/dev/null 2>&1; then
+              echo "Found on npm."
+              exit 0
+            fi
+            echo "Not yet on npm, retry $i/30..."
+            sleep 5
+          done
+          echo "Timeout waiting for npm"; exit 1
+
+      - name: Log in to Docker Hub
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 #docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f #docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 #docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 #docker/build-push-action@v5
+      - name: Build & push
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 #docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            REVISIUM_VERSION=${{ steps.ver.outputs.version }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
+          labels: |
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}

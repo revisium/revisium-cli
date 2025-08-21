@@ -1,0 +1,32 @@
+{
+  "createdId": "tu90HmTw0EdvwZh3-H13h",
+  "id": "healing_potion",
+  "versionId": "pyftqRAQ92bUGg5fji1w0",
+  "createdAt": "2025-05-31T06:06:43.241Z",
+  "updatedAt": "2025-05-31T06:06:43.241Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Healing Potion",
+    "properties": {
+      "damage": {
+        "max": 0,
+        "min": 0,
+        "type": "none"
+      },
+      "defense": 0,
+      "effects": [
+        {
+          "chance": 100,
+          "effect_id": "healing_ray"
+        }
+      ],
+      "modifiers": [],
+      "requirements": {
+        "level": 1,
+        "class_ids": []
+      }
+    },
+    "item_type_id": "potion"
+  }
+}

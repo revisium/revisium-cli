@@ -1,0 +1,26 @@
+{
+  "createdId": "SEhtu-Y7v8zfKyby6Oaf_",
+  "id": "spain",
+  "versionId": "-P92ll8JCqjAZXRuUdJ3j",
+  "createdAt": "2025-05-24T08:50:31.123Z",
+  "updatedAt": "2025-05-24T08:51:00.928Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "spain",
+    "icon": {
+      "url": "https://cdn.ab.tech/0f7d0d9926d21db31b19560b6e1043edaca151ab",
+      "hash": "0f7d0d9926d21db31b19560b6e1043edaca151ab",
+      "size": 847,
+      "width": 32,
+      "fileId": "BtPQpzZsySt_4v7JQYbD5",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "es.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Испания"
+  }
+}

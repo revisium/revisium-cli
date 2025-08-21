@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "required": [
+    "firstName",
+    "lastName"
+  ],
+  "properties": {
+    "lastName": {
+      "type": "string",
+      "default": "",
+      "description": "Имя"
+    },
+    "firstName": {
+      "type": "string",
+      "default": "",
+      "description": "Фамилия"
+    }
+  },
+  "additionalProperties": false
+}

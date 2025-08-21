@@ -1,0 +1,13 @@
+{
+  "createdId": "1pHB6iKv_-SoKMaYf2Woz",
+  "id": "block_chance",
+  "versionId": "DEscuSpM93r2I_s8iotJG",
+  "createdAt": "2025-05-31T06:06:37.441Z",
+  "updatedAt": "2025-05-31T06:06:37.441Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Block Chance",
+    "description": "Determines the probability of blocking an enemy attack."
+  }
+}

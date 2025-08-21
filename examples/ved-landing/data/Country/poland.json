@@ -1,0 +1,26 @@
+{
+  "createdId": "toAfunqTkBStZEryt2iVv",
+  "id": "poland",
+  "versionId": "56UlloowTuc5ss3abomlc",
+  "createdAt": "2025-06-09T16:02:09.725Z",
+  "updatedAt": "2025-06-27T08:43:42.257Z",
+  "publishedAt": "2025-06-09T16:02:09.725Z",
+  "readonly": true,
+  "data": {
+    "code": "poland",
+    "icon": {
+      "url": "https://cdn.ab.tech/36b5d1e3467653bc3e2e639fee9609e01061fd0c",
+      "hash": "36b5d1e3467653bc3e2e639fee9609e01061fd0c",
+      "size": 498,
+      "width": 512,
+      "fileId": "ebVBkJBmJQs7rUWhuhd73",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "poland.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Польша"
+  }
+}

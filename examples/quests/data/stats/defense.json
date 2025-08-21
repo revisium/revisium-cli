@@ -1,0 +1,13 @@
+{
+  "createdId": "0F0sax868iqtI81GFFASq",
+  "id": "defense",
+  "versionId": "XMQ6-Bfvq3Xt0uPMTgvCg",
+  "createdAt": "2025-05-31T06:06:37.669Z",
+  "updatedAt": "2025-05-31T06:06:37.669Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Defense",
+    "description": "Reduces damage taken by the character from physical attacks."
+  }
+}

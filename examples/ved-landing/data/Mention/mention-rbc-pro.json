@@ -1,0 +1,28 @@
+{
+  "createdId": "I5muIllGW9puCvc273L8k",
+  "id": "mention-rbc-pro",
+  "versionId": "SXHq_jU7Tz2Nphkm3SFzc",
+  "createdAt": "2025-07-17T08:35:22.840Z",
+  "updatedAt": "2025-07-17T08:37:56.521Z",
+  "publishedAt": "2025-07-17T08:35:22.840Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-rbc-pro",
+    "icon": {
+      "url": "https://cdn.ab.tech/35e919f59ae356a00fff21c1ebb7035c201e143f",
+      "hash": "35e919f59ae356a00fff21c1ebb7035c201e143f",
+      "size": 3931,
+      "width": 353,
+      "fileId": "vT8zb-tGucI_7M9hs4XbF",
+      "height": 56,
+      "status": "uploaded",
+      "fileName": "Frame (1).svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": "https://pro.rbc.ru/news/683efa7b9a79478093016b92",
+    "name": "\n",
+    "createdAt": "2025-07-17T08:35:22.840Z",
+    "publishedAt": "2025-07-17T08:35:22.840Z"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "UYwUudc90Cm_qWq3Qyh_c",
+  "id": "argentina",
+  "versionId": "mCaCUnOKN07h4-qCVkGtX",
+  "createdAt": "2025-05-24T09:04:32.866Z",
+  "updatedAt": "2025-05-24T09:04:44.672Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "argentina",
+    "icon": {
+      "url": "https://cdn.ab.tech/4152d5056e63f12b43f5308846c0473177e95778",
+      "hash": "4152d5056e63f12b43f5308846c0473177e95778",
+      "size": 1066,
+      "width": 32,
+      "fileId": "vMzEuztiYftvUkNO0k23_",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "ar.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Аргентина"
+  }
+}

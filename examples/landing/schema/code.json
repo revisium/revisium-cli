@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": [
+    "code",
+    "title"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "default": "",
+      "contentMediaType": "text/markdown"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

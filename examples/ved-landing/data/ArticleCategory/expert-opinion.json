@@ -1,0 +1,12 @@
+{
+  "createdId": "GxAPjGI8oC1bsmrJLjSZc",
+  "id": "expert-opinion",
+  "versionId": "aqkn7rpHfhc8BQDtRNAk9",
+  "createdAt": "2025-05-28T08:14:21.913Z",
+  "updatedAt": "2025-05-28T08:15:59.795Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "name": "Экспертное мнение"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "createdId": "xyw3JJwZIMdkt2NpslG5k",
+  "id": "mention-commersant",
+  "versionId": "rAUCSCvNMl22-ZW5Gs8tu",
+  "createdAt": "2025-07-17T08:43:00.263Z",
+  "updatedAt": "2025-07-17T08:43:26.410Z",
+  "publishedAt": "2025-07-17T08:43:00.263Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-commersant",
+    "icon": {
+      "url": "https://cdn.ab.tech/7f387348f0bbb56be46c3ac4ecc58ac3f9d212bd",
+      "hash": "7f387348f0bbb56be46c3ac4ecc58ac3f9d212bd",
+      "size": 17372,
+      "width": 502,
+      "fileId": "hBHg1_rIY6vGToUJ0T0uA",
+      "height": 73,
+      "status": "uploaded",
+      "fileName": "svg2.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": "https://www.kommersant.ru/doc/7692521?erid=F7NfYUJCUneRJTikogrZ",
+    "name": "\n",
+    "createdAt": "2025-07-17T08:43:00.263Z",
+    "publishedAt": "2025-07-17T08:43:00.263Z"
+  }
+}

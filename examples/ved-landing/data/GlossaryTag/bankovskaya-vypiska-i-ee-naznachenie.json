@@ -1,0 +1,12 @@
+{
+  "createdId": "4AZvZOtx6LeigbhUzrNEG",
+  "id": "bankovskaya-vypiska-i-ee-naznachenie",
+  "versionId": "bj3nInECtbOjrmC0ykMc6",
+  "createdAt": "2025-07-10T14:51:44.568Z",
+  "updatedAt": "2025-07-10T14:51:44.568Z",
+  "publishedAt": "2025-07-10T14:51:44.568Z",
+  "readonly": true,
+  "data": {
+    "name": "Банковская выписка"
+  }
+}

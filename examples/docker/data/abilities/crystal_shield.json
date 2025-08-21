@@ -1,0 +1,35 @@
+{
+  "createdId": "UR4_JFRkFkKlx7jtyg8eX",
+  "id": "crystal_shield",
+  "versionId": "CvtfrDbgxZ0OXsZjQeSHq",
+  "createdAt": "2025-05-31T06:06:41.782Z",
+  "updatedAt": "2025-05-31T06:06:41.782Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Crystal Shield",
+    "description": "Creates a powerful shield that protects against attacks.",
+    "ability_data": {
+      "type": "defense",
+      "effects": [
+        {
+          "chance": 100,
+          "effect_id": "stone_skin"
+        },
+        {
+          "chance": 20,
+          "effect_id": "magic_barrier"
+        }
+      ],
+      "cooldown": 20,
+      "requirements": {
+        "level": 10,
+        "skill_ids": [
+          "blok_shhitom",
+          "ledyanaya_bron",
+          "ukreplenie"
+        ]
+      }
+    }
+  }
+}

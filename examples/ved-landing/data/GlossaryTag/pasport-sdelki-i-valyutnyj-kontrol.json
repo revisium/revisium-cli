@@ -1,0 +1,12 @@
+{
+  "createdId": "-VLTLmGsWfdCZ7lrasDYm",
+  "id": "pasport-sdelki-i-valyutnyj-kontrol",
+  "versionId": "h1TMP602gORDg5EIobojO",
+  "createdAt": "2025-07-10T15:37:08.740Z",
+  "updatedAt": "2025-07-10T15:37:08.740Z",
+  "publishedAt": "2025-07-10T15:37:08.740Z",
+  "readonly": true,
+  "data": {
+    "name": "Паспорт сделки"
+  }
+}

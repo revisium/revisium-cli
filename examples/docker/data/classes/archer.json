@@ -1,0 +1,13 @@
+{
+  "createdId": "ckHEkH1wwO5uo9cAbRKHc",
+  "id": "archer",
+  "versionId": "pc5kzwf3qHmrw3A-G5hS7",
+  "createdAt": "2025-05-31T06:06:42.093Z",
+  "updatedAt": "2025-05-31T06:06:42.093Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Archer",
+    "description": "A shooter dealing damage at range with a bow."
+  }
+}

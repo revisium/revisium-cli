@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": [
+    "code",
+    "icon",
+    "link",
+    "title"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "default": ""
+    },
+    "icon": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "link": {
+      "type": "boolean",
+      "default": false
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

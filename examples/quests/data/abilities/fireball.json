@@ -1,0 +1,35 @@
+{
+  "createdId": "vRcjRCIlzKaQgWYWjZVWL",
+  "id": "fireball",
+  "versionId": "jlD-kAFy9bN0uWhSyqu-X",
+  "createdAt": "2025-05-31T06:06:41.780Z",
+  "updatedAt": "2025-05-31T06:06:41.780Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Fireball",
+    "description": "A powerful spell dealing fire damage to enemies.",
+    "ability_data": {
+      "type": "magic",
+      "effects": [
+        {
+          "chance": 100,
+          "effect_id": "fire_shield"
+        },
+        {
+          "chance": 30,
+          "effect_id": "ice_arrow"
+        }
+      ],
+      "cooldown": 10,
+      "requirements": {
+        "level": 5,
+        "skill_ids": [
+          "ognennyy_shar",
+          "charodeyskiy_i",
+          "vnutrenniy_og"
+        ]
+      }
+    }
+  }
+}

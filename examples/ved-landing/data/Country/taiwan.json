@@ -1,0 +1,26 @@
+{
+  "createdId": "G83YPVCs-x2nnLWs-DB1B",
+  "id": "taiwan",
+  "versionId": "ZRxKTZwFTrBAen6iGVnoa",
+  "createdAt": "2025-06-09T16:04:34.833Z",
+  "updatedAt": "2025-07-07T09:49:54.131Z",
+  "publishedAt": "2025-06-09T16:04:34.833Z",
+  "readonly": true,
+  "data": {
+    "code": "taiwan",
+    "icon": {
+      "url": "https://cdn.ab.tech/8cd781f1939a5222ef09a7484f90256e1e118f99",
+      "hash": "8cd781f1939a5222ef09a7484f90256e1e118f99",
+      "size": 1450,
+      "width": 512,
+      "fileId": "79YyPxE1EnMcUBL863LHW",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "taiwan.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Тайвань"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "FYOlcKrGRfCXCo9HxpYuN",
+  "id": "headless-cms",
+  "versionId": "P41UK91t6maMI6cZoQQdj",
+  "createdAt": "2025-06-05T06:16:16.814Z",
+  "updatedAt": "2025-06-05T06:17:27.740Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "file": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/7c9999c4a9f2aeb203f15b4394420905d7b130cf",
+      "hash": "7c9999c4a9f2aeb203f15b4394420905d7b130cf",
+      "size": 514828,
+      "width": 1058,
+      "fileId": "wA3klo_PXFVeZbFCJJ26Z",
+      "height": 610,
+      "status": "uploaded",
+      "fileName": "Screenshot 2025-06-05 at 09.16.59.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "title": "Low-Level Headless CMS",
+    "caseId": "headless-cms",
+    "description": "Utilize Revisium as the foundation for your content management needs without being tied to a specific front-end."
+  }
+}

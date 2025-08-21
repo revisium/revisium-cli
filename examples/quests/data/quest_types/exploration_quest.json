@@ -1,0 +1,13 @@
+{
+  "createdId": "uxSpQqP6vYmwZF-sH2tz8",
+  "id": "exploration_quest",
+  "versionId": "acT8rcPITRknirzW5JsYi",
+  "createdAt": "2025-05-31T06:06:44.968Z",
+  "updatedAt": "2025-05-31T06:06:44.968Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Exploration",
+    "description": "A quest where the player must explore a specific area or find a location."
+  }
+}
