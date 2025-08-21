@@ -5,7 +5,7 @@ RUN apk add --no-cache bash ca-certificates curl tini \
 
 WORKDIR /app
 
-RUN npm i -g revisium@0.10.0
+RUN npm i -g revisium
 
 RUN mkdir -p /app/migrations /app/schemas /app/data
 
