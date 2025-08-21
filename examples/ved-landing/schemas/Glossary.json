@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": [
+    "SEO"
+  ],
+  "properties": {
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

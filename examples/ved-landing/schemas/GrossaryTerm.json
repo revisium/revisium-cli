@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "required": [
+    "content",
+    "description",
+    "name",
+    "publishedAt",
+    "SEO",
+    "slug",
+    "tags",
+    "updatedAt",
+    "visible"
+  ],
+  "properties": {
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "slug": {
+      "$ref": "urn:jsonschema:io:revisium:row-id-schema:1.0.0"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "default": "",
+        "foreignKey": "GlossaryTag"
+      }
+    },
+    "content": {
+      "type": "string",
+      "default": "",
+      "contentMediaType": "text/markdown"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": false
+    },
+    "updatedAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-updated-at-schema:1.0.0"
+    },
+    "description": {
+      "type": "string",
+      "default": "",
+      "contentMediaType": "text/markdown"
+    },
+    "publishedAt": {
+      "$ref": "urn:jsonschema:io:revisium:row-published-at-schema:1.0.0"
+    }
+  },
+  "additionalProperties": false
+}

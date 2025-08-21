@@ -1,0 +1,143 @@
+{
+  "type": "object",
+  "required": [
+    "cases",
+    "cloud",
+    "code",
+    "docs",
+    "features",
+    "github",
+    "preview",
+    "texts"
+  ],
+  "properties": {
+    "code": {
+      "type": "object",
+      "required": [
+        "docker",
+        "dockerCompose"
+      ],
+      "properties": {
+        "docker": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "code"
+        },
+        "dockerCompose": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "code"
+        }
+      },
+      "additionalProperties": false
+    },
+    "docs": {
+      "type": "object",
+      "required": [
+        "label",
+        "link"
+      ],
+      "properties": {
+        "link": {
+          "type": "string",
+          "default": ""
+        },
+        "label": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "cases": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "case"
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "cloud": {
+      "type": "object",
+      "required": [
+        "label",
+        "link"
+      ],
+      "properties": {
+        "link": {
+          "type": "string",
+          "default": ""
+        },
+        "label": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "texts": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "github": {
+      "type": "string",
+      "default": ""
+    },
+    "preview": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "features": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "feature"
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

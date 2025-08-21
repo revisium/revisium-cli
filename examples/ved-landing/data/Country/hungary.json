@@ -1,0 +1,26 @@
+{
+  "createdId": "KA14Vff6tclJ_z1kVTlUw",
+  "id": "hungary",
+  "versionId": "VgQjAsx9mhQzKeMmLCrOV",
+  "createdAt": "2025-05-22T14:38:23.402Z",
+  "updatedAt": "2025-05-22T14:38:30.513Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "hungary",
+    "icon": {
+      "url": "https://cdn.ab.tech/19fb4a8b2531e52c4f59747237ca1502d6ff0f2f",
+      "hash": "19fb4a8b2531e52c4f59747237ca1502d6ff0f2f",
+      "size": 421,
+      "width": 32,
+      "fileId": "yTgc57peLEkHmX_XaUvQR",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "hu.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Венгрия"
+  }
+}

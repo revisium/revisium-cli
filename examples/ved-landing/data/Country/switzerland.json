@@ -1,0 +1,26 @@
+{
+  "createdId": "Q_XbV6kFeUrqmDVjweAal",
+  "id": "switzerland",
+  "versionId": "p0m2RshbZOW-7OgyzLfgL",
+  "createdAt": "2025-05-24T08:47:29.994Z",
+  "updatedAt": "2025-05-24T08:47:39.249Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "switzerland",
+    "icon": {
+      "url": "https://cdn.ab.tech/7377ea966927bd328f2f44f2eaa7e9182f28e9e2",
+      "hash": "7377ea966927bd328f2f44f2eaa7e9182f28e9e2",
+      "size": 589,
+      "width": 32,
+      "fileId": "eTF_cxEEFCyBL4rY-tFqU",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "ch.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Швейцария"
+  }
+}

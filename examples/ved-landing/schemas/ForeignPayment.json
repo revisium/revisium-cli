@@ -1,0 +1,366 @@
+{
+  "type": "object",
+  "required": [
+    "contactPromptBlock",
+    "FAQ",
+    "helpPaymentBlock",
+    "paymentOptionsBlock",
+    "paymentOverviewBlock",
+    "paymentSelectionBlock",
+    "requiredDocumentsBlock",
+    "SEO",
+    "solvingProblemsBlock",
+    "titleBlock",
+    "whyVedMasterBlock",
+    "workProcessBlock"
+  ],
+  "properties": {
+    "FAQ": {
+      "type": "object",
+      "required": [
+        "questions",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "title",
+              "value"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "title": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "value": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "titleBlock": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "helpPaymentBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "workProcessBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "whyVedMasterBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "contactPromptBlock": {
+      "type": "object",
+      "required": [
+        "text",
+        "title"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "paymentOptionsBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "paymentOverviewBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "solvingProblemsBlock": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "content",
+          "country"
+        ],
+        "properties": {
+          "content": {
+            "type": "string",
+            "default": "",
+            "contentMediaType": "text/markdown"
+          },
+          "country": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "Country"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "paymentSelectionBlock": {
+      "type": "object",
+      "required": [
+        "items",
+        "subTitle",
+        "title"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "subTitle": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "requiredDocumentsBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

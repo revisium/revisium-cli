@@ -1,0 +1,28 @@
+{
+  "createdId": "OxWy4pQY2gaKY9Z7s0o5o",
+  "id": "mention-inc",
+  "versionId": "SK5mwLImps9CkkjD5YnUA",
+  "createdAt": "2025-08-06T09:12:23.415Z",
+  "updatedAt": "2025-08-06T09:15:23.530Z",
+  "publishedAt": "2025-07-16T08:35:22.840Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-inc",
+    "icon": {
+      "url": "https://cdn.ab.tech/140b0ed45fc86410d4fadb163dc90fa32b93d381",
+      "hash": "140b0ed45fc86410d4fadb163dc90fa32b93d381",
+      "size": 1890,
+      "width": 255,
+      "fileId": "4v1FGofUjq_0qT7aFgy1z",
+      "height": 66,
+      "status": "uploaded",
+      "fileName": "Clip path group.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "link": "https://incrussia.ru/share/sekonomish-postradaesh/",
+    "name": "",
+    "createdAt": "2025-08-06T09:12:23.415Z",
+    "publishedAt": "2025-07-16T08:35:22.840Z"
+  }
+}

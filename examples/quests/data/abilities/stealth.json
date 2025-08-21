@@ -1,0 +1,35 @@
+{
+  "createdId": "gFbZe-vfbSAX-t0-wgdMW",
+  "id": "stealth",
+  "versionId": "pWb6ME4tpb-PMY2RwdcYS",
+  "createdAt": "2025-05-31T06:06:41.802Z",
+  "updatedAt": "2025-05-31T06:06:41.802Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Stealth",
+    "description": "Allows temporary invisibility from enemies.",
+    "ability_data": {
+      "type": "physical",
+      "effects": [
+        {
+          "chance": 100,
+          "effect_id": "mana_shield"
+        },
+        {
+          "chance": 50,
+          "effect_id": "haste"
+        }
+      ],
+      "cooldown": 15,
+      "requirements": {
+        "level": 7,
+        "skill_ids": [
+          "sprint",
+          "usilenie_uklo",
+          "charodeyskiy_v"
+        ]
+      }
+    }
+  }
+}

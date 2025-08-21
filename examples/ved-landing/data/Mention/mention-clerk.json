@@ -1,0 +1,28 @@
+{
+  "createdId": "Vdl8ZIBMlcOmFAy5YvUtw",
+  "id": "mention-clerk",
+  "versionId": "kF1YbBzgejeTRBOAlbfTs",
+  "createdAt": "2025-07-17T08:41:26.645Z",
+  "updatedAt": "2025-07-17T08:42:30.222Z",
+  "publishedAt": "2025-07-17T08:41:26.645Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-clerk",
+    "icon": {
+      "url": "https://cdn.ab.tech/daf197a6d70d4cec0bd6f2d02478f6ea4fd83ab8",
+      "hash": "daf197a6d70d4cec0bd6f2d02478f6ea4fd83ab8",
+      "size": 5966,
+      "width": 238,
+      "fileId": "AnbmGnt0_E5g0aFjyNW6F",
+      "height": 71,
+      "status": "uploaded",
+      "fileName": "Group.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": "https://www.klerk.ru/buh/articles/646494/",
+    "name": "\n",
+    "createdAt": "2025-07-17T08:41:26.645Z",
+    "publishedAt": "2025-07-17T08:41:26.645Z"
+  }
+}

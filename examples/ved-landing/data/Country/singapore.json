@@ -1,0 +1,26 @@
+{
+  "createdId": "Uxvsj_pdZQp0-FVysYjc-",
+  "id": "singapore",
+  "versionId": "DHp4GeJTHEAYSwWbJCf-f",
+  "createdAt": "2025-06-09T16:03:17.105Z",
+  "updatedAt": "2025-06-27T08:43:02.599Z",
+  "publishedAt": "2025-06-09T16:03:17.105Z",
+  "readonly": true,
+  "data": {
+    "code": "singapore",
+    "icon": {
+      "url": "https://cdn.ab.tech/34d658275f8ebaf8bc566eba507526c42503b47d",
+      "hash": "34d658275f8ebaf8bc566eba507526c42503b47d",
+      "size": 1734,
+      "width": 512,
+      "fileId": "RLJPssELYf2wNp-mfCDr8",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "singapore.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Сингапур"
+  }
+}

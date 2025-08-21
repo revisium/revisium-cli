@@ -1,0 +1,18 @@
+{
+  "createdId": "SMDA21OmWgu1vZK_HzCEg",
+  "id": "boevoy_klich",
+  "versionId": "cq20UYTfzVgVCB5EtkREt",
+  "createdAt": "2025-05-31T06:06:40.591Z",
+  "updatedAt": "2025-05-31T06:06:40.591Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "War Cry",
+    "skill_data": {
+      "bonus": 15,
+      "stat_id": "strength",
+      "cooldown_reduction": 3
+    },
+    "description": "Increases strength of all allies within range."
+  }
+}

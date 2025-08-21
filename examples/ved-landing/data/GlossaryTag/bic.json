@@ -1,0 +1,12 @@
+{
+  "createdId": "Y5Rf7b5eM3UCTECO5vH0t",
+  "id": "bic",
+  "versionId": "Fh9sa4WgsjbpplTFQ6KWB",
+  "createdAt": "2025-08-08T12:31:46.602Z",
+  "updatedAt": "2025-08-08T12:31:46.602Z",
+  "publishedAt": "2025-08-08T12:31:46.602Z",
+  "readonly": true,
+  "data": {
+    "name": "BIC-код"
+  }
+}

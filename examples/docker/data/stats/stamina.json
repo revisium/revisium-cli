@@ -1,0 +1,13 @@
+{
+  "createdId": "Ui6gwg7tIb9D9yDbxmxVb",
+  "id": "stamina",
+  "versionId": "VVbXC2WX3KbAfIWb-XPw5",
+  "createdAt": "2025-05-31T06:06:38.831Z",
+  "updatedAt": "2025-05-31T06:06:38.831Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Stamina",
+    "description": "Determines the character's ability for physical activity such as running or attacking."
+  }
+}

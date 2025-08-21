@@ -1,0 +1,26 @@
+{
+  "createdId": "CfAtKZ6SAlz5Rtrsy6Dv-",
+  "id": "czech-republic",
+  "versionId": "crur60JGMzOe-M2ObiUii",
+  "createdAt": "2025-06-09T16:05:05.318Z",
+  "updatedAt": "2025-07-07T09:51:53.638Z",
+  "publishedAt": "2025-06-09T16:05:05.318Z",
+  "readonly": true,
+  "data": {
+    "code": "czech-republic",
+    "icon": {
+      "url": "https://cdn.ab.tech/ce8576a0b9e705a10da643e280215dab6e2c165b",
+      "hash": "ce8576a0b9e705a10da643e280215dab6e2c165b",
+      "size": 709,
+      "width": 512,
+      "fileId": "X2tiXWBePW9rrOsI-V-Yj",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "czech republic.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Чехия"
+  }
+}

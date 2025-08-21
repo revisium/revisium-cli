@@ -1,0 +1,26 @@
+{
+  "createdId": "KDeQvaB_n-I8fiPrIZxRc",
+  "id": "kazakhstan",
+  "versionId": "Ec3GCEnzbOnn-i22ihhz7",
+  "createdAt": "2025-08-15T13:12:12.787Z",
+  "updatedAt": "2025-08-15T13:14:14.284Z",
+  "publishedAt": "2025-08-15T13:12:12.787Z",
+  "readonly": true,
+  "data": {
+    "code": "kazakhstan",
+    "icon": {
+      "url": "https://cdn.ab.tech/047083d9504905010a52057974d63506b765eb27",
+      "hash": "047083d9504905010a52057974d63506b765eb27",
+      "size": 1249,
+      "width": 32,
+      "fileId": "4cuWmoBqOtWWgJM4D2ofH",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "kazakhstan.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": false,
+    "title": "Казахстан"
+  }
+}

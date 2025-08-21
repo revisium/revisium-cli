@@ -1,0 +1,26 @@
+{
+  "createdId": "1gietxx9ZWC2yV-mAYH5c",
+  "id": "netherlands",
+  "versionId": "qGPDxWzmN9gC0CR40CaKj",
+  "createdAt": "2025-05-24T08:37:12.402Z",
+  "updatedAt": "2025-05-24T08:37:22.560Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "netherlands",
+    "icon": {
+      "url": "https://cdn.ab.tech/15745a36b2e31fc0b59ed7f9cb6ef93fa6d0eb1e",
+      "hash": "15745a36b2e31fc0b59ed7f9cb6ef93fa6d0eb1e",
+      "size": 710,
+      "width": 32,
+      "fileId": "qyZgU4GVC0YiSYKDipqQG",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "nl.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Нидерланды"
+  }
+}

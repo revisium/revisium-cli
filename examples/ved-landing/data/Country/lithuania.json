@@ -1,0 +1,26 @@
+{
+  "createdId": "3KL029Oj5dGT-cNp7HEwp",
+  "id": "lithuania",
+  "versionId": "8hdKiIV0HlWE5Pkd2GmWD",
+  "createdAt": "2025-06-09T15:59:29.984Z",
+  "updatedAt": "2025-06-27T08:43:57.233Z",
+  "publishedAt": "2025-06-09T15:59:29.984Z",
+  "readonly": true,
+  "data": {
+    "code": "lithuania",
+    "icon": {
+      "url": "https://cdn.ab.tech/32ea158c846dc8a29ab89736dadb7c3e34153cfb",
+      "hash": "32ea158c846dc8a29ab89736dadb7c3e34153cfb",
+      "size": 748,
+      "width": 512,
+      "fileId": "hMDfqd137l4ToELU2qZ3y",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "lithuania.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Литва"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "l5PwS2-KjH2c9DaAfV-cq",
+  "id": "korea",
+  "versionId": "CQmtnzwme8a8l-GmmDG7b",
+  "createdAt": "2025-05-15T12:32:06.377Z",
+  "updatedAt": "2025-05-22T14:31:24.206Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "korea",
+    "icon": {
+      "url": "https://cdn.ab.tech/9fb78701111111e9ecd87b553383d753413afb5c",
+      "hash": "9fb78701111111e9ecd87b553383d753413afb5c",
+      "size": 2867,
+      "width": 32,
+      "fileId": "bJxNzitGS67o85GrlJpZG",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "kr.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Южная Корея"
+  }
+}

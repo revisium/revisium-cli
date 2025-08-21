@@ -1,0 +1,26 @@
+{
+  "createdId": "t3KbXtcTflV7QuIKaDkHg",
+  "id": "malaysia",
+  "versionId": "T-UOazZizxW26Wr4GY1JD",
+  "createdAt": "2025-06-09T16:01:10.986Z",
+  "updatedAt": "2025-06-27T08:43:50.933Z",
+  "publishedAt": "2025-06-09T16:01:10.986Z",
+  "readonly": true,
+  "data": {
+    "code": "malaysia",
+    "icon": {
+      "url": "https://cdn.ab.tech/b875b7a8297ba843c78fed23a57f55a09256842b",
+      "hash": "b875b7a8297ba843c78fed23a57f55a09256842b",
+      "size": 1670,
+      "width": 512,
+      "fileId": "Ksd2__S6HlaMubcDfhAZl",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "malaysia.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Малайзия"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "U6kHn8s_HhnRUeRs8jk3K",
+  "id": "brazil",
+  "versionId": "mQt84Th6RHSJt8jLBBBrm",
+  "createdAt": "2025-05-24T09:01:02.860Z",
+  "updatedAt": "2025-05-24T09:01:10.645Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "brazil",
+    "icon": {
+      "url": "https://cdn.ab.tech/062b591e993c03731cb6d40dfd8bcf43a7746c3b",
+      "hash": "062b591e993c03731cb6d40dfd8bcf43a7746c3b",
+      "size": 1308,
+      "width": 32,
+      "fileId": "sP5PDXD4sdzqHuTkA17cI",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "br.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Бразилия"
+  }
+}

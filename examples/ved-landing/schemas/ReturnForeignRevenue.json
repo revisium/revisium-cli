@@ -1,0 +1,377 @@
+{
+  "type": "object",
+  "required": [
+    "applicationScenariosSection",
+    "currencyRevenueIntro",
+    "headerSection",
+    "infoDescriptionSection",
+    "questionSection",
+    "registrationSection",
+    "SEO",
+    "solvingInvoiceProblemSection",
+    "userFormSection",
+    "workingProcessSection",
+    "workingStepsSection"
+  ],
+  "properties": {
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "headerSection": {
+      "type": "object",
+      "required": [
+        "description",
+        "img",
+        "subTitle",
+        "title"
+      ],
+      "properties": {
+        "img": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "subTitle": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "questionSection": {
+      "type": "object",
+      "required": [
+        "answerNotFound",
+        "questions"
+      ],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "title",
+              "value"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "value": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "answerNotFound": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        }
+      },
+      "additionalProperties": false
+    },
+    "userFormSection": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "registrationSection": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "workingStepsSection": {
+      "type": "object",
+      "required": [
+        "title",
+        "workingSteps"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "workingSteps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "description": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "currencyRevenueIntro": {
+      "type": "object",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "workingProcessSection": {
+      "type": "object",
+      "required": [
+        "title",
+        "workingProcess"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "workingProcess": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "infoDescriptionSection": {
+      "type": "object",
+      "required": [
+        "descriptionBlocks",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "descriptionBlocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "content": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "applicationScenariosSection": {
+      "type": "object",
+      "required": [
+        "scenarios",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "solvingInvoiceProblemSection": {
+      "type": "object",
+      "required": [
+        "solvingInvoiceProblems",
+        "solvingProblemsBlock",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "solvingProblemsBlock": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "completionTime",
+              "content",
+              "country",
+              "currency",
+              "summa"
+            ],
+            "properties": {
+              "summa": {
+                "type": "string",
+                "default": ""
+              },
+              "content": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "country": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "Country"
+              },
+              "currency": {
+                "type": "string",
+                "default": ""
+              },
+              "completionTime": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "solvingInvoiceProblems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "client",
+              "description",
+              "summa",
+              "title"
+            ],
+            "properties": {
+              "summa": {
+                "type": "string",
+                "default": ""
+              },
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "client": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          },
+          "deprecated": true,
+          "description": "используйте solvingProblemsBlock"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

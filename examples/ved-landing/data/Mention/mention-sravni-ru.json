@@ -1,0 +1,28 @@
+{
+  "createdId": "Y19rg0W4mAiM_gRplQaZ5",
+  "id": "mention-sravni-ru",
+  "versionId": "bNG1TcldATeXZXejB7liQ",
+  "createdAt": "2025-07-17T08:39:17.669Z",
+  "updatedAt": "2025-07-17T08:40:01.373Z",
+  "publishedAt": "2025-07-17T08:39:17.669Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-sravni-ru",
+    "icon": {
+      "url": "https://cdn.ab.tech/4b5cfda23a6048fc5d5c3ea152d00503465eaa92",
+      "hash": "4b5cfda23a6048fc5d5c3ea152d00503465eaa92",
+      "size": 27283,
+      "width": 341,
+      "fileId": "fswR-spX_WcWg7LMoNdKH",
+      "height": 64,
+      "status": "uploaded",
+      "fileName": "Clip path group.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": "https://www.sravni.ru/q/chem-polezen-platjozhnyj-agent-76997/",
+    "name": "",
+    "createdAt": "2025-07-17T08:39:17.669Z",
+    "publishedAt": "2025-07-17T08:39:17.669Z"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "uFiVmoXQTEHh7xafvRTmi",
+  "id": "great-britain",
+  "versionId": "AVX5Bx4wRre42uOCfPn76",
+  "createdAt": "2025-05-22T14:37:10.712Z",
+  "updatedAt": "2025-05-23T12:19:21.997Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "great-britain",
+    "icon": {
+      "url": "https://cdn.ab.tech/3bea8d25555900cc40a6c76aec699d0f43c59d62",
+      "hash": "3bea8d25555900cc40a6c76aec699d0f43c59d62",
+      "size": 2474,
+      "width": 32,
+      "fileId": "-COCPo7k4HLz5yxjWYEW7",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "gb.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Великобритания"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "required": [
+    "description",
+    "effect_data",
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "effect_data": {
+      "type": "object",
+      "required": [
+        "application",
+        "duration",
+        "stat_changes",
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "duration": {
+          "type": "number",
+          "default": 0
+        },
+        "application": {
+          "type": "object",
+          "required": [
+            "chance",
+            "target_type"
+          ],
+          "properties": {
+            "chance": {
+              "type": "number",
+              "default": 0
+            },
+            "target_type": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "stat_changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "stat_id",
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "number",
+                "default": 0
+              },
+              "stat_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "stats"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

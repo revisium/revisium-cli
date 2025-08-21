@@ -1,0 +1,26 @@
+{
+  "createdId": "0houi6MAp1iIhZBoQms09",
+  "id": "schema",
+  "versionId": "zF3jWAcwziRKu_CbB_tKC",
+  "createdAt": "2025-06-17T17:27:02.514Z",
+  "updatedAt": "2025-06-19T18:17:44.272Z",
+  "publishedAt": "2025-06-17T17:27:02.514Z",
+  "readonly": true,
+  "data": {
+    "file": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/f9bebcdeb2e8cde464f55d9ac8f69114d18e96fa",
+      "hash": "f9bebcdeb2e8cde464f55d9ac8f69114d18e96fa",
+      "size": 304436,
+      "width": 0,
+      "fileId": "G5LCnCHzV7_h_4Ht3g9Is",
+      "height": 0,
+      "status": "uploaded",
+      "fileName": "Screen Recording 2025-06-19 at 21.16.00.mp4",
+      "mimeType": "video/mp4",
+      "extension": "mp4"
+    },
+    "title": "Declarative Schema Creation and Editing\n\n",
+    "featureId": "schema",
+    "description": "Design and edit data structures using a declarative interface based on JSON Schema. Supports primitives, arrays, nested objects, and system fields like id, timestamps, and versioning — all out of the box."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "createdId": "g_g6USHxqbkIAofY9H2n4",
+  "id": "charodeyskiy_v",
+  "versionId": "MGZ8j1cQoMseVpcvUzveM",
+  "createdAt": "2025-05-31T06:06:40.598Z",
+  "updatedAt": "2025-05-31T06:06:40.598Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Arcane Blast",
+    "skill_data": {
+      "bonus": 20,
+      "stat_id": "spell_power",
+      "cooldown_reduction": 5
+    },
+    "description": "Creates a magical energy explosion dealing damage to enemies."
+  }
+}

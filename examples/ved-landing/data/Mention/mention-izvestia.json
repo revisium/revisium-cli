@@ -1,0 +1,28 @@
+{
+  "createdId": "CQ4F9BjkNInX7hV8v7T1E",
+  "id": "mention-izvestia",
+  "versionId": "0X2MBmnu86HyJ-pCysvCZ",
+  "createdAt": "2025-08-06T09:13:53.399Z",
+  "updatedAt": "2025-08-06T09:16:07.563Z",
+  "publishedAt": "2025-07-14T08:35:22.840Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-izvestia",
+    "icon": {
+      "url": "https://cdn.ab.tech/8479bd929691e1dd12bef08e1bf7cb9e3d1503c1",
+      "hash": "8479bd929691e1dd12bef08e1bf7cb9e3d1503c1",
+      "size": 3978,
+      "width": 342,
+      "fileId": "o_3Ho5gUGE918yFugvVJ_",
+      "height": 72,
+      "status": "uploaded",
+      "fileName": "Frame (1).png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "link": "https://iz.ru/1910577/mariia-kolobova/nadezhnyj-balans-komissii-za-transgranichnye-platezhi-iz-rf-upali-v-2-3-raza",
+    "name": "",
+    "createdAt": "2025-08-06T09:13:53.399Z",
+    "publishedAt": "2025-07-14T08:35:22.840Z"
+  }
+}

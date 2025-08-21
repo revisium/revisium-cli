@@ -1,0 +1,52 @@
+{
+  "createdId": "laY5aRM9hAPmLvRj99P0A",
+  "id": "main",
+  "versionId": "lD8KFOwSmg5WJ7_m3Taoi",
+  "createdAt": "2025-06-03T15:02:56.720Z",
+  "updatedAt": "2025-08-10T08:41:53.874Z",
+  "publishedAt": "2025-08-10T08:41:46.720Z",
+  "readonly": true,
+  "data": {
+    "code": {
+      "docker": "docker",
+      "dockerCompose": "docker-compose"
+    },
+    "docs": {
+      "link": "https://docs.revisium.io/",
+      "label": "Docs"
+    },
+    "cases": {
+      "items": [],
+      "title": "Use cases"
+    },
+    "cloud": {
+      "link": "https://cloud.revisium.io/",
+      "label": "Try Revisium Cloud (Alpha)"
+    },
+    "texts": {
+      "title": "Design Schemas, Drive Data… Git-Style!",
+      "description": "Revisium lets you define flexible JSON-Schema–based content models, generate and manage your data through a simple UI or API, and track every change with Git-style versioning.\n\nIt’s a low-level, headless CMS designed for developers who want full control over schema design and data flow."
+    },
+    "github": "https://github.com/revisium",
+    "preview": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/ca96317c7fee6a7f2f7f22239089cd71302a3014",
+      "hash": "ca96317c7fee6a7f2f7f22239089cd71302a3014",
+      "size": 5379500,
+      "width": 0,
+      "fileId": "6zsr5uYuP8VLiCUkwQYuS",
+      "height": 0,
+      "status": "uploaded",
+      "fileName": "revisium-io.mp4",
+      "mimeType": "video/mp4",
+      "extension": "mp4"
+    },
+    "features": {
+      "items": [
+        "schema",
+        "foreign-key",
+        "migration"
+      ],
+      "title": "Core features"
+    }
+  }
+}

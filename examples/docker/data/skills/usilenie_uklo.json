@@ -1,0 +1,18 @@
+{
+  "createdId": "CwgSm40Hbv-dY1syxEb_g",
+  "id": "usilenie_uklo",
+  "versionId": "8DynWhM7mnp77gALomQEW",
+  "createdAt": "2025-05-31T06:06:41.524Z",
+  "updatedAt": "2025-05-31T06:06:41.524Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Evasion Enhancement",
+    "skill_data": {
+      "bonus": 20,
+      "stat_id": "evasion",
+      "cooldown_reduction": 3
+    },
+    "description": "Increases evasion chance for a short time."
+  }
+}

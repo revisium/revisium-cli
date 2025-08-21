@@ -1,0 +1,418 @@
+{
+  "type": "object",
+  "required": [
+    "ChoosingCountryBlock",
+    "helpPaymentBlock",
+    "infoBlock",
+    "infoDescriptionBlock",
+    "invoiceFormBlock",
+    "notAnswerBlock",
+    "paymentProcedureBlock",
+    "paymentViaAgentBlock",
+    "questionsBlock",
+    "registrationBlock",
+    "SEO",
+    "solvingProblemsBlock",
+    "titleBlock"
+  ],
+  "properties": {
+    "SEO": {
+      "type": "object",
+      "required": [
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "infoBlock": {
+      "type": "object",
+      "required": [
+        "content"
+      ],
+      "properties": {
+        "content": {
+          "type": "object",
+          "required": [
+            "infoItem"
+          ],
+          "properties": {
+            "infoItem": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "icon",
+                  "title"
+                ],
+                "properties": {
+                  "icon": {
+                    "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+                  },
+                  "title": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "titleBlock": {
+      "type": "object",
+      "required": [
+        "description",
+        "subtitle",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "subtitle": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "notAnswerBlock": {
+      "type": "object",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "questionsBlock": {
+      "type": "object",
+      "required": [
+        "questions"
+      ],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content",
+              "title",
+              "value"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "value": {
+                "type": "string",
+                "default": ""
+              },
+              "content": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "helpPaymentBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "object",
+          "required": [
+            "helpPaymentItems"
+          ],
+          "properties": {
+            "helpPaymentItems": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "title"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "invoiceFormBlock": {
+      "type": "object",
+      "required": [
+        "text",
+        "title"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "default": ""
+        },
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "registrationBlock": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChoosingCountryBlock": {
+      "type": "object",
+      "required": [
+        "invoices",
+        "subtitle",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "invoices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "Invoice"
+          }
+        },
+        "subtitle": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "infoDescriptionBlock": {
+      "type": "object",
+      "required": [
+        "descriptions",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "",
+          "contentMediaType": "text/markdown"
+        },
+        "descriptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content",
+              "title"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              },
+              "content": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "paymentViaAgentBlock": {
+      "type": "object",
+      "required": [
+        "content",
+        "description",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "content": {
+          "type": "object",
+          "required": [
+            "paymentItems"
+          ],
+          "properties": {
+            "paymentItems": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "description",
+                  "icon",
+                  "title"
+                ],
+                "properties": {
+                  "icon": {
+                    "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+                  },
+                  "title": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "description": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "solvingProblemsBlock": {
+      "type": "object",
+      "required": [
+        "solvingProblems",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "solvingProblems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "client",
+              "description",
+              "summa",
+              "title"
+            ],
+            "properties": {
+              "summa": {
+                "type": "string",
+                "default": ""
+              },
+              "title": {
+                "type": "string",
+                "default": ""
+              },
+              "client": {
+                "type": "string",
+                "default": ""
+              },
+              "description": {
+                "type": "string",
+                "default": "",
+                "contentMediaType": "text/markdown"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "paymentProcedureBlock": {
+      "type": "object",
+      "required": [
+        "paymentSteps",
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        },
+        "paymentSteps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "img",
+              "title"
+            ],
+            "properties": {
+              "img": {
+                "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+              },
+              "title": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

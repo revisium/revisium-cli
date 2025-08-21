@@ -1,0 +1,26 @@
+{
+  "createdId": "g7PtOG0mK7CnnVC6Kkyly",
+  "id": "iran",
+  "versionId": "0ynFx8vCg8kP-Aqb9JaGJ",
+  "createdAt": "2025-06-09T15:56:58.723Z",
+  "updatedAt": "2025-06-23T05:41:08.481Z",
+  "publishedAt": "2025-06-09T15:56:58.723Z",
+  "readonly": true,
+  "data": {
+    "code": "iran",
+    "icon": {
+      "url": "https://cdn.ab.tech/26222f06029d64c1ead4c6c1bae906b36aeec2f8",
+      "hash": "26222f06029d64c1ead4c6c1bae906b36aeec2f8",
+      "size": 1668,
+      "width": 512,
+      "fileId": "VUSWf6wCgE0d7GPD719Ra",
+      "height": 512,
+      "status": "uploaded",
+      "fileName": "iran.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Иран"
+  }
+}

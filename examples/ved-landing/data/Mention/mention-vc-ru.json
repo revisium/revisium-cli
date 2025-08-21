@@ -1,0 +1,28 @@
+{
+  "createdId": "sVrDdB_6LmMKj848sxMk4",
+  "id": "mention-vc-ru",
+  "versionId": "FGMLStRTclq_A0BMZTutJ",
+  "createdAt": "2025-07-17T08:40:32.929Z",
+  "updatedAt": "2025-07-17T08:40:53.937Z",
+  "publishedAt": "2025-07-17T08:40:32.929Z",
+  "readonly": true,
+  "data": {
+    "id": "mention-vc-ru",
+    "icon": {
+      "url": "https://cdn.ab.tech/5a22952f1b9d59f023d1ad0de5ccb2618fa5d9ef",
+      "hash": "5a22952f1b9d59f023d1ad0de5ccb2618fa5d9ef",
+      "size": 3967,
+      "width": 264,
+      "fileId": "3VuXwVttrTb1sDzliBvdg",
+      "height": 62,
+      "status": "uploaded",
+      "fileName": "Frame (2).svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": "https://vc.ru/money/2013720-mezhdunarodnye-platezhi-dlya-biznesa",
+    "name": "",
+    "createdAt": "2025-07-17T08:40:32.929Z",
+    "publishedAt": "2025-07-17T08:40:32.929Z"
+  }
+}

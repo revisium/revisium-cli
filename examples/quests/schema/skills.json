@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "required": [
+    "description",
+    "name",
+    "skill_data"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "skill_data": {
+      "type": "object",
+      "required": [
+        "bonus",
+        "cooldown_reduction",
+        "stat_id"
+      ],
+      "properties": {
+        "bonus": {
+          "type": "number",
+          "default": 0
+        },
+        "stat_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "stats"
+        },
+        "cooldown_reduction": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

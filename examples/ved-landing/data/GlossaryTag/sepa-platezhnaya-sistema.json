@@ -1,0 +1,12 @@
+{
+  "createdId": "j_7L0KLOb-Dz32-RIe6Am",
+  "id": "sepa-platezhnaya-sistema",
+  "versionId": "2NoEuDIqZqfSc2RRl53qg",
+  "createdAt": "2025-06-27T10:40:02.280Z",
+  "updatedAt": "2025-06-27T10:40:02.280Z",
+  "publishedAt": "2025-06-27T10:40:02.280Z",
+  "readonly": true,
+  "data": {
+    "name": "Платежная система SEPA"
+  }
+}

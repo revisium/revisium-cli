@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "required": [
+    "buttonText",
+    "hint",
+    "media",
+    "offers",
+    "title",
+    "video"
+  ],
+  "properties": {
+    "hint": {
+      "type": "string",
+      "default": "",
+      "deprecated": true,
+      "description": "use in offersItem"
+    },
+    "media": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0",
+      "deprecated": true,
+      "description": "se in offersItem"
+    },
+    "title": {
+      "type": "string",
+      "default": "",
+      "deprecated": true,
+      "description": "use in offersItem",
+      "contentMediaType": "text/markdown"
+    },
+    "video": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0",
+      "deprecated": true,
+      "description": "use in offersItem"
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "additionalInfo",
+          "buttonText",
+          "hint",
+          "media",
+          "source",
+          "title"
+        ],
+        "properties": {
+          "hint": {
+            "type": "string",
+            "default": ""
+          },
+          "media": {
+            "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+          },
+          "title": {
+            "type": "string",
+            "default": "",
+            "contentMediaType": "text/markdown"
+          },
+          "source": {
+            "type": "string",
+            "default": ""
+          },
+          "buttonText": {
+            "type": "string",
+            "default": ""
+          },
+          "additionalInfo": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "",
+      "deprecated": true,
+      "description": "use in offersItem",
+      "contentMediaType": "text/markdown"
+    }
+  },
+  "additionalProperties": false
+}

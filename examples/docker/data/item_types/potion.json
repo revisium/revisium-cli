@@ -1,0 +1,13 @@
+{
+  "createdId": "iKL9qsgDysv7vH8nNFcon",
+  "id": "potion",
+  "versionId": "Ao4broMmHqJcpnWayCvSx",
+  "createdAt": "2025-05-31T06:06:42.965Z",
+  "updatedAt": "2025-05-31T06:06:42.965Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Potion",
+    "description": "Items used to restore health, mana, or improve characteristics."
+  }
+}

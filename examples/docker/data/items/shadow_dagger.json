@@ -1,0 +1,39 @@
+{
+  "createdId": "7WPZh12kfSvp-_yC41WuS",
+  "id": "shadow_dagger",
+  "versionId": "pRSp-b-fH4z1GKgi5tOoW",
+  "createdAt": "2025-05-31T06:06:43.335Z",
+  "updatedAt": "2025-05-31T06:06:43.335Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Shadow Dagger",
+    "properties": {
+      "damage": {
+        "max": 18,
+        "min": 12,
+        "type": "shadow"
+      },
+      "defense": 2,
+      "effects": [
+        {
+          "chance": 50,
+          "effect_id": "stone_skin"
+        }
+      ],
+      "modifiers": [
+        {
+          "value": 10,
+          "stat_id": "agility"
+        }
+      ],
+      "requirements": {
+        "level": 3,
+        "class_ids": [
+          "rogue"
+        ]
+      }
+    },
+    "item_type_id": "weapon"
+  }
+}

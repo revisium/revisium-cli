@@ -1,0 +1,26 @@
+{
+  "createdId": "Q2X8tmSH6UoCriRNs9VR0",
+  "id": "latvia",
+  "versionId": "rNJjKCZEY0ntf4tj2ZjVI",
+  "createdAt": "2025-06-09T15:58:11.068Z",
+  "updatedAt": "2025-06-27T08:44:05.979Z",
+  "publishedAt": "2025-06-09T15:58:11.068Z",
+  "readonly": true,
+  "data": {
+    "code": "latvia",
+    "icon": {
+      "url": "https://cdn.ab.tech/b455c87d7d802e4c72cb43e4d4e8bbd3d3b71abf",
+      "hash": "b455c87d7d802e4c72cb43e4d4e8bbd3d3b71abf",
+      "size": 767,
+      "width": 512,
+      "fileId": "BDy0-sMPf0ytQy4neXTLI",
+      "height": 513,
+      "status": "uploaded",
+      "fileName": "latvia.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Латвия"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "6Kj8jjvzpQOwX3TUyT6LB",
+  "id": "indonesia",
+  "versionId": "Is2IC8mlMvBtWK5NZ_G6A",
+  "createdAt": "2025-05-24T09:06:48.226Z",
+  "updatedAt": "2025-05-24T09:06:59.539Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "indonesia",
+    "icon": {
+      "url": "https://cdn.ab.tech/95d8a4a4a501e7801329eba4aeecabea1224949e",
+      "hash": "95d8a4a4a501e7801329eba4aeecabea1224949e",
+      "size": 536,
+      "width": 32,
+      "fileId": "UZvUmDGr37SjhDwAeFyfC",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "id.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Индонезия"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "_zol4jtBZEGd2AcGEqPa6",
+  "id": "china",
+  "versionId": "tFypRzoN5BLQMd_FcmRWo",
+  "createdAt": "2025-05-15T12:33:32.584Z",
+  "updatedAt": "2025-05-22T14:30:48.641Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "china",
+    "icon": {
+      "url": "https://cdn.ab.tech/edb9dc998803fcb6b1823d572f01a77d9a4cb9e2",
+      "hash": "edb9dc998803fcb6b1823d572f01a77d9a4cb9e2",
+      "size": 1479,
+      "width": 32,
+      "fileId": "Nna-yAT2zZXUuC3cPIKms",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "cn.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Китай"
+  }
+}

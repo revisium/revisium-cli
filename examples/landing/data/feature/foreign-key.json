@@ -1,0 +1,26 @@
+{
+  "createdId": "0UhkQGosbc44dlA7sYDni",
+  "id": "foreign-key",
+  "versionId": "cDg-oAJAoAlOQuL9_yzdf",
+  "createdAt": "2025-06-19T17:22:22.970Z",
+  "updatedAt": "2025-06-19T18:27:17.461Z",
+  "publishedAt": "2025-06-19T17:22:22.970Z",
+  "readonly": true,
+  "data": {
+    "file": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/df5b37fe9b4881bc3139038ed66ac61804ad99bf",
+      "hash": "df5b37fe9b4881bc3139038ed66ac61804ad99bf",
+      "size": 330737,
+      "width": 0,
+      "fileId": "vX8kDatnlDWNtWa7kVZVN",
+      "height": 0,
+      "status": "uploaded",
+      "fileName": "Screen Recording 2025-06-19 at 21.25.25.mp4",
+      "mimeType": "video/mp4",
+      "extension": "mp4"
+    },
+    "title": "Flexible Relations with Referential Integrity",
+    "featureId": "foreign-key",
+    "description": "Turn any field — even nested ones — into a foreign key to another schema. Supports arrays, objects, and deep structures. Referential integrity is enforced automatically, even when records are renamed. Relations are reflected in the REST API and auto-resolved in GraphQL."
+  }
+}

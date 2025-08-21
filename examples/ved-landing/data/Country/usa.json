@@ -1,0 +1,26 @@
+{
+  "createdId": "freu98EOy4Q8QDAaiNYTZ",
+  "id": "usa",
+  "versionId": "TDV0gj6xgAIfvzDwYprcD",
+  "createdAt": "2025-05-15T12:33:09.475Z",
+  "updatedAt": "2025-05-22T14:30:56.255Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "usa",
+    "icon": {
+      "url": "https://cdn.ab.tech/8bd6924c807e2a4124bf5c22d13ba2fee36b427d",
+      "hash": "8bd6924c807e2a4124bf5c22d13ba2fee36b427d",
+      "size": 2313,
+      "width": 32,
+      "fileId": "dAxIXBSARB5xFUVeilfO5",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "us.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "США"
+  }
+}

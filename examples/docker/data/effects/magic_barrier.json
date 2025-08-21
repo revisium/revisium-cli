@@ -1,0 +1,27 @@
+{
+  "createdId": "h0oWXfbYQoU0oPWDJ2nad",
+  "id": "magic_barrier",
+  "versionId": "-ges-qMXfYesyMP29y7J0",
+  "createdAt": "2025-05-31T06:06:39.459Z",
+  "updatedAt": "2025-05-31T06:06:39.459Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Magic Barrier",
+    "description": "Creates a protective barrier blocking magical damage.",
+    "effect_data": {
+      "type": "shield",
+      "duration": 25,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": 25,
+          "stat_id": "magic_resistance"
+        }
+      ]
+    }
+  }
+}

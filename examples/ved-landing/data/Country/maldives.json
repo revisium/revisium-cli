@@ -1,0 +1,26 @@
+{
+  "createdId": "beKyfBiWuAZFYoGvYH4uF",
+  "id": "maldives",
+  "versionId": "QXvKiir4IyKxnY8LbdCyV",
+  "createdAt": "2025-05-24T09:13:05.335Z",
+  "updatedAt": "2025-05-30T13:07:08.291Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "maldives",
+    "icon": {
+      "url": "https://cdn.ab.tech/0ff6a2850c78cfc729a453ce072e0bf56448f94d",
+      "hash": "0ff6a2850c78cfc729a453ce072e0bf56448f94d",
+      "size": 960,
+      "width": 32,
+      "fileId": "nK3G2UsvgXhpPvClBtjqY",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "mv.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Мальдивы"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "createdId": "8hb939GgwCCIUx9iGMtKu",
+  "id": "uae",
+  "versionId": "JNrsc8AKf7IXTTmI74ibx",
+  "createdAt": "2025-05-22T14:33:54.740Z",
+  "updatedAt": "2025-05-22T14:34:23.353Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "uae",
+    "icon": {
+      "url": "https://cdn.ab.tech/5be2759136b326de6825c4e4a62a89a53c1c77c5",
+      "hash": "5be2759136b326de6825c4e4a62a89a53c1c77c5",
+      "size": 893,
+      "width": 32,
+      "fileId": "tcrcmymrWFrzCT1g9so_c",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "ae.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "ОАЭ"
+  }
+}

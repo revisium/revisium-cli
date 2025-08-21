@@ -1,0 +1,26 @@
+{
+  "createdId": "1ukDlbyMbi4oxiN06oA8U",
+  "id": "india",
+  "versionId": "EqgCVALJP1P3Ibb3MXylC",
+  "createdAt": "2025-05-24T09:13:45.440Z",
+  "updatedAt": "2025-05-24T09:13:56.856Z",
+  "publishedAt": "2025-06-07T13:20:56.731Z",
+  "readonly": true,
+  "data": {
+    "code": "india",
+    "icon": {
+      "url": "https://cdn.ab.tech/d8f8e4bdf7fd473d9eec41c009c673462171c2fc",
+      "hash": "d8f8e4bdf7fd473d9eec41c009c673462171c2fc",
+      "size": 1388,
+      "width": 32,
+      "fileId": "F0H_Ku0sUXVJcfggM9RQw",
+      "height": 32,
+      "status": "uploaded",
+      "fileName": "in.svg",
+      "mimeType": "image/svg+xml",
+      "extension": "svg"
+    },
+    "link": true,
+    "title": "Индия"
+  }
+}
