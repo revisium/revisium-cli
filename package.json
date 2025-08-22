@@ -29,7 +29,7 @@
     "generate:api": "npx swagger-typescript-api generate -p https://cloud.revisium.io/api-json -o src/__generated__ -n api.ts --extract-request-params --disable-throw-on-error"
   },
   "bin": {
-    "revisium": "dist/main.js"
+    "revisium": "dist/src/main.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
