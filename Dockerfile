@@ -5,12 +5,9 @@ RUN apk add --no-cache bash ca-certificates curl tini \
 
 WORKDIR /app
 
-ARG REVISIUM_VERSION
-RUN if [ -n "$REVISIUM_VERSION" ]; then \
-      npm i -g "revisium@${REVISIUM_VERSION}"; \
-    else \
-      npm i -g revisium; \
-    fi
+RUN npm i -g revisium \
+ && REV_DIR="$(npm root -g)/revisium" \
+ && echo "✅ Installed revisium@$(node -p "require('$REV_DIR/package.json').version")"
 
 RUN mkdir -p /app/migrations /app/schemas /app/data
 
