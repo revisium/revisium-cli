@@ -195,7 +195,10 @@ describe('CreateMigrationsCommand', () => {
 
   it('generates unique timestamps for migrations', async () => {
     setupSuccessfulFlow();
-    const dateSpy = jest.spyOn(Date, 'now').mockReturnValue(1640995200000); // Fixed timestamp
+    const dateSpy = jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(1640995200000) // first migration
+      .mockReturnValueOnce(1640995200001); // second migration
 
     await command.run([], {
       schemasFolder: 'test-schemas',
