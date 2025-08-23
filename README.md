@@ -18,10 +18,11 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 
 ## Features
 
-- 🚀 **Migration Management** - Save and apply database migrations
+- 🚀 **Migration Management** - Save and apply database migrations with optional commit
 - 📋 **Schema Export** - Export table schemas to JSON files
 - 📊 **Data Export** - Export table rows to JSON files
 - ⬆️ **Data Upload** - Upload table rows with dependency sorting and smart updates
+- 💾 **Revision Control** - Create revisions automatically with --commit flag
 - 🔧 **Flexible Configuration** - Environment variables or command-line options
 
 ## Quick Start
@@ -56,9 +57,15 @@ revisium rows save --folder ./data
 # Upload table data
 revisium rows upload --folder ./data
 
+# Upload and create revision automatically
+revisium rows upload --folder ./data --commit
+
 # Manage migrations
 revisium migrate save --file ./migrations.json
 revisium migrate apply --file ./migrations.json
+
+# Apply migrations and create revision
+revisium migrate apply --file ./migrations.json --commit
 
 # Override with command-line options
 revisium schema save --folder ./schemas --organization my-org --branch dev
@@ -71,11 +78,11 @@ For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md)
 ### Available Commands
 
 - **`migrate save`** - Export migrations from Revisium to JSON file
-- **`migrate apply`** - Apply migrations from JSON file to Revisium
+- **`migrate apply`** - Apply migrations from JSON file to Revisium (supports `--commit`)
 - **`schema save`** - Export table schemas to JSON files
 - **`schema create-migrations`** - Convert schemas to migration format
 - **`rows save`** - Export table data to JSON files
-- **`rows upload`** - Upload table data from JSON files
+- **`rows upload`** - Upload table data from JSON files (supports `--commit`)
 
 ### Global Options
 
@@ -104,6 +111,12 @@ revisium schema create-migrations --schemas-folder ./schemas --file ./migrations
 
 # Apply migrations to different environment
 revisium migrate apply --file ./migrations.json --url http://staging.example.com
+
+# Apply migrations and create a revision
+revisium migrate apply --file ./migrations.json --commit
+
+# Upload data and create a revision
+revisium rows upload --folder ./data --commit
 ```
 
 ## Foreign Key Dependencies

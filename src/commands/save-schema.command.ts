@@ -111,7 +111,7 @@ export class SaveSchemaCommand extends BaseCommand {
   }
 
   @Option({
-    flags: '-f, --folder <folder>',
+    flags: '-f, --folder [string]',
     description: 'Folder path to save schema files',
     required: true,
   })

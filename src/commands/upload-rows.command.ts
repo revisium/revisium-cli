@@ -6,12 +6,14 @@ import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
+import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
 
 type Options = {
   folder: string;
   tables?: string;
+  commit?: boolean;
   organization?: string;
   project?: string;
   branch?: string;
@@ -44,6 +46,7 @@ export class UploadRowsCommand extends BaseCommand {
     private readonly draftRevisionService: DraftRevisionService,
     private readonly jsonValidatorService: JsonValidatorService,
     private readonly tableDependencyService: TableDependencyService,
+    private readonly commitRevisionService: CommitRevisionService,
   ) {
     super();
   }
@@ -56,14 +59,25 @@ export class UploadRowsCommand extends BaseCommand {
     await this.coreApiService.tryToLogin(options);
     const revisionId =
       await this.draftRevisionService.getDraftRevisionId(options);
-    await this.uploadAllTableRows(revisionId, options.folder, options.tables);
+    const totalStats = await this.uploadAllTableRows(
+      revisionId,
+      options.folder,
+      options.tables,
+    );
+
+    const totalChanges = totalStats.uploaded + totalStats.updated;
+    await this.commitRevisionService.handleCommitFlow(
+      options,
+      'Uploaded',
+      totalChanges,
+    );
   }
 
   private async uploadAllTableRows(
     revisionId: string,
     folderPath: string,
     tableFilter?: string,
-  ) {
+  ): Promise<UploadStats> {
     try {
       const originalTables = await this.getTargetTables(
         folderPath,
@@ -128,6 +142,7 @@ export class UploadRowsCommand extends BaseCommand {
       }
 
       this.printFinalStats(totalStats);
+      return totalStats;
     } catch (error) {
       console.error(
         'Error uploading table rows:',
@@ -399,5 +414,14 @@ export class UploadRowsCommand extends BaseCommand {
   })
   parseTables(val: string) {
     return val;
+  }
+
+  @Option({
+    flags: '-c, --commit [boolean]',
+    description: 'Create a revision after uploading rows',
+    defaultValue: false,
+  })
+  parseCommit(value?: string) {
+    return JSON.parse(value ?? 'false') as boolean;
   }
 }

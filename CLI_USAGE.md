@@ -11,10 +11,10 @@ revisium
 │   └── create-migrations --schemas-folder <path> --file <file>
 ├── migrate
 │   ├── save --file <file>
-│   └── apply --file <file>
+│   └── apply --file <file> [--commit]
 └── rows
     ├── save --folder <path> [--tables <list>]
-    └── upload --folder <path> [--tables <list>]
+    └── upload --folder <path> [--tables <list>] [--commit]
 ```
 
 ## Global Options
@@ -77,6 +77,7 @@ revisium migrate apply --file ./migrations.json [options]
 | Option | Description | Required | Default |
 |--------|-------------|----------|---------|
 | `-f, --file <path>` | Input file path | ✓ | - |
+| `-c, --commit` | Create a revision after applying migrations | - | `false` |
 | `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
 | `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
 | `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
@@ -89,8 +90,14 @@ revisium migrate apply --file ./migrations.json [options]
 # Apply migrations using environment variables
 revisium migrate apply --file ./migrations.json
 
+# Apply migrations and create a revision
+revisium migrate apply --file ./migrations.json --commit
+
 # Apply to specific environment
 revisium migrate apply --file ./migrations.json --url http://production.example.com --organization prod-org
+
+# Apply to production with automatic revision creation
+revisium migrate apply --file ./migrations.json --url http://production.example.com --commit
 ```
 
 ## Schema Commands
@@ -231,6 +238,7 @@ revisium rows upload --folder ./data [options]
 |--------|-------------|----------|---------|
 | `-f, --folder <path>` | Folder path containing row files | ✓ | - |
 | `-t, --tables <ids>` | Comma-separated table IDs | - | All tables found in folder |
+| `-c, --commit` | Create a revision after uploading rows | - | `false` |
 | `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
 | `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
 | `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
@@ -252,12 +260,77 @@ revisium rows upload --folder ./data [options]
 # Upload all tables from folder
 revisium rows upload --folder ./data
 
+# Upload and create a revision
+revisium rows upload --folder ./data --commit
+
 # Upload specific tables only
 revisium rows upload --folder ./data --tables users,posts,comments
 
+# Upload specific tables and create a revision
+revisium rows upload --folder ./data --tables users,posts --commit
+
 # Upload to different environment
 revisium rows upload --folder ./data --url http://staging.example.com --organization staging-org
+
+# Upload to staging with automatic revision creation
+revisium rows upload --folder ./data --url http://staging.example.com --organization staging-org --commit
 ```
+
+## Revision Control with --commit Flag
+
+The `--commit` flag is available for operations that modify data in Revisium (`migrate apply` and `rows upload`). When used, it automatically creates a revision after the operation completes successfully.
+
+### How it Works
+
+**Without --commit (default):**
+- Changes are applied to the draft state
+- You must manually create a revision later using the web interface
+- ⚠️  Warning message displays: "Changes applied to draft. Use --commit to create a revision."
+
+**With --commit:**
+- Changes are applied to the draft state
+- A revision is automatically created with a descriptive commit message
+- ✅ Success message displays the new revision ID
+
+### Commit Messages
+
+The CLI automatically generates descriptive commit messages:
+
+- **Migrations**: `"Applied X migrations via revisium-cli"` (where X is the number of applied migrations)
+- **Row uploads**: `"Uploaded X items via revisium-cli"` (where X is the total number of uploaded and updated rows)
+
+### Examples
+
+```bash
+# Apply migrations to draft only (default behavior)
+revisium migrate apply --file ./migrations.json
+# Output: ⚠️  Migrations applied to draft. Use --commit to create a revision.
+
+# Apply migrations and create revision automatically
+revisium migrate apply --file ./migrations.json --commit
+# Output: ✅ Created revision: rev_abc123
+
+# Upload data to draft only (default behavior)
+revisium rows upload --folder ./data
+# Output: ⚠️  Changes applied to draft. Use --commit to create a revision.
+
+# Upload data and create revision automatically
+revisium rows upload --folder ./data --commit
+# Output: ✅ Created revision: rev_def456
+```
+
+### Best Practices
+
+- **Use --commit for production deployments** to ensure changes are permanently recorded
+- **Skip --commit for testing** to allow iterative changes without creating multiple revisions
+- **Combine with specific environments** for controlled deployments:
+  ```bash
+  # Deploy to staging with revision
+  revisium migrate apply --file ./migrations.json --url http://staging.example.com --commit
+  
+  # Deploy to production with revision
+  revisium migrate apply --file ./migrations.json --url http://production.example.com --commit
+  ```
 
 ## Authentication Methods
 
@@ -333,8 +406,8 @@ revisium schema create-migrations --schemas-folder ./dev-schemas --file ./prod-m
 # Apply to staging for testing
 revisium migrate apply --file ./prod-migrations.json --url http://staging.example.com
 
-# Apply to production
-revisium migrate apply --file ./prod-migrations.json --url http://production.example.com
+# Apply to production with revision creation
+revisium migrate apply --file ./prod-migrations.json --url http://production.example.com --commit
 ```
 
 ### Data Migration Between Environments
@@ -343,8 +416,8 @@ revisium migrate apply --file ./prod-migrations.json --url http://production.exa
 # Export data from source
 revisium rows save --folder ./migration-data --url http://source.example.com
 
-# Upload to target (tables will be sorted by dependencies automatically)
-revisium rows upload --folder ./migration-data --url http://target.example.com
+# Upload to target with revision creation (tables will be sorted by dependencies automatically)
+revisium rows upload --folder ./migration-data --url http://target.example.com --commit
 ```
 
 ### Selective Table Operations

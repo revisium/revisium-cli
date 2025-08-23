@@ -169,7 +169,7 @@ export class SaveRowsCommand extends BaseCommand {
   }
 
   @Option({
-    flags: '-f, --folder <folder>',
+    flags: '-f, --folder [string]',
     description: 'Folder path to save row files',
     required: true,
   })
@@ -178,7 +178,7 @@ export class SaveRowsCommand extends BaseCommand {
   }
 
   @Option({
-    flags: '-t, --tables <tables>',
+    flags: '-t, --tables [string]',
     description:
       'Comma-separated table IDs (e.g., table1,table2). If not specified, processes all tables.',
     required: false,
