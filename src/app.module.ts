@@ -12,6 +12,7 @@ import { UploadRowsCommand } from 'src/commands/upload-rows.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
+import { ResolveOptionsService } from 'src/services/resolve-options.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 
 @Module({
@@ -30,6 +31,7 @@ import { TableDependencyService } from 'src/services/table-dependency.service';
     JsonValidatorService,
     CoreApiService,
     DraftRevisionService,
+    ResolveOptionsService,
   ],
 })
 export class AppModule {}
