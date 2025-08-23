@@ -1,15 +1,12 @@
 import { writeFile } from 'fs/promises';
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand } from 'src/commands/base.command';
+import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
 type Options = {
   file: string;
-  organization?: string;
-  project?: string;
-  branch?: string;
-};
+} & BaseOptions;
 
 @SubCommand({
   name: 'save',
@@ -28,7 +25,7 @@ export class SaveMigrationsCommand extends BaseCommand {
       throw new Error('Error: --file option is required');
     }
 
-    await this.coreApiService.login();
+    await this.coreApiService.tryToLogin(options);
     const revisionId =
       await this.draftRevisionService.getDraftRevisionId(options);
     await this.saveFile(revisionId, options.file);

@@ -1,5 +1,14 @@
 import { CommandRunner, Option } from 'nest-commander';
 
+export type BaseOptions = {
+  organization?: string;
+  project?: string;
+  branch?: string;
+  url?: string;
+  username?: string;
+  password?: string;
+};
+
 export abstract class BaseCommand extends CommandRunner {
   @Option({
     flags: '-o, --organization <organization>',
@@ -29,7 +38,7 @@ export abstract class BaseCommand extends CommandRunner {
   }
 
   @Option({
-    flags: '--url <api url>',
+    flags: '--url <url>',
     description: 'api url',
     required: false,
   })
