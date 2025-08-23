@@ -294,12 +294,13 @@ describe('ApplyMigrationsCommand', () => {
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
       'revision-123',
     );
-    coreApiServiceFake.api.applyMigrations.mockResolvedValue({
-      data: [{ status: 'applied', id: 'migration-1' }],
-    });
-    coreApiServiceFake.api.applyMigrations.mockResolvedValue({
-      data: [{ status: 'applied', id: 'migration-2' }],
-    });
+    coreApiServiceFake.api.applyMigrations
+      .mockResolvedValueOnce({
+        data: [{ status: 'applied', id: 'migration-1' }],
+      })
+      .mockResolvedValueOnce({
+        data: [{ status: 'applied', id: 'migration-2' }],
+      });
   };
 
   beforeEach(async () => {
