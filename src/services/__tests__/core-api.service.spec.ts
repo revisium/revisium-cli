@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { InternalServerErrorException } from '@nestjs/common';
-import { CoreApiService } from '../core-api.service';
+import { CoreApiService, SKIPPING_LOGIN } from '../core-api.service';
 import { BaseOptions } from 'src/commands/base.command';
 
 const mockApiLogin = jest.fn();
@@ -38,9 +38,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin();
 
     expect(service.baseUrl).toBe('https://cloud.revisium.io/');
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -52,9 +50,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin(options);
 
     expect(service.baseUrl).toBe('http://options-api.com');
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -68,9 +64,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin(options);
 
     expect(service.baseUrl).toBe('http://options-api.com');
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -80,9 +74,7 @@ describe('CoreApiService', () => {
 
     await service.tryToLogin();
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -180,9 +172,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin();
 
     expect(mockApiLogin).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -196,9 +186,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin();
 
     expect(mockApiLogin).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 
@@ -240,9 +228,7 @@ describe('CoreApiService', () => {
     await service.tryToLogin();
 
     expect(mockApiLogin).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'Skipping login: username or password is missing.',
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(SKIPPING_LOGIN);
     consoleSpy.mockRestore();
   });
 

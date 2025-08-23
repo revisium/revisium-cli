@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { Api, RequestParams } from 'src/__generated__/api';
 import { BaseOptions } from 'src/commands/base.command';
 
+export const SKIPPING_LOGIN =
+  'Skipping login because username or password is missing. Login is required for private projects, but not for "public" ones.';
+
 @Injectable()
 export class CoreApiService extends Api<unknown> {
   public token: string | undefined = undefined;
@@ -23,6 +26,8 @@ export class CoreApiService extends Api<unknown> {
       this.baseUrl = 'https://cloud.revisium.io/';
     }
 
+    console.log(`API URL: ${this.baseUrl}`);
+
     const username =
       options?.username ?? this.configService.get('REVISIUM_USERNAME');
 
@@ -41,7 +46,7 @@ export class CoreApiService extends Api<unknown> {
 
       this.token = response.data.accessToken;
     } else {
-      console.log('Skipping login: username or password is missing.');
+      console.log(SKIPPING_LOGIN);
     }
   }
 
