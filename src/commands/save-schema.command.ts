@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
@@ -15,7 +16,7 @@ type Options = {
   name: 'save',
   description: 'Save all table schemas to JSON files',
 })
-export class SaveSchemaCommand extends CommandRunner {
+export class SaveSchemaCommand extends BaseCommand {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
@@ -114,34 +115,7 @@ export class SaveSchemaCommand extends CommandRunner {
     description: 'Folder path to save schema files',
     required: true,
   })
-  parseFolder(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  parseOrganization(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  parseProject(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  parseBranch(val: string) {
-    return val;
+  parseFolder(value: string) {
+    return value;
   }
 }
