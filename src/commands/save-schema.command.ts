@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
@@ -102,7 +102,7 @@ export class SaveSchemaCommand extends BaseCommand {
         'Error saving table schemas:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 

@@ -58,7 +58,7 @@ export class DraftRevisionService {
       throw result.error;
     }
 
-    console.log(`Got draft revision -> id: ${result.data.id}`);
+    console.log(`Got draft revision -> id: "${result.data.id}"`);
 
     return result.data.id;
   }

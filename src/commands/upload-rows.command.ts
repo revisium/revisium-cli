@@ -133,7 +133,7 @@ export class UploadRowsCommand extends BaseCommand {
         'Error uploading table rows:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 

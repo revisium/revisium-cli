@@ -63,7 +63,7 @@ export class SaveRowsCommand extends BaseCommand {
         'Error saving table rows:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 

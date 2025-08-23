@@ -47,7 +47,7 @@ export class ApplyMigrationsCommand extends BaseCommand {
         'Error reading or parsing file:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 
