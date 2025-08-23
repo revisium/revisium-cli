@@ -25,18 +25,23 @@ describe('CoreApiService', () => {
     expect(service.baseUrl).toBe('http://test-api.com');
   });
 
-  it('initializes without base URL when not provided', () => {
+  it('initializes with default base URL when not provided', () => {
     const service = createService({});
 
-    expect(service.baseUrl).toBeUndefined();
+    expect(service.baseUrl).toBe('https://cloud.revisium.io/');
   });
 
-  it('throws error when no base URL is available', async () => {
+  it('uses default base URL when none provided', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     const service = createService({});
 
-    await expect(service.tryToLogin()).rejects.toThrow(
-      'No base URL provided. Use environment variable REVISIUM_API_URL or --url option.',
+    await service.tryToLogin();
+
+    expect(service.baseUrl).toBe('https://cloud.revisium.io/');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Skipping login: username or password is missing.',
     );
+    consoleSpy.mockRestore();
   });
 
   it('sets base URL from options when provided', async () => {

@@ -38,16 +38,43 @@ npx revisium --help
 
 ### Configuration
 
-Create a `.env` file in your project root:
+**All configuration parameters are optional.** The CLI provides sensible defaults and can be configured using environment variables or command-line options.
+
+**Environment Variables (Optional):**
+Create a `.env` file in your project root to set defaults:
 
 ```env
-REVISIUM_API_URL=http://localhost:8080
+# Optional - defaults to https://cloud.revisium.io/
+REVISIUM_API_URL=https://cloud.revisium.io/
+
+# Optional - authentication credentials
 REVISIUM_USERNAME=your_username
 REVISIUM_PASSWORD=your_password
+
+# Required for most operations
 REVISIUM_ORGANIZATION=your_organization
 REVISIUM_PROJECT=your_project
+
+# Optional - defaults to 'master'
 REVISIUM_BRANCH=master
 ```
+
+**Command-line Options:**
+Override environment variables with command-line options:
+
+```bash
+# Authentication options
+--url http://api.example.com
+--username your_username
+--password your_password
+
+# Project context options
+--organization your_org
+--project your_project
+--branch your_branch
+```
+
+**Note:** Command-line options take precedence over environment variables.
 
 ### Basic Usage
 
@@ -70,187 +97,51 @@ revisium rows upload --folder ./data
 # Manage migrations
 revisium migrate save --file ./migrations.json
 revisium migrate apply --file ./migrations.json
+
+# Use command-line options to override environment variables
+revisium schema save --folder ./schemas --url http://staging.example.com --organization my-org
 ```
 
 ## Commands
 
-### Migration Commands
+For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md).
 
-#### `migrate save`
-Export migrations to a JSON file.
+### Available Commands
 
+- **`migrate save`** - Export migrations from Revisium to JSON file
+- **`migrate apply`** - Apply migrations from JSON file to Revisium
+- **`schema save`** - Export table schemas to JSON files
+- **`schema create-migrations`** - Convert schemas to migration format
+- **`rows save`** - Export table data to JSON files
+- **`rows upload`** - Upload table data from JSON files
+
+### Global Options
+
+All commands support these authentication and project options:
+
+| Option | Environment Variable | Description | Default |
+|--------|---------------------|-------------|---------|
+| `--url <url>` | `REVISIUM_API_URL` | API base URL | `https://cloud.revisium.io/` |
+| `--username <name>` | `REVISIUM_USERNAME` | Username | - |
+| `--password <pass>` | `REVISIUM_PASSWORD` | Password | - |
+| `-o, --organization <name>` | `REVISIUM_ORGANIZATION` | Organization | - |
+| `-p, --project <name>` | `REVISIUM_PROJECT` | Project | - |
+| `-b, --branch <name>` | `REVISIUM_BRANCH` | Branch | `master` |
+
+**Quick Examples:**
 ```bash
-revisium migrate save --file ./migrations.json [options]
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-f, --file <path>` | Output file path | ✓ | - |
-| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
-| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
-| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
-
-#### `migrate apply`
-Apply migrations from a JSON file.
-
-```bash
-revisium migrate apply --file ./migrations.json [options]
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-f, --file <path>` | Input file path | ✓ | - |
-| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
-| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
-| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
-
-### Schema Commands
-
-#### `schema save`
-Export table schemas to JSON files.
-
-```bash
-revisium schema save --folder ./schemas [options]
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-f, --folder <path>` | Output folder path | ✓ | - |
-| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
-| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
-| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
-
-**Output:**
-```
-schemas/
-├── table-1.json
-├── table-2.json
-└── table-n.json
-```
-
-#### `schema create-migrations`
-Convert saved schemas to migration files.
-
-```bash
-revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `--schemas-folder <path>` | Folder containing schema JSON files | ✓ | - |
-| `-f, --file <path>` | Output file for generated migrations | ✓ | - |
-
-**Features:**
-- **Dependency Analysis**: Automatically analyzes table dependencies based on foreign keys
-- **Topological Sorting**: Orders migrations to respect foreign key constraints
-- **Circular Dependency Detection**: Warns about circular dependencies
-- **Schema Validation**: Validates generated migrations against JSON schema
-- **Unique Timestamps**: Generates unique ISO date strings for migration IDs
-- **Hash Generation**: Creates SHA256 hashes for schema integrity
-
-**Example Workflow:**
-```bash
-# 1. Export schemas from Revisium
+# Export schemas with environment variables
 revisium schema save --folder ./schemas
 
-# 2. Convert schemas to migrations
+# Export with command-line options (overrides environment)
+revisium schema save --folder ./schemas --url http://api.example.com --organization my-org
+
+# Create migrations from schemas
 revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
 
-# 3. Apply migrations to another environment
-revisium migrate apply --file ./migrations.json
+# Apply migrations to different environment
+revisium migrate apply --file ./migrations.json --url http://staging.example.com
 ```
-
-### Rows Commands
-
-#### `rows save`
-Export table rows to JSON files.
-
-```bash
-revisium rows save --folder ./data [options]
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-f, --folder <path>` | Output folder path | ✓ | - |
-| `-t, --tables <ids>` | Comma-separated table IDs | - | All tables |
-| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
-| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
-| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
-
-**Examples:**
-```bash
-# Export all tables
-revisium rows save --folder ./data
-
-# Export specific tables
-revisium rows save --folder ./data --tables users,posts,comments
-
-# Override project settings
-revisium rows save --folder ./data --project my-project --branch dev
-```
-
-**Output:**
-```
-data/
-├── users/
-│   ├── user-123.json
-│   ├── user-456.json
-│   └── ...
-├── posts/
-│   ├── post-789.json
-│   └── ...
-└── comments/
-    ├── comment-def.json
-    └── ...
-```
-
-#### `rows upload`
-Upload table rows from JSON files to Revisium.
-
-```bash
-revisium rows upload --folder ./data [options]
-```
-
-**Options:**
-
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-f, --folder <path>` | Folder path containing row files | ✓ | - |
-| `-t, --tables <ids>` | Comma-separated table IDs | - | All tables found in folder |
-| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
-| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
-| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
-
-**Examples:**
-```bash
-# Upload all tables from folder
-revisium rows upload --folder ./data
-
-# Upload specific tables only
-revisium rows upload --folder ./data --tables users,posts,comments
-
-# Override project settings
-revisium rows upload --folder ./data --project my-project --branch dev
-```
-
-**Features:**
-- **Schema Validation**: Validates data fields against table schema
-- **Smart Upload**: Creates new rows or updates changed rows
-- **Duplicate Detection**: Skips rows with identical data
-- **Dependency Sorting**: Automatically sorts tables by foreign key dependencies
-- **Circular Dependency Detection**: Warns about circular foreign key references
-- **Statistics Reporting**: Shows uploaded/updated/skipped/error counts
-- **Folder Structure**: Uses same structure as `rows save` command
 
 ## Foreign Key Dependencies
 
@@ -277,24 +168,52 @@ If two tables reference each other (e.g., `users` ↔ `posts`), the CLI will:
 - 💡 Suggest uploading in multiple passes or breaking the circular reference
 - Continue with upload but foreign key errors may occur
 
-## Configuration
+## Configuration Options
 
-Create a `.env` file:
+### Environment Variables (Optional)
+Environment variables provide convenient defaults but are not required:
 
 ```env
-REVISIUM_API_URL=http://localhost:8080
-REVISIUM_USERNAME=your_username  
-REVISIUM_PASSWORD=your_password
-REVISIUM_ORGANIZATION=your_organization
-REVISIUM_PROJECT=your_project
-REVISIUM_BRANCH=master
+# API Connection - Optional with defaults
+REVISIUM_API_URL=https://cloud.revisium.io/  # Default: https://cloud.revisium.io/
+REVISIUM_USERNAME=your_username              # Optional: for authentication
+REVISIUM_PASSWORD=your_password              # Optional: for authentication
+
+# Project Context - Required for most operations
+REVISIUM_ORGANIZATION=your_organization      # Required: target organization
+REVISIUM_PROJECT=your_project                # Required: target project
+REVISIUM_BRANCH=master                       # Default: 'master'
 ```
 
-You can also use command-line options:
+### Command-line Options
+Override any environment variable with command-line options:
 
 ```bash
-revisium schema save --folder ./schemas --organization acme --project website
+# Override API connection
+revisium schema save --folder ./schemas \
+  --url http://production.example.com \
+  --username prod-user \
+  --password prod-pass
+
+# Override project context
+revisium schema save --folder ./schemas \
+  --organization acme \
+  --project website \
+  --branch feature-branch
 ```
+
+### Authentication Flow
+1. CLI checks for credentials (command-line options take precedence over environment variables)
+2. If both username and password are provided, attempts authentication
+3. If authentication succeeds, includes JWT token in subsequent API requests
+4. If credentials are missing, continues with unauthenticated requests (may fail for private projects)
+
+**Error Messages:**
+- Missing organization: "No organization provided. Use environment variable REVISIUM_ORGANIZATION or --organization option."
+- Missing project: "No project provided. Use environment variable REVISIUM_PROJECT or --project option."
+- Authentication skipped: "Skipping login: username or password is missing."
+
+**Note:** If no API URL is provided, the CLI defaults to `https://cloud.revisium.io/`.
 
 ## Development
 

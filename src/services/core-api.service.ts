@@ -9,7 +9,8 @@ export class CoreApiService extends Api<unknown> {
 
   constructor(private readonly configService: ConfigService) {
     super({
-      baseUrl: configService.get('REVISIUM_API_URL'),
+      baseUrl:
+        configService.get('REVISIUM_API_URL') || 'https://cloud.revisium.io/',
     });
   }
 
@@ -19,9 +20,7 @@ export class CoreApiService extends Api<unknown> {
     }
 
     if (!this.baseUrl) {
-      throw new Error(
-        'No base URL provided. Use environment variable REVISIUM_API_URL or --url option.',
-      );
+      this.baseUrl = 'https://cloud.revisium.io/';
     }
 
     const username =
