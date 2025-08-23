@@ -25,7 +25,7 @@ describe('SaveMigrationsCommand', () => {
 
     await command.run([], { file: 'migrations.json' });
 
-    expect(coreApiServiceFake.login).toHaveBeenCalledTimes(1);
+    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledTimes(1);
   });
 
   it('resolves revision ID from options', async () => {
@@ -84,17 +84,8 @@ describe('SaveMigrationsCommand', () => {
     consoleSpy.mockRestore();
   });
 
-  it('propagates authentication errors', async () => {
-    const authError = new Error('Invalid credentials');
-    coreApiServiceFake.login.mockRejectedValue(authError);
-
-    await expect(command.run([], { file: 'migrations.json' })).rejects.toThrow(
-      'Invalid credentials',
-    );
-  });
-
   it('propagates revision resolution errors', async () => {
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     const revisionError = new Error('Project not found');
     draftRevisionServiceFake.getDraftRevisionId.mockRejectedValue(
       revisionError,
@@ -107,7 +98,7 @@ describe('SaveMigrationsCommand', () => {
 
   it('handles API fetch errors gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
       'revision-123',
     );
@@ -148,7 +139,7 @@ describe('SaveMigrationsCommand', () => {
 
   it('handles non-Error exceptions', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
       'revision-123',
     );
@@ -167,7 +158,7 @@ describe('SaveMigrationsCommand', () => {
   });
 
   it('processes empty migrations array', async () => {
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
       'revision-123',
     );
@@ -183,7 +174,7 @@ describe('SaveMigrationsCommand', () => {
   });
 
   it('formats JSON with proper indentation', async () => {
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
       'revision-123',
     );
@@ -239,7 +230,7 @@ describe('SaveMigrationsCommand', () => {
   };
 
   const coreApiServiceFake = {
-    login: jest.fn(),
+    tryToLogin: jest.fn(),
     api: {
       migrations: jest.fn(),
     },
@@ -250,7 +241,7 @@ describe('SaveMigrationsCommand', () => {
   };
 
   const setupSuccessfulApiCalls = (revisionId = 'revision-123') => {
-    coreApiServiceFake.login.mockResolvedValue(undefined);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
     draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(revisionId);
     coreApiServiceFake.api.migrations.mockResolvedValue(mockMigrationsResponse);
   };

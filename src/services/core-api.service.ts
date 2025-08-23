@@ -20,7 +20,7 @@ export class CoreApiService extends Api<unknown> {
 
     if (!this.baseUrl) {
       throw new Error(
-        'No base url provided, use environment variables REVISIUM_API_URL or --api options',
+        'No base URL provided. Use environment variable REVISIUM_API_URL or --url option.',
       );
     }
 
@@ -32,8 +32,8 @@ export class CoreApiService extends Api<unknown> {
 
     if (username && password) {
       const response = await this.api.login({
-        emailOrUsername: this.configService.get('REVISIUM_USERNAME', ''),
-        password: this.configService.get('REVISIUM_PASSWORD', ''),
+        emailOrUsername: username,
+        password: password,
       });
 
       if (response.error) {
@@ -42,7 +42,7 @@ export class CoreApiService extends Api<unknown> {
 
       this.token = response.data.accessToken;
     } else {
-      console.log(`Not login, because username or password is missing`);
+      console.log('Skipping login: username or password is missing.');
     }
   }
 
