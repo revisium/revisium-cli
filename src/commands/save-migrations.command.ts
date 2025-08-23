@@ -48,7 +48,7 @@ export class SaveMigrationsCommand extends BaseCommand {
   }
 
   @Option({
-    flags: '-f, --file <file>',
+    flags: '-f, --file [string]',
     description: 'file to save migrations',
     required: true,
   })

@@ -146,7 +146,7 @@ export class CreateMigrationsCommand extends CommandRunner {
   }
 
   @Option({
-    flags: '--schemas-folder <folder>',
+    flags: '--schemas-folder [string]',
     description: 'Folder containing schema JSON files',
     required: true,
   })
@@ -155,7 +155,7 @@ export class CreateMigrationsCommand extends CommandRunner {
   }
 
   @Option({
-    flags: '-f, --file <file>',
+    flags: '-f, --file [string]',
     description: 'Output file for generated migrations',
     required: true,
   })

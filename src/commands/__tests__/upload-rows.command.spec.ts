@@ -8,6 +8,7 @@ import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
+import { CommitRevisionService } from 'src/services/commit-revision.service';
 
 jest.mock('fs/promises');
 
@@ -601,6 +602,64 @@ describe('UploadRowsCommand', () => {
     expect(result).toBe('users,posts,comments');
   });
 
+  it('parses commit option correctly', () => {
+    expect(command.parseCommit('true')).toBe(true);
+    expect(command.parseCommit('false')).toBe(false);
+    expect(command.parseCommit()).toBe(false);
+  });
+
+  describe('with commit option', () => {
+    it('calls commitRevisionService when commit is true', async () => {
+      setupSuccessfulFlow();
+      commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+      await command.run([], { folder: './data', commit: true });
+
+      expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
+        { folder: './data', commit: true },
+        'Uploaded',
+        2, // Based on setupSuccessfulFlow actual result
+      );
+    });
+
+    it('calls commitRevisionService when commit is false', async () => {
+      setupSuccessfulFlow();
+      commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+      await command.run([], { folder: './data', commit: false });
+
+      expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
+        { folder: './data', commit: false },
+        'Uploaded',
+        2, // Based on setupSuccessfulFlow actual result
+      );
+    });
+
+    it('calls commitRevisionService with zero changes when no data uploaded', async () => {
+      coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+      draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+        'revision-123',
+      );
+      mockReaddir.mockResolvedValueOnce([]);
+      tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
+        sortedTables: [],
+        warnings: [],
+      });
+      tableDependencyServiceFake.formatDependencyInfo.mockReturnValue(
+        'No dependencies',
+      );
+      commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+      await command.run([], { folder: './empty-data', commit: true });
+
+      expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
+        { folder: './empty-data', commit: true },
+        'Uploaded',
+        0,
+      );
+    });
+  });
+
   let command: UploadRowsCommand;
   let consoleSpy: jest.SpyInstance;
 
@@ -641,6 +700,10 @@ describe('UploadRowsCommand', () => {
   const tableDependencyServiceFake = {
     analyzeDependencies: jest.fn(),
     formatDependencyInfo: jest.fn(),
+  };
+
+  const commitRevisionServiceFake = {
+    handleCommitFlow: jest.fn(),
   };
 
   const setupSuccessfulFlow = () => {
@@ -718,6 +781,10 @@ describe('UploadRowsCommand', () => {
         {
           provide: TableDependencyService,
           useValue: tableDependencyServiceFake,
+        },
+        {
+          provide: CommitRevisionService,
+          useValue: commitRevisionServiceFake,
         },
       ],
     }).compile();
