@@ -36,45 +36,7 @@ npm install -g revisium
 npx revisium --help
 ```
 
-### Configuration
-
-**All configuration parameters are optional.** The CLI provides sensible defaults and can be configured using environment variables or command-line options.
-
-**Environment Variables (Optional):**
-Create a `.env` file in your project root to set defaults:
-
-```env
-# Optional - defaults to https://cloud.revisium.io/
-REVISIUM_API_URL=https://cloud.revisium.io/
-
-# Optional - authentication credentials
-REVISIUM_USERNAME=your_username
-REVISIUM_PASSWORD=your_password
-
-# Required for most operations
-REVISIUM_ORGANIZATION=your_organization
-REVISIUM_PROJECT=your_project
-
-# Optional - defaults to 'master'
-REVISIUM_BRANCH=master
-```
-
-**Command-line Options:**
-Override environment variables with command-line options:
-
-```bash
-# Authentication options
---url http://api.example.com
---username your_username
---password your_password
-
-# Project context options
---organization your_org
---project your_project
---branch your_branch
-```
-
-**Note:** Command-line options take precedence over environment variables.
+**All configuration is optional** - see [Configuration](#configuration) section for details.
 
 ### Basic Usage
 
@@ -98,8 +60,8 @@ revisium rows upload --folder ./data
 revisium migrate save --file ./migrations.json
 revisium migrate apply --file ./migrations.json
 
-# Use command-line options to override environment variables
-revisium schema save --folder ./schemas --url http://staging.example.com --organization my-org
+# Override with command-line options
+revisium schema save --folder ./schemas --organization my-org --branch dev
 ```
 
 ## Commands
@@ -168,52 +130,31 @@ If two tables reference each other (e.g., `users` ↔ `posts`), the CLI will:
 - 💡 Suggest uploading in multiple passes or breaking the circular reference
 - Continue with upload but foreign key errors may occur
 
-## Configuration Options
+## Configuration
 
-### Environment Variables (Optional)
-Environment variables provide convenient defaults but are not required:
+**Environment Variables (Optional):**
+Create a `.env` file for defaults:
 
 ```env
-# API Connection - Optional with defaults
-REVISIUM_API_URL=https://cloud.revisium.io/  # Default: https://cloud.revisium.io/
-REVISIUM_USERNAME=your_username              # Optional: for authentication
-REVISIUM_PASSWORD=your_password              # Optional: for authentication
-
-# Project Context - Required for most operations
-REVISIUM_ORGANIZATION=your_organization      # Required: target organization
-REVISIUM_PROJECT=your_project                # Required: target project
-REVISIUM_BRANCH=master                       # Default: 'master'
+REVISIUM_API_URL=https://cloud.revisium.io/    # Default
+REVISIUM_USERNAME=your_username
+REVISIUM_PASSWORD=your_password
+REVISIUM_ORGANIZATION=your_organization        # Required for most operations
+REVISIUM_PROJECT=your_project                  # Required for most operations  
+REVISIUM_BRANCH=master                         # Default
 ```
 
-### Command-line Options
-Override any environment variable with command-line options:
+**Command-line Options:**
+Override any environment variable:
 
 ```bash
-# Override API connection
-revisium schema save --folder ./schemas \
-  --url http://production.example.com \
-  --username prod-user \
-  --password prod-pass
-
-# Override project context
-revisium schema save --folder ./schemas \
-  --organization acme \
-  --project website \
-  --branch feature-branch
+revisium schema save --folder ./schemas --organization acme --project website
 ```
 
-### Authentication Flow
-1. CLI checks for credentials (command-line options take precedence over environment variables)
-2. If both username and password are provided, attempts authentication
-3. If authentication succeeds, includes JWT token in subsequent API requests
-4. If credentials are missing, continues with unauthenticated requests (may fail for private projects)
-
-**Error Messages:**
-- Missing organization: "No organization provided. Use environment variable REVISIUM_ORGANIZATION or --organization option."
-- Missing project: "No project provided. Use environment variable REVISIUM_PROJECT or --project option."
-- Authentication skipped: "Skipping login: username or password is missing."
-
-**Note:** If no API URL is provided, the CLI defaults to `https://cloud.revisium.io/`.
+**Defaults:**
+- API URL: `https://cloud.revisium.io/`
+- Branch: `master`
+- Authentication: Optional (skipped if credentials missing)
 
 ## Development
 
