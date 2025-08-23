@@ -2,11 +2,11 @@
 
 # Revisium CLI
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=revisium_revisium-cli&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=revisium_revisium-cli)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=revisium_revisium-cli&metric=coverage)](https://sonarcloud.io/summary/new_code?id=revisium_revisium-cli)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=revisium_revisium-cli&metric=bugs)](https://sonarcloud.io/summary/new_code?id=revisium_revisium-cli)
+[![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/revisium-cli/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/revisium/revisium-cli)](https://github.com/revisium/revisium-cli/releases)
-[![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/supergraph-builder/blob/master/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-11.0-red.svg)](https://nestjs.com/)
-[![npm version](https://img.shields.io/npm/v/revisium.svg)](https://www.npmjs.com/package/revisium)
 
 **Command-line interface for managing Revisium projects**
 
@@ -53,7 +53,7 @@ revisium schema create-migrations --schemas-folder ./schemas --file ./migrations
 # Export table data
 revisium rows save --folder ./data
 
-# Upload table data  
+# Upload table data
 revisium rows upload --folder ./data
 
 # Manage migrations
@@ -81,16 +81,17 @@ For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md)
 
 All commands support these authentication and project options:
 
-| Option | Environment Variable | Description | Default |
-|--------|---------------------|-------------|---------|
-| `--url <url>` | `REVISIUM_API_URL` | API base URL | `https://cloud.revisium.io/` |
-| `--username <name>` | `REVISIUM_USERNAME` | Username | - |
-| `--password <pass>` | `REVISIUM_PASSWORD` | Password | - |
-| `-o, --organization <name>` | `REVISIUM_ORGANIZATION` | Organization | - |
-| `-p, --project <name>` | `REVISIUM_PROJECT` | Project | - |
-| `-b, --branch <name>` | `REVISIUM_BRANCH` | Branch | `master` |
+| Option                      | Environment Variable    | Description  | Default                      |
+| --------------------------- | ----------------------- | ------------ | ---------------------------- |
+| `--url <url>`               | `REVISIUM_API_URL`      | API base URL | `https://cloud.revisium.io/` |
+| `--username <name>`         | `REVISIUM_USERNAME`     | Username     | -                            |
+| `--password <pass>`         | `REVISIUM_PASSWORD`     | Password     | -                            |
+| `-o, --organization <name>` | `REVISIUM_ORGANIZATION` | Organization | -                            |
+| `-p, --project <name>`      | `REVISIUM_PROJECT`      | Project      | -                            |
+| `-b, --branch <name>`       | `REVISIUM_BRANCH`       | Branch       | `master`                     |
 
 **Quick Examples:**
+
 ```bash
 # Export schemas with environment variables
 revisium schema save --folder ./schemas
@@ -118,7 +119,8 @@ Revisium supports foreign key relationships between tables using the `foreignKey
 ### Example:
 
 Given tables with these relationships:
-- `users` table has foreign key to `posts` 
+
+- `users` table has foreign key to `posts`
 - `posts` table has foreign key to `images`
 
 The CLI will automatically upload in this order: `images` → `posts` → `users`
@@ -126,7 +128,8 @@ The CLI will automatically upload in this order: `images` → `posts` → `users
 ### Circular Dependencies:
 
 If two tables reference each other (e.g., `users` ↔ `posts`), the CLI will:
-- ⚠️  Log warnings about circular dependencies
+
+- ⚠️ Log warnings about circular dependencies
 - 💡 Suggest uploading in multiple passes or breaking the circular reference
 - Continue with upload but foreign key errors may occur
 
@@ -140,7 +143,7 @@ REVISIUM_API_URL=https://cloud.revisium.io/    # Default
 REVISIUM_USERNAME=your_username
 REVISIUM_PASSWORD=your_password
 REVISIUM_ORGANIZATION=your_organization        # Required for most operations
-REVISIUM_PROJECT=your_project                  # Required for most operations  
+REVISIUM_PROJECT=your_project                  # Required for most operations
 REVISIUM_BRANCH=master                         # Default
 ```
 
@@ -152,6 +155,7 @@ revisium schema save --folder ./schemas --organization acme --project website
 ```
 
 **Defaults:**
+
 - API URL: `https://cloud.revisium.io/`
 - Branch: `master`
 - Authentication: Optional (skipped if credentials missing)
