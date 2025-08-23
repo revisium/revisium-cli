@@ -12,6 +12,7 @@ async function bootstrap() {
   try {
     await CommandFactory.runWithoutClosing(AppModule, {
       version: (packageJson as PackageJson).version,
+      logger: ['error', 'warn'],
     });
     return 0;
   } catch (e) {
