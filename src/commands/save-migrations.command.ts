@@ -1,5 +1,6 @@
 import { writeFile } from 'fs/promises';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { Option, SubCommand } from 'nest-commander';
+import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
@@ -14,7 +15,7 @@ type Options = {
   name: 'save',
   description: 'Save migrations to file',
 })
-export class SaveMigrationsCommand extends CommandRunner {
+export class SaveMigrationsCommand extends BaseCommand {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
@@ -22,20 +23,15 @@ export class SaveMigrationsCommand extends CommandRunner {
     super();
   }
 
-  async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.file) {
-        console.error('Error: --file option is required');
-        process.exit(1);
-      }
-
-      await this.coreApiService.login();
-      const revisionId =
-        await this.draftRevisionService.getDraftRevisionId(options);
-      await this.saveFile(revisionId, options.file);
-    } catch (error) {
-      console.error(error);
+  async run(_inputs: string[], options?: Options): Promise<void> {
+    if (!options?.file) {
+      throw new Error('Error: --file option is required');
     }
+
+    await this.coreApiService.login();
+    const revisionId =
+      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.saveFile(revisionId, options.file);
   }
 
   private async saveFile(revisionId: string, filePath: string) {
@@ -50,7 +46,7 @@ export class SaveMigrationsCommand extends CommandRunner {
         'Error reading or parsing file:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -65,32 +61,5 @@ export class SaveMigrationsCommand extends CommandRunner {
 
   private get api() {
     return this.coreApiService.api;
-  }
-
-  @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  parseOrganization(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  parseProject(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  parseBranch(val: string) {
-    return val;
   }
 }
