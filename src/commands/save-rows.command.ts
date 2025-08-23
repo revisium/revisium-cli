@@ -31,7 +31,7 @@ export class SaveRowsCommand extends CommandRunner {
         process.exit(1);
       }
 
-      await this.coreApiService.login();
+      await this.coreApiService.tryToLogin();
       const revisionId =
         await this.draftRevisionService.getDraftRevisionId(options);
       await this.saveAllTableRows(revisionId, options.folder, options.tables);

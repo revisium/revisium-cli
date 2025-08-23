@@ -30,7 +30,7 @@ export class SaveSchemaCommand extends CommandRunner {
         process.exit(1);
       }
 
-      await this.coreApiService.login();
+      await this.coreApiService.tryToLogin();
       const revisionId =
         await this.draftRevisionService.getDraftRevisionId(options);
       await this.saveAllTableSchemas(revisionId, options.folder);
