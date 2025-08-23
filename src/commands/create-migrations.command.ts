@@ -25,36 +25,24 @@ export class CreateMigrationsCommand extends CommandRunner {
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.schemasFolder) {
-        console.error('Error: --schemas-folder option is required');
-        process.exit(1);
-      }
-
-      if (!options.file) {
-        console.error('Error: --file option is required');
-        process.exit(1);
-      }
-
-      const schemas = await this.loadSchemas(options.schemasFolder);
-      const migrations = this.createMigrations(schemas);
-
-      // Validate the generated migrations
-      this.jsonValidatorService.validateMigration(migrations);
-
-      await writeFile(
-        options.file,
-        JSON.stringify(migrations, null, 2),
-        'utf-8',
-      );
-
-      console.log(
-        `✅ Successfully created ${migrations.length} migrations in: ${options.file}`,
-      );
-    } catch (error) {
-      console.error('Error creating migrations:', error);
-      process.exit(1);
+    if (!options.schemasFolder) {
+      throw new Error('Error: --schemas-folder option is required');
     }
+
+    if (!options.file) {
+      throw new Error('Error: --file option is required');
+    }
+
+    const schemas = await this.loadSchemas(options.schemasFolder);
+    const migrations = this.createMigrations(schemas);
+
+    this.jsonValidatorService.validateMigration(migrations);
+
+    await writeFile(options.file, JSON.stringify(migrations, null, 2), 'utf-8');
+
+    console.log(
+      `✅ Successfully created ${migrations.length} migrations in: ${options.file}`,
+    );
   }
 
   private async loadSchemas(
@@ -162,8 +150,8 @@ export class CreateMigrationsCommand extends CommandRunner {
     description: 'Folder containing schema JSON files',
     required: true,
   })
-  parseSchemasFolder(val: string) {
-    return val;
+  parseSchemasFolder(value: string) {
+    return value;
   }
 
   @Option({
@@ -171,7 +159,7 @@ export class CreateMigrationsCommand extends CommandRunner {
     description: 'Output file for generated migrations',
     required: true,
   })
-  parseFile(val: string) {
-    return val;
+  parseFile(value: string) {
+    return value;
   }
 }

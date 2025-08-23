@@ -24,19 +24,14 @@ export class SaveSchemaCommand extends CommandRunner {
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.folder) {
-        console.error('Error: --folder option is required');
-        process.exit(1);
-      }
-
-      await this.coreApiService.tryToLogin(options);
-      const revisionId =
-        await this.draftRevisionService.getDraftRevisionId(options);
-      await this.saveAllTableSchemas(revisionId, options.folder);
-    } catch (error) {
-      console.error(error);
+    if (!options.folder) {
+      throw new Error('Error: --folder option is required');
     }
+
+    await this.coreApiService.tryToLogin(options);
+    const revisionId =
+      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.saveAllTableSchemas(revisionId, options.folder);
   }
 
   private async saveAllTableSchemas(revisionId: string, folderPath: string) {
