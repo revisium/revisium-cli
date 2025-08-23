@@ -1,9 +1,6 @@
 import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
-import {
-  getEnvFilePath,
-  shouldIgnoreEnvFile,
-} from 'src/utils/env-config.utils';
+import { getEnvFilePath, shouldIgnoreEnvFile } from '../env-config.utils';
 
 jest.mock('fs');
 jest.mock('path');
@@ -18,7 +15,7 @@ const createMockStats = (isDirectory: boolean) =>
     isDirectory: () => isDirectory,
   }) as ReturnType<typeof statSync>;
 
-describe('env-config functions', () => {
+describe('env-config utils', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -84,10 +81,24 @@ describe('env-config functions', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('fallback to .env when REVISIUM_ENV_FILE points to directory', () => {
+      process.env.REVISIUM_ENV_FILE = 'some-dir';
+      mockExistsSync.mockReturnValue(true);
+      mockStatSync
+        .mockReturnValueOnce(createMockStats(true)) // First call for custom file (directory)
+        .mockReturnValueOnce(createMockStats(false)); // Second call for .env (regular file)
+
+      const result = getEnvFilePath();
+
+      expect(result).toBe('/resolved/.env');
+      expect(mockResolve).toHaveBeenCalledWith('some-dir');
+      expect(mockResolve).toHaveBeenCalledWith('.env');
+    });
   });
 
   describe('shouldIgnoreEnvFile', () => {
-    it('returns true when no env file path found', () => {
+    it('returns true when getEnvFilePath returns undefined', () => {
       delete process.env.REVISIUM_ENV_FILE;
       mockExistsSync.mockReturnValue(false);
 
@@ -96,7 +107,7 @@ describe('env-config functions', () => {
       expect(result).toBe(true);
     });
 
-    it('returns false when env file exists and is regular file', () => {
+    it('returns false when getEnvFilePath returns a valid path', () => {
       process.env.REVISIUM_ENV_FILE = 'valid.env';
       mockExistsSync.mockReturnValue(true);
       mockStatSync.mockReturnValue(createMockStats(false));
