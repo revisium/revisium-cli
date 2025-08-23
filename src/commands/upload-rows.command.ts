@@ -54,7 +54,7 @@ export class UploadRowsCommand extends CommandRunner {
         process.exit(1);
       }
 
-      await this.coreApiService.tryToLogin();
+      await this.coreApiService.tryToLogin(options);
       const revisionId =
         await this.draftRevisionService.getDraftRevisionId(options);
       await this.uploadAllTableRows(revisionId, options.folder, options.tables);

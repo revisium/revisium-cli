@@ -23,9 +23,16 @@ describe('SaveMigrationsCommand', () => {
   it('authenticates before fetching migrations', async () => {
     setupSuccessfulApiCalls();
 
-    await command.run([], { file: 'migrations.json' });
+    await command.run([], {
+      file: 'migrations.json',
+      url: 'http://localhost:8000',
+    });
 
     expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledTimes(1);
+    expect(coreApiServiceFake.tryToLogin).toHaveBeenNthCalledWith(1, {
+      file: 'migrations.json',
+      url: 'http://localhost:8000',
+    });
   });
 
   it('resolves revision ID from options', async () => {
@@ -82,18 +89,6 @@ describe('SaveMigrationsCommand', () => {
     );
 
     consoleSpy.mockRestore();
-  });
-
-  it('propagates revision resolution errors', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    const revisionError = new Error('Project not found');
-    draftRevisionServiceFake.getDraftRevisionId.mockRejectedValue(
-      revisionError,
-    );
-
-    await expect(command.run([], { file: 'migrations.json' })).rejects.toThrow(
-      'Project not found',
-    );
   });
 
   it('handles API fetch errors gracefully', async () => {

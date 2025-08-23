@@ -32,7 +32,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
         process.exit(1);
       }
 
-      await this.coreApiService.tryToLogin();
+      await this.coreApiService.tryToLogin(options);
       const jsonData = await this.validateJsonFile(options.file);
       await this.applyMigration(options, jsonData);
     } catch (error) {

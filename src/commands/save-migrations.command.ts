@@ -25,7 +25,7 @@ export class SaveMigrationsCommand extends BaseCommand {
       throw new Error('Error: --file option is required');
     }
 
-    await this.coreApiService.tryToLogin();
+    await this.coreApiService.tryToLogin(options);
     const revisionId =
       await this.draftRevisionService.getDraftRevisionId(options);
     await this.saveFile(revisionId, options.file);
