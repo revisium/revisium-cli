@@ -2,7 +2,7 @@
 import { CommandFactory } from 'nest-commander';
 import * as process from 'node:process';
 import { AppModule } from './app.module';
-import * as packageJson from 'package.json';
+import * as packageJson from '../package.json';
 
 type PackageJson = {
   version: string;
