@@ -53,7 +53,9 @@ export class JsonValidatorService {
       console.log(`Validated ${data.length} items`);
     } else {
       console.log(this.validator.errors);
-      throw new Error('❌ JSON file validation failed:');
+      throw new Error(
+        `❌ JSON file validation failed:\n${this.ajv.errorsText(this.validator.errors ?? [], { separator: '\n' })}`,
+      );
     }
 
     return data;
