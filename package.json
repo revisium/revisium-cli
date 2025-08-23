@@ -72,20 +72,30 @@
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
+    "modulePaths": [
+      "<rootDir>"
+    ],
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": "./",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "<rootDir>/src/**/*.(t|j)s",
+      "!<rootDir>/src/main.ts",
+      "!<rootDir>/src/__generated__/**",
+      "!<rootDir>/src/**/__tests__/**",
+      "!<rootDir>/src/**/index.ts"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageReporters": [
+      "text-summary",
+      "lcov"
+    ],
     "testEnvironment": "node"
   }
 }
