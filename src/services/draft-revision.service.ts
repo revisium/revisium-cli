@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { HttpResponse, RevisionModel } from 'src/__generated__/api';
 import { CoreApiService } from 'src/services/core-api.service';
 
 export const DEFAULT_BRANCH = 'master';
@@ -41,13 +42,23 @@ export class DraftRevisionService {
       options?.branch ??
       this.configService.get<string>('REVISIUM_BRANCH', DEFAULT_BRANCH);
 
-    const result = await this.api.draftRevision(organization, project, branch);
+    console.log(
+      `Request parameters -> organization: "${organization}", project: "${project}", branch: "${branch}"`,
+    );
+
+    const result = (await this.api.draftRevision(
+      organization,
+      project,
+      branch,
+    )) as HttpResponse<RevisionModel, Error>;
 
     if (result.error) {
-      const errorMessage = `Failed to get draft revision for ${organization}/${project}/${branch}: ${result.error}`;
+      const errorMessage = `Failed to get draft revision: ${result.error.message}`;
       console.error(errorMessage);
-      throw new Error(result.error as string);
+      throw result.error;
     }
+
+    console.log(`Got draft revision -> id: ${result.data.id}`);
 
     return result.data.id;
   }
