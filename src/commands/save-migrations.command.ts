@@ -52,8 +52,8 @@ export class SaveMigrationsCommand extends BaseCommand {
     description: 'file to save migrations',
     required: true,
   })
-  parseFile(val: string) {
-    return val;
+  parseFile(value: string) {
+    return value;
   }
 
   private get api() {

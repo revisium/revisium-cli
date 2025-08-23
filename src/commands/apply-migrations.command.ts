@@ -1,5 +1,6 @@
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { Option, SubCommand } from 'nest-commander';
 import { readFile } from 'fs/promises';
+import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
@@ -16,7 +17,7 @@ type Options = {
   name: 'apply',
   description: 'Validate and process migration files',
 })
-export class ApplyMigrationsCommand extends CommandRunner {
+export class ApplyMigrationsCommand extends BaseCommand {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly jsonValidatorService: JsonValidatorService,
@@ -26,18 +27,13 @@ export class ApplyMigrationsCommand extends CommandRunner {
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.file) {
-        console.error('Error: --file option is required');
-        process.exit(1);
-      }
-
-      await this.coreApiService.tryToLogin(options);
-      const jsonData = await this.validateJsonFile(options.file);
-      await this.applyMigration(options, jsonData);
-    } catch (error) {
-      console.error(error);
+    if (!options.file) {
+      throw new Error('Error: --file option is required');
     }
+
+    await this.coreApiService.tryToLogin(options);
+    const jsonData = await this.validateJsonFile(options.file);
+    await this.applyMigration(options, jsonData);
   }
 
   private async validateJsonFile(filePath: string) {
@@ -51,7 +47,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
         'Error reading or parsing file:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -100,34 +96,7 @@ export class ApplyMigrationsCommand extends CommandRunner {
     description: 'JSON file to validate',
     required: true,
   })
-  parseFile(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  parseOrganization(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  parseProject(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  parseBranch(val: string) {
-    return val;
+  parseFile(value: string) {
+    return value;
   }
 }

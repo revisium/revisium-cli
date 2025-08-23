@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { Option, SubCommand } from 'nest-commander';
+import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
@@ -16,7 +17,7 @@ type Options = {
   name: 'save',
   description: 'Save all rows from tables to JSON files',
 })
-export class SaveRowsCommand extends CommandRunner {
+export class SaveRowsCommand extends BaseCommand {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
@@ -25,19 +26,14 @@ export class SaveRowsCommand extends CommandRunner {
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.folder) {
-        console.error('Error: --folder option is required');
-        process.exit(1);
-      }
-
-      await this.coreApiService.tryToLogin(options);
-      const revisionId =
-        await this.draftRevisionService.getDraftRevisionId(options);
-      await this.saveAllTableRows(revisionId, options.folder, options.tables);
-    } catch (error) {
-      console.error(error);
+    if (!options.folder) {
+      throw new Error('Error: --folder option is required');
     }
+
+    await this.coreApiService.tryToLogin(options);
+    const revisionId =
+      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.saveAllTableRows(revisionId, options.folder, options.tables);
   }
 
   private async saveAllTableRows(
@@ -67,7 +63,7 @@ export class SaveRowsCommand extends CommandRunner {
         'Error saving table rows:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -187,34 +183,7 @@ export class SaveRowsCommand extends CommandRunner {
       'Comma-separated table IDs (e.g., table1,table2). If not specified, processes all tables.',
     required: false,
   })
-  parseTables(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  parseOrganization(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  parseProject(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  parseBranch(val: string) {
-    return val;
+  parseTables(value: string) {
+    return value;
   }
 }

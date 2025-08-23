@@ -204,6 +204,11 @@ describe('SaveMigrationsCommand', () => {
     );
   });
 
+  it('parses file option correctly', () => {
+    const result = command.parseFile('test-file.json');
+    expect(result).toBe('test-file.json');
+  });
+
   let command: SaveMigrationsCommand;
   let testDir: string;
 

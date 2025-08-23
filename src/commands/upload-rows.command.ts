@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import { Option, SubCommand } from 'nest-commander';
+import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
@@ -37,7 +38,7 @@ interface RowData {
   name: 'upload',
   description: 'Upload rows from JSON files to Revisium tables',
 })
-export class UploadRowsCommand extends CommandRunner {
+export class UploadRowsCommand extends BaseCommand {
   constructor(
     private readonly coreApiService: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
@@ -48,19 +49,14 @@ export class UploadRowsCommand extends CommandRunner {
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    try {
-      if (!options.folder) {
-        console.error('Error: --folder option is required');
-        process.exit(1);
-      }
-
-      await this.coreApiService.tryToLogin(options);
-      const revisionId =
-        await this.draftRevisionService.getDraftRevisionId(options);
-      await this.uploadAllTableRows(revisionId, options.folder, options.tables);
-    } catch (error) {
-      console.error(error);
+    if (!options.folder) {
+      throw new Error('Error: --folder option is required');
     }
+
+    await this.coreApiService.tryToLogin(options);
+    const revisionId =
+      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.uploadAllTableRows(revisionId, options.folder, options.tables);
   }
 
   private async uploadAllTableRows(
@@ -137,7 +133,7 @@ export class UploadRowsCommand extends CommandRunner {
         'Error uploading table rows:',
         error instanceof Error ? error.message : String(error),
       );
-      process.exit(1);
+      throw error;
     }
   }
 
@@ -402,33 +398,6 @@ export class UploadRowsCommand extends CommandRunner {
     required: false,
   })
   parseTables(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  parseOrganization(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  parseProject(val: string) {
-    return val;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  parseBranch(val: string) {
     return val;
   }
 }

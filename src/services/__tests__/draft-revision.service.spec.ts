@@ -194,14 +194,16 @@ describe('DraftRevisionService', () => {
       REVISIUM_ORGANIZATION: 'test-org',
       REVISIUM_PROJECT: 'test-project',
     });
-    mockDraftRevision.mockResolvedValue({ error: 'Project not found' });
+    mockDraftRevision.mockResolvedValue({
+      error: new Error('Project not found'),
+    });
 
     await expect(service.getDraftRevisionId()).rejects.toThrow(
       'Project not found',
     );
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Failed to get draft revision for test-org/test-project/master: Project not found',
+      'Failed to get draft revision: Project not found',
     );
     consoleErrorSpy.mockRestore();
   });
