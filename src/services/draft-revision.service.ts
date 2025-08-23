@@ -44,7 +44,8 @@ export class DraftRevisionService {
     const result = await this.api.draftRevision(organization, project, branch);
 
     if (result.error) {
-      console.error(result.error);
+      const errorMessage = `Failed to get draft revision for ${organization}/${project}/${branch}: ${result.error}`;
+      console.error(errorMessage);
       throw new Error(result.error as string);
     }
 
