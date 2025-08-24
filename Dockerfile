@@ -8,7 +8,7 @@ RUN npm i -g revisium --ignore-scripts \
  && echo "✅ Installed revisium successfully"
 
 WORKDIR /app
-RUN mkdir -p /app/migrations /app/schemas /app/data \
+RUN mkdir -p /app /app/data \
  && chown -R node:node /app
 
 COPY --chown=node:node revisium-entrypoint.sh /usr/local/bin/revisium-entrypoint.sh
