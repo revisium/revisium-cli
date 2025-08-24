@@ -3,13 +3,13 @@ FROM node:22-alpine
 RUN apk add --no-cache bash ca-certificates curl tini \
   && update-ca-certificates
 
-WORKDIR /app
-
 RUN npm i -g revisium \
- && REV_DIR="$(npm root -g)/revisium" \
- && echo "✅ Installed revisium@$(node -p "require('$REV_DIR/package.json').version")"
+ && revisium --version \
+ && echo "✅ Installed revisium successfully"
 
-RUN mkdir -p /app/migrations /app/schemas /app/data
+WORKDIR /app
+RUN mkdir -p /app/data \
+ && chown -R node:node /app
 
 COPY --chown=node:node revisium-entrypoint.sh /usr/local/bin/revisium-entrypoint.sh
 RUN chmod +x /usr/local/bin/revisium-entrypoint.sh
