@@ -148,8 +148,22 @@ If two tables reference each other (e.g., `users` ↔ `posts`), the CLI will:
 
 ## Configuration
 
+### Environment File Configuration
+
+By default, the CLI loads environment variables from `.env` in the current directory. You can specify a custom environment file:
+
+```bash
+# Use custom environment file
+export REVISIUM_ENV_FILE=/path/to/custom.env
+revisium schema save --folder ./schemas
+
+# Or specify relative path
+export REVISIUM_ENV_FILE=./config/production.env  
+revisium migrate apply --file ./migrations.json
+```
+
 **Environment Variables (Optional):**
-Create a `.env` file for defaults:
+Create a `.env` file (or custom file) for defaults:
 
 ```env
 REVISIUM_API_URL=https://cloud.revisium.io/    # Default
@@ -159,6 +173,11 @@ REVISIUM_ORGANIZATION=your_organization        # Required for most operations
 REVISIUM_PROJECT=your_project                  # Required for most operations
 REVISIUM_BRANCH=master                         # Default
 ```
+
+**Environment File Options:**
+- **`REVISIUM_ENV_FILE`** - Path to custom environment file (defaults to `.env`)
+- File must exist and be a regular file (not a directory)
+- Supports both absolute and relative paths
 
 **Command-line Options:**
 Override any environment variable:

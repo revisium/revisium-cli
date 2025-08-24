@@ -15,9 +15,19 @@ import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { ResolveOptionsService } from 'src/services/resolve-options.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
+import {
+  getEnvFilePath,
+  shouldIgnoreEnvFile,
+} from 'src/utils/env-config.utils';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: getEnvFilePath(),
+      ignoreEnvFile: shouldIgnoreEnvFile(),
+    }),
+  ],
   providers: [
     MigrationCommand,
     ApplyMigrationsCommand,
