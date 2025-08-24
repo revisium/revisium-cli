@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MIGRATIONS_FILE="${MIGRATIONS_FILE:-/app/migrations/migrations.json}"
+MIGRATIONS_FILE="${MIGRATIONS_FILE:-/app/migrations.json}"
 DATA_DIR="${DATA_DIR:-/app/data}"
 DRY_RUN="${DRY_RUN:-false}"
 

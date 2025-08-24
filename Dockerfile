@@ -14,10 +14,6 @@ RUN mkdir -p /app /app/data \
 COPY --chown=node:node revisium-entrypoint.sh /usr/local/bin/revisium-entrypoint.sh
 RUN chmod +x /usr/local/bin/revisium-entrypoint.sh
 
-ENV MIGRATIONS_FILE=/app/migrations.json \
-    DATA_DIR=/app/data \
-    DRY_RUN=false
-
 ENTRYPOINT ["/sbin/tini","--","/usr/local/bin/revisium-entrypoint.sh"]
 
 USER node
