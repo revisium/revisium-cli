@@ -419,9 +419,8 @@ export class UploadRowsCommand extends BaseCommand {
   @Option({
     flags: '-c, --commit [boolean]',
     description: 'Create a revision after uploading rows',
-    defaultValue: true,
   })
   parseCommit(value?: string) {
-    return JSON.parse(value ?? 'false') as boolean;
+    return JSON.parse(value ?? 'true') as boolean;
   }
 }
