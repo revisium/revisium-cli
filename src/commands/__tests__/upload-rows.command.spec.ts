@@ -605,7 +605,7 @@ describe('UploadRowsCommand', () => {
   it('parses commit option correctly', () => {
     expect(command.parseCommit('true')).toBe(true);
     expect(command.parseCommit('false')).toBe(false);
-    expect(command.parseCommit()).toBe(false);
+    expect(command.parseCommit()).toBe(true);
   });
 
   describe('with commit option', () => {
