@@ -133,7 +133,7 @@ export class ApplyMigrationsCommand extends BaseCommand {
   @Option({
     flags: '-c, --commit [boolean]',
     description: 'Create a revision after applying migrations',
-    defaultValue: false,
+    defaultValue: true,
   })
   parseCommit(value?: string): boolean {
     return JSON.parse(value ?? 'false') as boolean;
