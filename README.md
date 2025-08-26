@@ -18,12 +18,14 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 
 ## Features
 
-- 🚀 **Migration Management** - Save and apply database migrations with optional commit
-- 📋 **Schema Export** - Export table schemas to JSON files
-- 📊 **Data Export** - Export table rows to JSON files
-- ⬆️ **Data Upload** - Upload table rows with dependency sorting and smart updates
+- 🚀 **Migration Management** - Save and apply database migrations with optional auto-commit
+- 📋 **Schema Export/Import** - Export table schemas to JSON files and convert to migrations
+- 📊 **Data Export/Upload** - Export and upload table rows with smart dependency handling
+- 🔗 **Foreign Key Dependencies** - Automatic table sorting based on relationships
 - 💾 **Revision Control** - Create revisions automatically with --commit flag
-- 🔧 **Flexible Configuration** - Environment variables or command-line options
+- 🐳 **Docker Deployment** - Containerized automation for CI/CD and production deployments
+- 🔧 **Flexible Configuration** - Environment variables, custom .env files, or command-line options
+- ⚡ **CI/CD Ready** - Built-in support for GitHub Actions, GitLab CI, and Kubernetes
 
 ## Quick Start
 
@@ -191,6 +193,136 @@ revisium schema save --folder ./schemas --organization acme --project website
 - API URL: `https://cloud.revisium.io/`
 - Branch: `master`
 - Authentication: Optional (skipped if credentials missing)
+
+## Docker Deployment
+
+The CLI is available as a Docker image for deployment automation, CI/CD pipelines, and containerized environments like Kubernetes.
+
+### Docker Image
+
+```bash
+# Pull the official image
+docker pull revisium/revisium-cli
+
+# Or use a specific version
+docker pull revisium/revisium-cli:1.0.0
+```
+
+### Automated Migrations and Data Seeding
+
+The Docker image includes an entrypoint script that automatically applies migrations and uploads data when the container starts. This is perfect for deployment automation and CI/CD workflows.
+
+#### Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `REVISIUM_API_URL` | API endpoint | - | ✅ |
+| `REVISIUM_USERNAME` | Username for authentication | - | ✅ |
+| `REVISIUM_PASSWORD` | Password for authentication | - | ✅ |
+| `REVISIUM_ORGANIZATION` | Organization name | - | ✅ |
+| `REVISIUM_PROJECT` | Project name | - | ✅ |
+| `REVISIUM_BRANCH` | Branch name | - | ✅ |
+| `REVISIUM_MIGRATE_COMMIT` | Auto-commit after migrations | `false` | ❌ |
+| `REVISIUM_UPLOAD_COMMIT` | Auto-commit after data upload | `false` | ❌ |
+| `MIGRATIONS_FILE` | Path to migrations file | `/app/migrations.json` | ❌ |
+| `DATA_DIR` | Path to data directory | `/app/data` | ❌ |
+| `DRY_RUN` | Preview mode without execution | `false` | ❌ |
+
+#### Container Behavior
+
+1. **Apply Migrations**: If `/app/migrations.json` exists, runs:
+   ```bash
+   revisium migrate apply --file /app/migrations.json [--commit]
+   ```
+2. **Upload Data**: If `/app/data` directory exists and contains files, runs:
+   ```bash
+   revisium rows upload --folder /app/data [--commit]
+   ```
+3. **Auto-commit**: `--commit` flag is added when `REVISIUM_MIGRATE_COMMIT` or `REVISIUM_UPLOAD_COMMIT` is `true`
+4. **Graceful Handling**: Skips missing files/directories without errors
+
+### Example: Custom Deployment Image
+
+Create your own deployment image with migrations and data:
+
+**Dockerfile:**
+```dockerfile
+FROM revisium/revisium-cli:latest
+
+# Copy your migrations and data
+COPY migrations.json /app/migrations.json
+COPY data/ /app/data/
+
+# The entrypoint will automatically:
+# 1. Apply migrations from /app/migrations.json
+# 2. Upload data from /app/data/
+# 3. Create revisions if commit flags are enabled
+```
+
+**docker-compose.yml:**
+```yaml
+version: '3.9'
+
+services:
+  revisium-deployment:
+    build: .  # Uses the Dockerfile above
+    environment:
+      REVISIUM_API_URL: 'https://api.revisium.example.com'
+      REVISIUM_USERNAME: 'deployment-user'
+      REVISIUM_PASSWORD: 'secure-password'
+      REVISIUM_ORGANIZATION: 'organization'
+      REVISIUM_PROJECT: 'project'
+      REVISIUM_BRANCH: 'master'
+      
+      # Auto-commit changes for deployment
+      REVISIUM_MIGRATE_COMMIT: 'true'
+      REVISIUM_UPLOAD_COMMIT: 'true'
+      
+      # Optional: preview mode
+      # DRY_RUN: 'true'
+```
+
+### Kubernetes Deployment
+
+Use as an init container or job for automated deployments:
+
+**k8s-migration-job.yaml:**
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: revisium-migration
+spec:
+  template:
+    spec:
+      containers:
+      - name: revisium-cli
+        image: my-registry/my-app-migrations:v1.0.0
+        env:
+        - name: REVISIUM_API_URL
+          value: "https://revisium.example.com"
+        - name: REVISIUM_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: revisium-credentials
+              key: username
+        - name: REVISIUM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: revisium-credentials
+              key: password
+        - name: REVISIUM_ORGANIZATION
+          value: "production"
+        - name: REVISIUM_PROJECT
+          value: "main-app"
+        - name: REVISIUM_BRANCH
+          value: "master"
+        - name: REVISIUM_MIGRATE_COMMIT
+          value: "true"
+        - name: REVISIUM_UPLOAD_COMMIT
+          value: "true"
+      restartPolicy: OnFailure
+```
 
 ## Development
 
