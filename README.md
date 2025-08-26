@@ -205,7 +205,7 @@ The CLI is available as a Docker image for deployment automation, CI/CD pipeline
 docker pull revisium/revisium-cli
 
 # Or use a specific version
-docker pull revisium/revisium-cli:0.11.4
+docker pull revisium/revisium-cli:1.0.0
 ```
 
 ### Automated Migrations and Data Seeding
