@@ -317,8 +317,11 @@ export interface ApplyMigrationsResponseDto {
 }
 
 export interface OrderByDto {
-  field: 'createdAt' | 'updatedAt' | 'publishedAt' | 'id';
+  field: 'createdAt' | 'updatedAt' | 'publishedAt' | 'id' | 'data';
   direction: 'asc' | 'desc';
+  path?: string;
+  type?: 'text' | 'int' | 'float' | 'boolean' | 'timestamp';
+  aggregation?: 'min' | 'max' | 'avg' | 'first' | 'last';
 }
 
 export interface StringFilterDto {
@@ -361,8 +364,8 @@ export interface DateTimeFilterDto {
 export interface JsonFilterDto {
   /** Exact JSON match */
   equals?: object;
-  /** Path in JSON (PostgreSQL: array of keys/indexes, e.g. ["pet1","petName"]) */
-  path?: string[];
+  /** Path in JSON (PostgreSQL: array of keys/indexes, e.g. ["pet1","petName"] or dot notation "pet1.petName") */
+  path?: string | string[];
   /** Case sensitivity mode for string filters within JSON ("insensitive" uses ILIKE on PostgreSQL) */
   mode?: 'default' | 'insensitive';
   /** Substring match in JSON string value */
@@ -385,6 +388,14 @@ export interface JsonFilterDto {
   gt?: number;
   /** Greater-than-or-equal comparison. Must be a number or numeric JSON value */
   gte?: number;
+  /** Full-text search string for JSON content */
+  search?: string;
+  /** Language for full-text search (e.g., "english", "russian") */
+  searchLanguage?: string;
+  /** Search type: plain (individual words) or phrase (exact phrase) */
+  searchType?: 'plain' | 'phrase';
+  /** Scope of search within JSON structure */
+  searchIn?: 'all' | 'values' | 'keys' | 'strings' | 'numbers' | 'booleans';
 }
 
 export interface RowWhereInputDto {
@@ -496,6 +507,26 @@ export interface UpdateRowDto {
 }
 
 export interface UpdateRowResponse {
+  table?: TableModel;
+  previousVersionTableId?: string;
+  row?: RowModel;
+  previousVersionRowId?: string;
+}
+
+export interface PatchRow {
+  /** @example "replace" */
+  op: 'replace';
+  /** @example "/name" */
+  path: string;
+  /** @example "New Value" */
+  value: object;
+}
+
+export interface PatchRowDto {
+  patches: PatchRow[];
+}
+
+export interface PatchRowResponse {
   table?: TableModel;
   previousVersionTableId?: string;
   row?: RowModel;
@@ -881,7 +912,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Revisium API
- * @version 2.1.0
+ * @version 2.3.0
  * @contact
  */
 export class Api<
@@ -1999,6 +2030,31 @@ export class Api<
       this.request<UpdateRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
         method: 'PUT',
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Row
+     * @name PatchRow
+     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}
+     * @secure
+     */
+    patchRow: (
+      revisionId: string,
+      tableId: string,
+      rowId: string,
+      data: PatchRowDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<PatchRowResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
