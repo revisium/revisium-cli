@@ -231,7 +231,7 @@ describe('PatchLoaderService', () => {
         ];
 
         const outputDir = join(testDir, 'output');
-        await service.savePatches(patches, outputDir, false);
+        await service.savePatchesAsSeparateFiles(patches, outputDir);
 
         const files = await readdir(outputDir);
         expect(files).toHaveLength(2);
@@ -260,7 +260,7 @@ describe('PatchLoaderService', () => {
         ];
 
         const outputDir = join(testDir, 'new', 'nested', 'dir');
-        await service.savePatches(patches, outputDir, false);
+        await service.savePatchesAsSeparateFiles(patches, outputDir);
 
         const files = await readdir(outputDir);
         expect(files).toHaveLength(1);
@@ -287,7 +287,7 @@ describe('PatchLoaderService', () => {
         ];
 
         const outputFile = join(testDir, 'merged.json');
-        await service.savePatches(patches, outputFile, true);
+        await service.savePatchesAsMergedFile(patches, outputFile);
 
         const content = await readFile(outputFile, 'utf-8');
         const data = JSON.parse(content) as PatchFileMerged;
@@ -318,7 +318,7 @@ describe('PatchLoaderService', () => {
         ];
 
         const outputFile = join(testDir, 'merged.json');
-        await service.savePatches(patches, outputFile, true);
+        await service.savePatchesAsMergedFile(patches, outputFile);
 
         // Should create two files: merged_Article.json and merged_Author.json
         const files = await readdir(testDir);
@@ -356,7 +356,7 @@ describe('PatchLoaderService', () => {
         ];
 
         const outputFile = join(testDir, 'new', 'nested', 'merged.json');
-        await service.savePatches(patches, outputFile, true);
+        await service.savePatchesAsMergedFile(patches, outputFile);
 
         const content = await readFile(outputFile, 'utf-8');
         const data = JSON.parse(content) as PatchFileMerged;
@@ -388,7 +388,7 @@ describe('PatchLoaderService', () => {
       ];
 
       const outputDir = join(testDir, 'output');
-      await service.savePatches(originalPatches, outputDir, false);
+      await service.savePatchesAsSeparateFiles(originalPatches, outputDir);
 
       const loadedPatches = await service.loadPatches(outputDir);
 
@@ -419,7 +419,7 @@ describe('PatchLoaderService', () => {
       ];
 
       const outputFile = join(testDir, 'merged.json');
-      await service.savePatches(originalPatches, outputFile, true);
+      await service.savePatchesAsMergedFile(originalPatches, outputFile);
 
       const loadedPatches = await service.loadPatches(outputFile);
 

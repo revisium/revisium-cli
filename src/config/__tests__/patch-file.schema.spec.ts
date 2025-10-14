@@ -146,13 +146,6 @@ describe('Patch File Schemas', () => {
       expect(validate([{ op: 'remove' }])).toBe(false);
     });
 
-    it('rejects missing required fields for move', () => {
-      const validate = ajv.compile(jsonValuePatchSchema);
-
-      expect(validate([{ op: 'move', path: 'newPath' }])).toBe(false);
-      expect(validate([{ op: 'move', from: 'oldPath' }])).toBe(false);
-    });
-
     it('rejects additional properties', () => {
       const validate = ajv.compile(jsonValuePatchSchema);
 

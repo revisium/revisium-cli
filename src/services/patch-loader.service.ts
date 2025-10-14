@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { readFile, readdir, stat, writeFile, mkdir } from 'fs/promises';
-import { join, extname, dirname } from 'path';
+import { readFile, readdir, stat, writeFile, mkdir } from 'node:fs/promises';
+import { join, extname, dirname } from 'node:path';
 import { PatchFile, PatchFileMerged } from '../types/patch.types';
 
 @Injectable()
@@ -57,16 +57,18 @@ export class PatchLoaderService {
     return patches;
   }
 
-  async savePatches(
+  async savePatchesAsSeparateFiles(
     patches: PatchFile[],
     outputPath: string,
-    merge: boolean,
   ): Promise<void> {
-    if (merge) {
-      await this.saveMergedFile(patches, outputPath);
-    } else {
-      await this.saveSeparateFiles(patches, outputPath);
-    }
+    await this.saveSeparateFiles(patches, outputPath);
+  }
+
+  async savePatchesAsMergedFile(
+    patches: PatchFile[],
+    outputPath: string,
+  ): Promise<void> {
+    await this.saveMergedFile(patches, outputPath);
   }
 
   private async saveSeparateFiles(
