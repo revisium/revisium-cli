@@ -17,6 +17,7 @@ revisium
 │   └── upload --folder <path> [--tables <list>] [--commit]
 └── patches
     ├── validate --input <path>
+    ├── preview --input <path> [--only-changes]
     └── save --table <name> --paths <paths> --output <path> [--merge]
 ```
 
@@ -353,6 +354,69 @@ revisium patches validate --input ./patches --url http://staging.example.com --o
 ❌ Validation failed
 ```
 
+### `patches preview`
+Preview diff between patch files and current API data to see what would change.
+
+```bash
+revisium patches preview --input <path> [options]
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-i, --input <path>` | Input folder or file with patch files | ✓ | - |
+| `--only-changes` | Show only rows with changes | - | `false` |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+| `--url <url>` | API base URL | - | `$REVISIUM_API_URL` (defaults to `https://cloud.revisium.io/`) |
+| `--username <name>` | Username | - | `$REVISIUM_USERNAME` |
+| `--password <pass>` | Password | - | `$REVISIUM_PASSWORD` |
+
+**Features:**
+- **Diff Comparison**: Compares patches with current API data
+- **Compact List**: Shows list of changed rows with count of changes per row
+- **Filter Changes**: Show only rows that will actually change values
+
+**Examples:**
+```bash
+# Preview changes (compact list)
+revisium patches preview --input ./patches
+
+# Preview from merged file
+revisium patches preview --input ./patches.json
+
+# Show only rows with changes
+revisium patches preview --input ./patches --only-changes
+
+# Preview against specific branch
+revisium patches preview --input ./patches --branch development
+```
+
+**Output:**
+```bash
+🔍 Loading patches from ./patches...
+✅ Loaded 2 patch file(s)
+
+🔍 Validating patches...
+✅ Validation passed
+
+🔍 Comparing with current data...
+✅ Compared 2 row(s)
+
+Table: Article
+
+🔄 article-123 (1 change)
+🔄 article-456 (2 changes)
+
+📊 Summary:
+  Total rows: 2
+  🔄 Changes: 3
+  ⏭️  Skipped: 1
+  ❌ Errors: 0
+```
+
 ### `patches save`
 Save current field values from Revisium API as patch files for later updates.
 
@@ -449,7 +513,10 @@ revisium patches save --table Article --paths title,description --output ./trans
 # 3. Validate edited patches
 revisium patches validate --input ./translations
 
-# 4. Apply patches to rows (use rows upload or API endpoints)
+# 4. Preview changes before applying
+revisium patches preview --input ./translations --only-changes
+
+# 5. Apply patches to rows (use rows upload or API endpoints)
 # ... patches can be applied through API or other tools ...
 ```
 

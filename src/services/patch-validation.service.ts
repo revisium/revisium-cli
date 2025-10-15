@@ -165,8 +165,6 @@ export class PatchValidationService {
     patchFiles: PatchFile[],
     options: { organization?: string; project?: string; branch?: string },
   ): Promise<ValidationResult[]> {
-    const results: ValidationResult[] = [];
-
     let revisionId: string;
     try {
       revisionId = await this.draftRevisionService.getDraftRevisionId(options);
@@ -182,6 +180,14 @@ export class PatchValidationService {
       }));
     }
 
+    return this.validateAllWithRevisionId(patchFiles, revisionId);
+  }
+
+  public async validateAllWithRevisionId(
+    patchFiles: PatchFile[],
+    revisionId: string,
+  ): Promise<ValidationResult[]> {
+    const results: ValidationResult[] = [];
     const schemaCache = new Map<string, JsonSchema>();
 
     for (const patchFile of patchFiles) {
