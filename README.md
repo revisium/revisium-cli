@@ -85,6 +85,8 @@ For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md)
 - **`schema create-migrations`** - Convert schemas to migration format
 - **`rows save`** - Export table data to JSON files
 - **`rows upload`** - Upload table data from JSON files (supports `--commit`)
+- **`patches validate`** - Validate patch files against table schema
+- **`patches save`** - Save field values as patches for selective updates
 
 ### Global Options
 
@@ -119,6 +121,115 @@ revisium migrate apply --file ./migrations.json --commit
 
 # Upload data and create a revision
 revisium rows upload --folder ./data --commit
+
+# Validate patches
+revisium patches validate --input ./patches
+
+# Save field values as patches
+revisium patches save --table Article --paths title,status --output ./patches
+```
+
+## Patches Commands
+
+The patches commands allow you to selectively update specific fields in table rows without affecting other fields. This is useful for content management, translations, and partial updates.
+
+### Save patches
+
+Export current field values from the API as patch files:
+
+```bash
+# Save specific fields to separate files (one file per row, default)
+revisium patches save --table Article --paths title,status --output ./patches
+
+# Save to merged file (all rows in single JSON file)
+revisium patches save --table Article --paths title,status --output ./patches.json --merge
+
+# Save specific nested fields
+revisium patches save --table Article --paths "title,metadata.author,metadata.tags" --output ./patches
+
+# Save nested fields to merged file
+revisium patches save --table Article --paths "title,metadata.author" --output ./article-patches.json --merge
+
+# Save from specific branch (separate files)
+revisium patches save --table Article --paths title --output ./patches --branch development
+
+# Save from specific branch (merged file)
+revisium patches save --table Article --paths title,status --output ./patches.json --merge --branch development
+```
+
+### Validate patches
+
+Validate patch files against the table schema from the API:
+
+```bash
+# Validate patches from folder
+revisium patches validate --input ./patches
+
+# Validate patches from single file
+revisium patches validate --input ./patches.json
+
+# Validate against specific branch schema
+revisium patches validate --input ./patches --branch development
+```
+
+**Patch File Format:**
+
+Separate file (one per row):
+```json
+{
+  "version": "1.0",
+  "table": "Article",
+  "rowId": "article-123",
+  "createdAt": "2025-10-15T12:00:00.000Z",
+  "patches": [
+    { "op": "replace", "path": "title", "value": "Updated Title" },
+    { "op": "replace", "path": "metadata.author", "value": "John Doe" }
+  ]
+}
+```
+
+Merged file (multiple rows):
+```json
+{
+  "version": "1.0",
+  "table": "Article",
+  "createdAt": "2025-10-15T12:00:00.000Z",
+  "rows": [
+    {
+      "rowId": "article-123",
+      "patches": [
+        { "op": "replace", "path": "title", "value": "Updated Title" }
+      ]
+    },
+    {
+      "rowId": "article-456",
+      "patches": [
+        { "op": "replace", "path": "status", "value": "published" }
+      ]
+    }
+  ]
+}
+```
+
+**Use Cases:**
+
+- **Content Management**: Export content for translation or editing
+- **Selective Updates**: Update specific fields without affecting others
+- **Content Migration**: Move content between environments
+- **Backup**: Create backups of specific field values
+
+**Workflow Example:**
+
+```bash
+# 1. Export current field values as patches
+revisium patches save --table Article --paths title,description --output ./translations
+
+# 2. Edit patch files manually (translate content, etc.)
+
+# 3. Validate edited patches
+revisium patches validate --input ./translations
+
+# 4. (Future) Apply patches back to rows using API
 ```
 
 ## Foreign Key Dependencies

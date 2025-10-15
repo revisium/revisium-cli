@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JsonSchemaStore } from '@revisium/schema-toolkit';
-import Ajv from 'ajv/dist/2020';
-import addFormats from 'ajv-formats';
 import { CoreApiService } from './core-api.service';
 import { DraftRevisionService } from './draft-revision.service';
+import { JsonValidatorService } from './json-validator.service';
 import {
   PatchFile,
   ValidationResult,
@@ -16,23 +15,45 @@ import {
   getJsonSchemaStoreByPath,
   convertJsonPathToSchemaPath,
 } from '@revisium/schema-toolkit/lib';
+import {
+  rowIdSchema,
+  rowCreatedIdSchema,
+  rowVersionIdSchema,
+  rowCreatedAtSchema,
+  rowPublishedAtSchema,
+  rowUpdatedAtSchema,
+  rowHashSchema,
+  rowSchemaHashSchema,
+  fileSchema,
+} from '@revisium/schema-toolkit/plugins';
+import { SystemSchemaIds } from '@revisium/schema-toolkit/consts';
 
 @Injectable()
 export class PatchValidationService {
-  private readonly ajv: Ajv;
+  private readonly refs: Readonly<Record<string, JsonSchema>>;
 
   constructor(
     private readonly coreApi: CoreApiService,
     private readonly draftRevisionService: DraftRevisionService,
+    private readonly jsonValidator: JsonValidatorService,
   ) {
-    this.ajv = new Ajv({ strict: false });
-    addFormats(this.ajv);
+    this.refs = {
+      [SystemSchemaIds.RowId]: rowIdSchema,
+      [SystemSchemaIds.RowCreatedId]: rowCreatedIdSchema,
+      [SystemSchemaIds.RowVersionId]: rowVersionIdSchema,
+      [SystemSchemaIds.RowCreatedAt]: rowCreatedAtSchema,
+      [SystemSchemaIds.RowPublishedAt]: rowPublishedAtSchema,
+      [SystemSchemaIds.RowUpdatedAt]: rowUpdatedAtSchema,
+      [SystemSchemaIds.RowHash]: rowHashSchema,
+      [SystemSchemaIds.RowSchemaHash]: rowSchemaHashSchema,
+      [SystemSchemaIds.File]: fileSchema,
+    };
   }
 
   public validateFormat(patchFile: PatchFile): ValidationResult {
     const errors: ValidationError[] = [];
 
-    const validate = this.ajv.compile(patchFileSchema);
+    const validate = this.jsonValidator.ajv.compile(patchFileSchema);
     const isValid = validate(patchFile);
 
     if (!isValid && validate.errors) {
@@ -57,7 +78,7 @@ export class PatchValidationService {
     const errors: ValidationError[] = [];
 
     try {
-      const schemaStore = createJsonSchemaStore(tableSchema);
+      const schemaStore = createJsonSchemaStore(tableSchema, this.refs);
 
       for (const patch of patchFile.patches) {
         try {
@@ -110,9 +131,7 @@ export class PatchValidationService {
 
   public async validate(
     patchFile: PatchFile,
-    organizationName: string,
-    projectName: string,
-    branchName: string,
+    options: { organization?: string; project?: string; branch?: string },
   ): Promise<ValidationResult> {
     const formatResult = this.validateFormat(patchFile);
     if (!formatResult.valid) {
@@ -120,11 +139,8 @@ export class PatchValidationService {
     }
 
     try {
-      const revisionId = await this.draftRevisionService.getDraftRevisionId({
-        organization: organizationName,
-        project: projectName,
-        branch: branchName,
-      });
+      const revisionId =
+        await this.draftRevisionService.getDraftRevisionId(options);
 
       const tableSchema = await this.getTableSchema(
         patchFile.table,
@@ -147,20 +163,54 @@ export class PatchValidationService {
 
   public async validateAll(
     patchFiles: PatchFile[],
-    organizationName: string,
-    projectName: string,
-    branchName: string,
+    options: { organization?: string; project?: string; branch?: string },
   ): Promise<ValidationResult[]> {
     const results: ValidationResult[] = [];
 
+    let revisionId: string;
+    try {
+      revisionId = await this.draftRevisionService.getDraftRevisionId(options);
+    } catch (error) {
+      return patchFiles.map((patchFile) => ({
+        valid: false,
+        errors: [
+          {
+            rowId: patchFile.rowId,
+            message: `Failed to get revision ID: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+      }));
+    }
+
+    const schemaCache = new Map<string, JsonSchema>();
+
     for (const patchFile of patchFiles) {
-      const result = await this.validate(
-        patchFile,
-        organizationName,
-        projectName,
-        branchName,
-      );
-      results.push(result);
+      const formatResult = this.validateFormat(patchFile);
+      if (!formatResult.valid) {
+        results.push(formatResult);
+        continue;
+      }
+
+      try {
+        let tableSchema = schemaCache.get(patchFile.table);
+        if (!tableSchema) {
+          tableSchema = await this.getTableSchema(patchFile.table, revisionId);
+          schemaCache.set(patchFile.table, tableSchema);
+        }
+
+        const schemaResult = this.validateAgainstSchema(patchFile, tableSchema);
+        results.push(schemaResult);
+      } catch (error) {
+        results.push({
+          valid: false,
+          errors: [
+            {
+              rowId: patchFile.rowId,
+              message: `Failed to fetch table schema: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        });
+      }
     }
 
     return results;
@@ -193,7 +243,7 @@ export class PatchValidationService {
     try {
       const plainSchema = fieldSchema.getPlainSchema();
 
-      const validate = this.ajv.compile(plainSchema);
+      const validate = this.jsonValidator.ajv.compile(plainSchema);
       const isValid = validate(value);
 
       if (!isValid && validate.errors) {
