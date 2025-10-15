@@ -9,7 +9,6 @@ import { formatDiffAsTable } from '../utils/diff-formatter.utils';
 
 type Options = BaseOptions & {
   input: string;
-  onlyChanges?: boolean;
 };
 
 @SubCommand({
@@ -73,12 +72,8 @@ export class PreviewPatchesCommand extends BaseCommand {
 
     console.log('🔍 Comparing with current data...');
 
-    let diff = await this.diffService.compareWithApi(patches, revisionId);
+    const diff = await this.diffService.compareWithApi(patches, revisionId);
     console.log(`✅ Compared ${diff.summary.totalRows} row(s)\n`);
-
-    if (options.onlyChanges) {
-      diff = this.diffService.getChangesOnly(diff);
-    }
 
     if (diff.summary.totalChanges === 0) {
       console.log(
@@ -102,13 +97,5 @@ export class PreviewPatchesCommand extends BaseCommand {
   })
   parseInput(value: string): string {
     return value;
-  }
-
-  @Option({
-    flags: '--only-changes',
-    description: 'Show only rows with changes',
-  })
-  parseOnlyChanges(): boolean {
-    return true;
   }
 }

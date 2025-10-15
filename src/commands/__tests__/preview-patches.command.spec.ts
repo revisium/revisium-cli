@@ -11,7 +11,6 @@ describe('PreviewPatchesCommand', () => {
   let command: PreviewPatchesCommand;
   let diffServiceFake: {
     compareWithApi: jest.Mock;
-    getChangesOnly: jest.Mock;
   };
   let loaderServiceFake: {
     loadPatches: jest.Mock;
@@ -40,7 +39,6 @@ describe('PreviewPatchesCommand', () => {
   beforeEach(async () => {
     diffServiceFake = {
       compareWithApi: jest.fn(),
-      getChangesOnly: jest.fn(),
     };
 
     loaderServiceFake = {
@@ -192,22 +190,6 @@ describe('PreviewPatchesCommand', () => {
     consoleSpy.mockRestore();
   });
 
-  it('filters to only changes when requested', async () => {
-    setupSuccessfulFlow();
-
-    await command.run([], { input: './patches', onlyChanges: true });
-
-    expect(diffServiceFake.getChangesOnly).toHaveBeenCalled();
-  });
-
-  it('does not filter when only-changes not specified', async () => {
-    setupSuccessfulFlow();
-
-    await command.run([], { input: './patches' });
-
-    expect(diffServiceFake.getChangesOnly).not.toHaveBeenCalled();
-  });
-
   function setupSuccessfulFlow() {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
     coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
@@ -240,6 +222,5 @@ describe('PreviewPatchesCommand', () => {
         errors: 0,
       },
     });
-    diffServiceFake.getChangesOnly.mockImplementation((diff: unknown) => diff);
   }
 });

@@ -75,8 +75,6 @@ revisium schema save --folder ./schemas --organization my-org --branch dev
 
 ## Commands
 
-For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md).
-
 ### Available Commands
 
 - **`migrate save`** - Export migrations from Revisium to JSON file
@@ -187,9 +185,6 @@ revisium patches preview --input ./patches
 # Preview from merged file
 revisium patches preview --input ./patches.json
 
-# Show only rows with changes
-revisium patches preview --input ./patches --only-changes
-
 # Preview against specific branch
 revisium patches preview --input ./patches --branch development
 ```
@@ -254,7 +249,7 @@ revisium patches save --table Article --paths title,description --output ./trans
 revisium patches validate --input ./translations
 
 # 4. Preview changes before applying
-revisium patches preview --input ./translations --only-changes
+revisium patches preview --input ./translations
 
 # 5. (Future) Apply patches back to rows using API
 ```

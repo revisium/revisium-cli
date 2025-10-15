@@ -128,30 +128,6 @@ export class PatchDiffService {
     };
   }
 
-  public getChangesOnly(diff: DiffResult): DiffResult {
-    const filteredRows = diff.rows
-      .map((row) => ({
-        ...row,
-        patches: row.patches.filter((p) => p.status === 'CHANGE'),
-      }))
-      .filter((row) => row.patches.length > 0);
-
-    const totalChanges = filteredRows.reduce(
-      (sum, row) => sum + row.patches.length,
-      0,
-    );
-
-    return {
-      ...diff,
-      rows: filteredRows,
-      summary: {
-        ...diff.summary,
-        totalRows: filteredRows.length,
-        totalChanges,
-      },
-    };
-  }
-
   private async loadRow(
     revisionId: string,
     tableId: string,
