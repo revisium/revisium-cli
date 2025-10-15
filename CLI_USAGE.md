@@ -12,9 +12,12 @@ revisium
 ├── migrate
 │   ├── save --file <file>
 │   └── apply --file <file> [--commit]
-└── rows
-    ├── save --folder <path> [--tables <list>]
-    └── upload --folder <path> [--tables <list>] [--commit]
+├── rows
+│   ├── save --folder <path> [--tables <list>]
+│   └── upload --folder <path> [--tables <list>] [--commit]
+└── patches
+    ├── validate --input <path>
+    └── save --table <name> --paths <paths> --output <path> [--merge]
 ```
 
 ## Global Options
@@ -274,6 +277,180 @@ revisium rows upload --folder ./data --url http://staging.example.com --organiza
 
 # Upload to staging with automatic revision creation
 revisium rows upload --folder ./data --url http://staging.example.com --organization staging-org --commit
+```
+
+## Patches Commands
+
+Patches allow you to selectively update specific fields in table rows without affecting other fields. They are useful for content management, translations, and partial updates.
+
+### `patches validate`
+Validate patch files against table schema from Revisium API.
+
+```bash
+revisium patches validate --input <path> [options]
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `-i, --input <path>` | Input folder or file with patch files | ✓ | - |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+| `--url <url>` | API base URL | - | `$REVISIUM_API_URL` (defaults to `https://cloud.revisium.io/`) |
+| `--username <name>` | Username | - | `$REVISIUM_USERNAME` |
+| `--password <pass>` | Password | - | `$REVISIUM_PASSWORD` |
+
+**Patch File Format:**
+```json
+{
+  "version": "1.0",
+  "table": "Article",
+  "rowId": "article-123",
+  "createdAt": "2025-10-15T12:00:00.000Z",
+  "patches": [
+    { "op": "replace", "path": "title", "value": "Updated Title" },
+    { "op": "replace", "path": "metadata.author", "value": "John Doe" }
+  ]
+}
+```
+
+**Features:**
+- **Schema Validation**: Validates patch values against table schema from API
+- **Path Validation**: Ensures all field paths exist in the table schema
+- **Type Checking**: Validates data types match schema requirements
+- **Foreign Key Validation**: Checks foreign key references are valid
+- **Batch Validation**: Validates multiple patch files at once
+
+**Examples:**
+```bash
+# Validate patches from folder
+revisium patches validate --input ./patches
+
+# Validate patches from merged file
+revisium patches validate --input ./patches.json
+
+# Validate patches from specific branch
+revisium patches validate --input ./patches --branch development
+
+# Validate patches from different environment
+revisium patches validate --input ./patches --url http://staging.example.com --organization staging-org
+```
+
+**Output:**
+```bash
+📋 Loading patches from ./patches...
+✅ Loaded 3 patch file(s)
+
+🔍 Validating patches...
+✅ Valid: Article/article-123
+✅ Valid: Article/article-456
+❌ Invalid: Article/article-789
+   - Invalid type: expected string, got number [title]
+   - Unknown field: metadata.invalidField [metadata.invalidField]
+
+❌ Validation failed
+```
+
+### `patches save`
+Save current field values from Revisium API as patch files for later updates.
+
+```bash
+revisium patches save --table <name> --output <path> [options]
+```
+
+**Options:**
+
+| Option | Description | Required | Default |
+|--------|-------------|----------|---------|
+| `--table <name>` | Table name to export patches from | ✓ | - |
+| `--paths <paths>` | Comma-separated field paths to include (e.g., "title,status") | ✓ | - |
+| `--output <path>` | Output folder (separate files) or file path (merged) | ✓ | - |
+| `--merge` | Save all patches into a single JSON file | - | `false` |
+| `-o, --organization <name>` | Organization name | - | `$REVISIUM_ORGANIZATION` |
+| `-p, --project <name>` | Project name | - | `$REVISIUM_PROJECT` |
+| `-b, --branch <name>` | Branch name | - | `$REVISIUM_BRANCH` |
+| `--url <url>` | API base URL | - | `$REVISIUM_API_URL` (defaults to `https://cloud.revisium.io/`) |
+| `--username <name>` | Username | - | `$REVISIUM_USERNAME` |
+| `--password <pass>` | Password | - | `$REVISIUM_PASSWORD` |
+
+**Features:**
+- **Selective Export**: Export only specific fields using `--paths`
+- **Nested Fields**: Support for nested field paths (e.g., "metadata.author")
+- **Separate Files**: One file per row (default)
+- **Merged File**: All patches in single file with `--merge` flag
+- **Empty Value Handling**: Skips rows where all specified paths are empty
+
+**Output Structure (Separate Files):**
+```
+patches/
+├── Article/
+│   ├── article-123.json
+│   ├── article-456.json
+│   └── article-789.json
+└── Product/
+    ├── product-abc.json
+    └── product-def.json
+```
+
+**Output Structure (Merged File):**
+```
+patches.json
+```
+
+**Examples:**
+```bash
+# Save specific fields to separate files
+revisium patches save --table Article --paths title,status --output ./patches
+
+# Save specific nested fields
+revisium patches save --table Article --paths "title,metadata.author,metadata.tags" --output ./patches
+
+# Save patches to merged file
+revisium patches save --table Article --paths title,status --output ./patches.json --merge
+
+# Save from specific branch
+revisium patches save --table Article --paths title --output ./patches --branch development
+
+# Save from different environment
+revisium patches save --table Article --paths title,status --output ./patches --url http://production.example.com
+```
+
+**Example Output:**
+```bash
+📋 Loading table schema for 'Article'...
+📋 Using paths: title, status
+📋 Loading rows from table 'Article'...
+✅ Loaded 150 row(s)
+
+💾 Generating patches...
+✅ Generated patches for 150 row(s)
+
+💾 Saving patches to ./patches...
+✅ Saved successfully
+```
+
+**Use Cases:**
+- **Content Management**: Export content for translation or editing
+- **Selective Updates**: Update specific fields without affecting others
+- **Content Migration**: Move content between environments
+- **Backup**: Create backups of specific field values
+- **Audit Trail**: Track changes to specific fields over time
+
+**Workflow Example:**
+```bash
+# 1. Export current field values as patches
+revisium patches save --table Article --paths title,description --output ./translations
+
+# 2. Edit patch files (translate content, etc.)
+# ... manual editing of JSON files ...
+
+# 3. Validate edited patches
+revisium patches validate --input ./translations
+
+# 4. Apply patches to rows (use rows upload or API endpoints)
+# ... patches can be applied through API or other tools ...
 ```
 
 ## Revision Control with --commit Flag

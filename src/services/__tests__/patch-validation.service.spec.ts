@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PatchValidationService } from '../patch-validation.service';
 import { CoreApiService } from '../core-api.service';
 import { DraftRevisionService } from '../draft-revision.service';
+import { JsonValidatorService } from '../json-validator.service';
 import { PatchFile } from '../../types/patch.types';
-import {
-  JsonSchema,
-  JsonSchemaTypeName,
-} from '@revisium/schema-toolkit/types';
+import { JsonSchema, JsonSchemaTypeName } from '@revisium/schema-toolkit/types';
 
 describe('PatchValidationService', () => {
   let service: PatchValidationService;
@@ -53,6 +51,7 @@ describe('PatchValidationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PatchValidationService,
+        JsonValidatorService,
         {
           provide: CoreApiService,
           useValue: mockCoreApi,
@@ -335,12 +334,11 @@ describe('PatchValidationService', () => {
         status: 200,
       });
 
-      const result = await service.validate(
-        patchFile,
-        'org',
-        'project',
-        'branch',
-      );
+      const result = await service.validate(patchFile, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -359,12 +357,11 @@ describe('PatchValidationService', () => {
         patches: [{ op: 'replace', path: 'title', value: 'Title' }],
       } as unknown as PatchFile;
 
-      const result = await service.validate(
-        patchFile,
-        'org',
-        'project',
-        'branch',
-      );
+      const result = await service.validate(patchFile, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -387,12 +384,11 @@ describe('PatchValidationService', () => {
         status: 404,
       });
 
-      const result = await service.validate(
-        patchFile,
-        'org',
-        'project',
-        'branch',
-      );
+      const result = await service.validate(patchFile, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -417,12 +413,11 @@ describe('PatchValidationService', () => {
         status: 200,
       });
 
-      const result = await service.validate(
-        patchFile,
-        'org',
-        'project',
-        'branch',
-      );
+      const result = await service.validate(patchFile, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -445,12 +440,11 @@ describe('PatchValidationService', () => {
         status: 200,
       });
 
-      const result = await service.validate(
-        patchFile,
-        'org',
-        'project',
-        'branch',
-      );
+      const result = await service.validate(patchFile, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -484,12 +478,11 @@ describe('PatchValidationService', () => {
         status: 200,
       });
 
-      const results = await service.validateAll(
-        patchFiles,
-        'org',
-        'project',
-        'branch',
-      );
+      const results = await service.validateAll(patchFiles, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(results).toHaveLength(2);
       expect(results[0].valid).toBe(true);
@@ -521,12 +514,11 @@ describe('PatchValidationService', () => {
         status: 200,
       });
 
-      const results = await service.validateAll(
-        patchFiles,
-        'org',
-        'project',
-        'branch',
-      );
+      const results = await service.validateAll(patchFiles, {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(results).toHaveLength(2);
       expect(results[0].valid).toBe(true);
@@ -535,7 +527,11 @@ describe('PatchValidationService', () => {
     });
 
     it('handles empty array', async () => {
-      const results = await service.validateAll([], 'org', 'project', 'branch');
+      const results = await service.validateAll([], {
+        organization: 'org',
+        project: 'project',
+        branch: 'branch',
+      });
 
       expect(results).toHaveLength(0);
     });

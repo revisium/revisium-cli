@@ -1,4 +1,5 @@
 import Ajv, { Schema, ValidateFunction } from 'ajv/dist/2020';
+import addFormats from 'ajv-formats';
 import { jsonPatchSchema } from 'src/config/json-patch-schema';
 import { metaSchema } from 'src/config/meta-schema';
 import { migrationSchema } from 'src/config/migration.schema';
@@ -17,11 +18,13 @@ import { tableMigrationsSchema } from 'src/config/table-migrations-schema';
 import { Migration } from 'src/types/migration.types';
 
 export class JsonValidatorService {
-  public readonly ajv = new Ajv();
+  public readonly ajv = new Ajv({ strict: false });
 
   private readonly validator: ValidateFunction<Migration[]>;
 
   constructor() {
+    addFormats(this.ajv);
+
     this.ajv.addKeyword({
       keyword: 'foreignKey',
       type: 'string',
