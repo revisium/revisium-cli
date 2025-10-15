@@ -1,0 +1,18 @@
+{
+  "createdId": "8ZE8XKoS0L2CHUf9oY1br",
+  "id": "charodeyskiy_i",
+  "versionId": "mAwCEmGxpDH-fgTELiuN5",
+  "createdAt": "2025-05-31T06:06:40.796Z",
+  "updatedAt": "2025-05-31T06:06:40.796Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Arcane Intellect",
+    "skill_data": {
+      "bonus": 10,
+      "stat_id": "intelligence",
+      "cooldown_reduction": 4
+    },
+    "description": "Increases intelligence for a certain time."
+  }
+}

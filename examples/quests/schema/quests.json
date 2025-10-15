@@ -1,0 +1,248 @@
+{
+  "type": "object",
+  "required": [
+    "description",
+    "is_repeatable",
+    "name",
+    "preview",
+    "quest_type_id",
+    "requirements",
+    "rewards",
+    "steps"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "coordinates",
+          "description",
+          "items",
+          "location_id",
+          "npc_id",
+          "objective_type",
+          "step_number"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "item_id",
+                "quantity"
+              ],
+              "properties": {
+                "item_id": {
+                  "type": "string",
+                  "default": "",
+                  "foreignKey": "items"
+                },
+                "quantity": {
+                  "type": "number",
+                  "default": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "npc_id": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "npcs"
+          },
+          "coordinates": {
+            "type": "object",
+            "required": [
+              "x",
+              "y"
+            ],
+            "properties": {
+              "x": {
+                "type": "number",
+                "default": 0
+              },
+              "y": {
+                "type": "number",
+                "default": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "location_id": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "locations"
+          },
+          "step_number": {
+            "type": "number",
+            "default": 0
+          },
+          "objective_type": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "preview": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "rewards": {
+      "type": "object",
+      "required": [
+        "abilities",
+        "currency",
+        "experience",
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "item_id",
+              "quantity"
+            ],
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "items"
+              },
+              "quantity": {
+                "type": "number",
+                "default": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "currency": {
+          "type": "object",
+          "required": [
+            "gold",
+            "silver"
+          ],
+          "properties": {
+            "gold": {
+              "type": "number",
+              "default": 0
+            },
+            "silver": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "abilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "abilities"
+          }
+        },
+        "experience": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "requirements": {
+      "type": "object",
+      "required": [
+        "required_factions",
+        "required_items",
+        "required_level",
+        "required_skills"
+      ],
+      "properties": {
+        "required_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "item_id",
+              "quantity"
+            ],
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "items"
+              },
+              "quantity": {
+                "type": "number",
+                "default": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required_level": {
+          "type": "number",
+          "default": 0
+        },
+        "required_skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": "",
+            "foreignKey": "skills"
+          }
+        },
+        "required_factions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "faction_id",
+              "reputation"
+            ],
+            "properties": {
+              "faction_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "factions"
+              },
+              "reputation": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "is_repeatable": {
+      "type": "boolean",
+      "default": false
+    },
+    "quest_type_id": {
+      "type": "string",
+      "default": "",
+      "foreignKey": "quest_types"
+    }
+  },
+  "additionalProperties": false
+}

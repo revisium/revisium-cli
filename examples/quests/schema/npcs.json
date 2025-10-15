@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "required": [
+    "attributes",
+    "avatar",
+    "location_id",
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "avatar": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "attributes": {
+      "type": "object",
+      "required": [
+        "equipment",
+        "faction_id",
+        "health",
+        "level",
+        "stats"
+      ],
+      "properties": {
+        "level": {
+          "type": "number",
+          "default": 0
+        },
+        "stats": {
+          "type": "object",
+          "required": [
+            "agility",
+            "intelligence",
+            "strength"
+          ],
+          "properties": {
+            "agility": {
+              "type": "number",
+              "default": 0
+            },
+            "strength": {
+              "type": "number",
+              "default": 0
+            },
+            "intelligence": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "health": {
+          "type": "number",
+          "default": 0
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "item_id",
+              "slot"
+            ],
+            "properties": {
+              "slot": {
+                "type": "string",
+                "default": ""
+              },
+              "item_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "items"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "faction_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "factions"
+        }
+      },
+      "additionalProperties": false
+    },
+    "location_id": {
+      "type": "string",
+      "default": "",
+      "foreignKey": "locations"
+    }
+  },
+  "additionalProperties": false
+}

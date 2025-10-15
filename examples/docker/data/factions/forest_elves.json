@@ -1,0 +1,13 @@
+{
+  "createdId": "Smb-7x62QKaZG5HtKKt_y",
+  "id": "forest_elves",
+  "versionId": "J7HQ2FL0n2XWsgv7AfzLJ",
+  "createdAt": "2025-05-31T06:06:42.545Z",
+  "updatedAt": "2025-05-31T06:06:42.545Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Forest Elves",
+    "description": "An elven faction living in forests and protecting nature."
+  }
+}

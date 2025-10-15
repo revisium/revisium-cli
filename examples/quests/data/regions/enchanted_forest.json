@@ -1,0 +1,13 @@
+{
+  "createdId": "Lfu6udgBCwIKWNf77wNgE",
+  "id": "enchanted_forest",
+  "versionId": "_88qkF84efo9uSAxCQYhz",
+  "createdAt": "2025-05-31T06:06:43.627Z",
+  "updatedAt": "2025-05-31T06:06:43.627Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Enchanted Forest",
+    "description": "A mystical forest full of magical creatures and secrets."
+  }
+}

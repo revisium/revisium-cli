@@ -1,0 +1,136 @@
+[
+  {
+    "id": "2025-08-03T11:21:23.449Z",
+    "hash": "92af9fa137f70fd04c6b525a2168fb8e52a3cc30",
+    "schema": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "user",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-03T11:21:28.591Z",
+    "hash": "0492bd186a109be07c0fa66bec7e2e486cd30e9c",
+    "schema": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "post",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-03T11:21:52.726Z",
+    "hash": "3c4229c389dda2fea2ac8436096d6d2c008b19eb",
+    "patches": [
+      {
+        "op": "add",
+        "path": "/properties/lastName",
+        "value": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      {
+        "op": "add",
+        "path": "/properties/age",
+        "value": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    ],
+    "tableId": "user",
+    "changeType": "update"
+  },
+  {
+    "id": "2025-08-03T11:21:55.703Z",
+    "hash": "b06709e1e48ca5e80e7981ceaec1cacf3e0d6448",
+    "patches": [
+      {
+        "op": "move",
+        "from": "/properties/name",
+        "path": "/properties/firstName"
+      }
+    ],
+    "tableId": "user",
+    "changeType": "update"
+  },
+  {
+    "id": "2025-08-03T11:22:05.142Z",
+    "hash": "25bc2ccc9fe4c4c59b5f46f28e7e2173665bac18",
+    "patches": [
+      {
+        "op": "add",
+        "path": "/properties/users",
+        "value": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "user"
+        }
+      }
+    ],
+    "tableId": "post",
+    "changeType": "update"
+  },
+  {
+    "id": "2025-08-03T11:22:09.590Z",
+    "hash": "7c59d032e99b2d242e68a7b6d027281ea2084c3f",
+    "schema": {
+      "type": "object",
+      "required": ["ff"],
+      "properties": {
+        "ff": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "test",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-03T11:22:23.702Z",
+    "tableId": "post",
+    "changeType": "rename",
+    "nextTableId": "post2"
+  },
+  {
+    "id": "2025-08-03T11:22:28.406Z",
+    "tableId": "user",
+    "changeType": "rename",
+    "nextTableId": "user2"
+  },
+  {
+    "id": "2025-08-03T11:22:31.399Z",
+    "tableId": "test",
+    "changeType": "remove"
+  },
+  {
+    "id": "2025-08-03T12:11:27.628Z",
+    "tableId": "post2",
+    "changeType": "rename",
+    "nextTableId": "post"
+  },
+  {
+    "id": "2025-08-03T12:11:33.684Z",
+    "tableId": "user2",
+    "changeType": "rename",
+    "nextTableId": "user"
+  }
+]

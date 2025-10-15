@@ -1,0 +1,13 @@
+{
+  "createdId": "521xNZN0gSLGv0FvxBY-Z",
+  "id": "movement_speed",
+  "versionId": "3DfGcsH45Qj7ErTikAPNg",
+  "createdAt": "2025-05-31T06:06:38.526Z",
+  "updatedAt": "2025-05-31T06:06:38.526Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Movement Speed",
+    "description": "Affects the character's movement speed in the game world."
+  }
+}

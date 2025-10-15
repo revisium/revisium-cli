@@ -1,0 +1,27 @@
+{
+  "createdId": "7OUhPSkDAwYPB92bYTy60",
+  "id": "healing_ray",
+  "versionId": "yh_76IeTxv-9aQPHWJtTg",
+  "createdAt": "2025-05-31T06:06:39.182Z",
+  "updatedAt": "2025-05-31T06:06:39.182Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Healing Ray",
+    "description": "Restores some of the target's health.",
+    "effect_data": {
+      "type": "healing",
+      "duration": 5,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": 25,
+          "stat_id": "health"
+        }
+      ]
+    }
+  }
+}

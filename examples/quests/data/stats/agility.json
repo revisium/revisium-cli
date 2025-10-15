@@ -1,0 +1,13 @@
+{
+  "createdId": "MgYwvkngXMMfV3ROCRdpj",
+  "id": "agility",
+  "versionId": "BiaaRBn_qBZSJfUIcd9fB",
+  "createdAt": "2025-05-31T06:06:37.113Z",
+  "updatedAt": "2025-05-31T06:06:37.113Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Agility",
+    "description": "Determines the character's evasion chance and attack accuracy."
+  }
+}

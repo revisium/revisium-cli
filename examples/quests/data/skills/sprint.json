@@ -1,0 +1,18 @@
+{
+  "createdId": "_gduNjfXQuUlVFutbxj17",
+  "id": "sprint",
+  "versionId": "64DVcZ-R4XjOfh5YfeuyS",
+  "createdAt": "2025-05-31T06:06:40.722Z",
+  "updatedAt": "2025-05-31T06:06:40.722Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Sprint",
+    "skill_data": {
+      "bonus": 30,
+      "stat_id": "movement_speed",
+      "cooldown_reduction": 2
+    },
+    "description": "Increases movement speed for a short period."
+  }
+}

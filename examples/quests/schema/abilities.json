@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "required": [
+    "ability_data",
+    "description",
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "ability_data": {
+      "type": "object",
+      "required": [
+        "cooldown",
+        "effects",
+        "requirements",
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": ""
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "chance",
+              "effect_id"
+            ],
+            "properties": {
+              "chance": {
+                "type": "number",
+                "default": 0
+              },
+              "effect_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "effects"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "cooldown": {
+          "type": "number",
+          "default": 0
+        },
+        "requirements": {
+          "type": "object",
+          "required": [
+            "level",
+            "skill_ids"
+          ],
+          "properties": {
+            "level": {
+              "type": "number",
+              "default": 0
+            },
+            "skill_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "skills"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,13 @@
+{
+  "createdId": "7ef4-nj8_Pl5vSu3zkOAi",
+  "id": "critical_damage",
+  "versionId": "Ww2J5ZJxifqt2omEKGIvj",
+  "createdAt": "2025-05-31T06:06:37.631Z",
+  "updatedAt": "2025-05-31T06:06:37.631Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Critical Damage",
+    "description": "Determines the damage multiplier for critical hits."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "createdId": "ZK99JrRelrmdwNGcXs-BE",
+  "id": "vnutrenniy_og",
+  "versionId": "F2rhSvxLjdr7hdpli1e-4",
+  "createdAt": "2025-05-31T06:06:41.521Z",
+  "updatedAt": "2025-05-31T06:06:41.521Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Inner Fire",
+    "skill_data": {
+      "bonus": 10,
+      "stat_id": "strength",
+      "cooldown_reduction": 4
+    },
+    "description": "Increases attack power and defense for a short time."
+  }
+}

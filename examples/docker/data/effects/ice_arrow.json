@@ -1,0 +1,27 @@
+{
+  "createdId": "-a2j7KeVY60uIgiUP_-T4",
+  "id": "ice_arrow",
+  "versionId": "E3byBeL34y2MUwr4-ZNs_",
+  "createdAt": "2025-05-31T06:06:39.324Z",
+  "updatedAt": "2025-05-31T06:06:39.324Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Ice Arrow",
+    "description": "Deals damage to enemy and freezes them for a short time.",
+    "effect_data": {
+      "type": "magical damage",
+      "duration": 10,
+      "application": {
+        "chance": 75,
+        "target_type": "enemy"
+      },
+      "stat_changes": [
+        {
+          "value": -20,
+          "stat_id": "movement_speed"
+        }
+      ]
+    }
+  }
+}

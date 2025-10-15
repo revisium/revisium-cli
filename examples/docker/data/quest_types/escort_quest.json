@@ -1,0 +1,13 @@
+{
+  "createdId": "8gNlFK1Rs1gvWLVgm6IL3",
+  "id": "escort_quest",
+  "versionId": "5TWlKwswpwUJYiKA6TD1B",
+  "createdAt": "2025-05-31T06:06:44.959Z",
+  "updatedAt": "2025-05-31T06:06:44.959Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Escort Character",
+    "description": "A quest where the player must escort an NPC to a safe place."
+  }
+}

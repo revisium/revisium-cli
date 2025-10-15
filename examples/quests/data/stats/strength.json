@@ -1,0 +1,13 @@
+{
+  "createdId": "nt-GnS5w_80LskdMP2rh5",
+  "id": "strength",
+  "versionId": "yMuGRVLLZekls4ysEok_n",
+  "createdAt": "2025-05-31T06:06:38.836Z",
+  "updatedAt": "2025-05-31T06:06:38.836Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Strength",
+    "description": "Affects physical damage dealt by the character."
+  }
+}

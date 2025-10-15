@@ -1,0 +1,13 @@
+{
+  "createdId": "JUw4Q6Rfe4BjTal9AKiVb",
+  "id": "evasion",
+  "versionId": "3GTWRkJN2dQ7kiV_6XLHz",
+  "createdAt": "2025-05-31T06:06:37.523Z",
+  "updatedAt": "2025-05-31T06:06:37.523Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Evasion",
+    "description": "Determines the probability of avoiding an enemy attack."
+  }
+}

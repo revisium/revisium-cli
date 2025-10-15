@@ -1,0 +1,126 @@
+{
+  "type": "object",
+  "required": [
+    "item_type_id",
+    "name",
+    "properties"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "properties": {
+      "type": "object",
+      "required": [
+        "damage",
+        "defense",
+        "effects",
+        "modifiers",
+        "requirements"
+      ],
+      "properties": {
+        "damage": {
+          "type": "object",
+          "required": [
+            "max",
+            "min",
+            "type"
+          ],
+          "properties": {
+            "max": {
+              "type": "number",
+              "default": 0
+            },
+            "min": {
+              "type": "number",
+              "default": 0
+            },
+            "type": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        },
+        "defense": {
+          "type": "number",
+          "default": 0
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "chance",
+              "effect_id"
+            ],
+            "properties": {
+              "chance": {
+                "type": "number",
+                "default": 0
+              },
+              "effect_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "effects"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "modifiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "stat_id",
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "number",
+                "default": 0
+              },
+              "stat_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "stats"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "required": [
+            "class_ids",
+            "level"
+          ],
+          "properties": {
+            "level": {
+              "type": "number",
+              "default": 0
+            },
+            "class_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "classes"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "item_type_id": {
+      "type": "string",
+      "default": "",
+      "foreignKey": "item_types"
+    }
+  },
+  "additionalProperties": false
+}

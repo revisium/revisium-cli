@@ -1,0 +1,13 @@
+{
+  "createdId": "XaSwCT19EV2hqqE0s20_b",
+  "id": "armor_penetration",
+  "versionId": "HZMdCDgGEiSOTzsM7RLFz",
+  "createdAt": "2025-05-31T06:06:37.617Z",
+  "updatedAt": "2025-05-31T06:06:37.617Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Armor Penetration",
+    "description": "Allows ignoring part of the opponent's defense when attacking."
+  }
+}

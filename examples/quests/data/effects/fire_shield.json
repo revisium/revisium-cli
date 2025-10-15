@@ -1,0 +1,27 @@
+{
+  "createdId": "WaEIKEB7IUE885sPZZyue",
+  "id": "fire_shield",
+  "versionId": "c8OvMlwl9koXvDnLqAx4Y",
+  "createdAt": "2025-05-31T06:06:39.172Z",
+  "updatedAt": "2025-05-31T06:06:39.172Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Fire Shield",
+    "description": "Creates a fire barrier that absorbs some damage.",
+    "effect_data": {
+      "type": "shield",
+      "duration": 30,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": 15,
+          "stat_id": "defense"
+        }
+      ]
+    }
+  }
+}

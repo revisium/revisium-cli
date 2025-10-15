@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  revisium-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: revisium-runner
+    environment:
+      REVISIUM_API_URL: 'https://cloud.revisium.io/'
+      REVISIUM_USERNAME: 'admin'
+      REVISIUM_PASSWORD: '<password>'
+      REVISIUM_ORGANIZATION: 'admin'
+      REVISIUM_PROJECT: 'quests'
+      REVISIUM_BRANCH: 'master'
+
+      DRY_RUN: 'false'

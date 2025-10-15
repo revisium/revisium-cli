@@ -1,0 +1,13 @@
+{
+  "createdId": "r_JZl-ZULEfwf-8Yo6Aie",
+  "id": "mana_regeneration",
+  "versionId": "OfV6sErZgoFNP2pQh1vrX",
+  "createdAt": "2025-05-31T06:06:38.772Z",
+  "updatedAt": "2025-05-31T06:06:38.772Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Mana Regeneration",
+    "description": "The character's mana regeneration rate."
+  }
+}

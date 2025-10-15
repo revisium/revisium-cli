@@ -1,0 +1,13 @@
+{
+  "createdId": "ngkN0gc25g_vSME-_chyo",
+  "id": "accessory",
+  "versionId": "6xdfs0MjQv4T3WP3Ijy4i",
+  "createdAt": "2025-05-31T06:06:42.894Z",
+  "updatedAt": "2025-05-31T06:06:42.894Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Accessory",
+    "description": "Items that enhance character stats."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "createdId": "dfKGzFuo_CUR_xbizqAHf",
+  "id": "crystal_armor",
+  "versionId": "o6bxAuUmA8BVIR7uIT4kH",
+  "createdAt": "2025-05-31T06:06:43.244Z",
+  "updatedAt": "2025-05-31T06:06:43.244Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Crystal Armor",
+    "properties": {
+      "damage": {
+        "max": 0,
+        "min": 0,
+        "type": "none"
+      },
+      "defense": 30,
+      "effects": [
+        {
+          "chance": 20,
+          "effect_id": "stone_skin"
+        }
+      ],
+      "modifiers": [
+        {
+          "value": 5,
+          "stat_id": "defense"
+        }
+      ],
+      "requirements": {
+        "level": 6,
+        "class_ids": [
+          "warrior"
+        ]
+      }
+    },
+    "item_type_id": "armor"
+  }
+}

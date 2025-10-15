@@ -1,0 +1,41 @@
+{
+  "createdId": "SVAzh1g99sLUD9WeJJ_YQ",
+  "id": "frost_guardian",
+  "versionId": "yPPoTfugGonpPRY_5QiCk",
+  "createdAt": "2025-05-31T06:06:44.672Z",
+  "updatedAt": "2025-06-01T15:03:23.665Z",
+  "publishedAt": "2025-06-07T12:38:32.466Z",
+  "readonly": true,
+  "data": {
+    "name": "Frost Guardian",
+    "avatar": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/eda3dd2f7feac470f39114ae7d0225fcdbbe5a4c",
+      "hash": "eda3dd2f7feac470f39114ae7d0225fcdbbe5a4c",
+      "size": 2510329,
+      "width": 1024,
+      "fileId": "RcfLujaclZhjZ7xyKqSDu",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "frost_guardian.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "attributes": {
+      "level": 10,
+      "stats": {
+        "agility": 15,
+        "strength": 20,
+        "intelligence": 5
+      },
+      "health": 150,
+      "equipment": [
+        {
+          "slot": "weapon",
+          "item_id": "flaming_sword"
+        }
+      ],
+      "faction_id": "guardians"
+    },
+    "location_id": "frostwind_pass"
+  }
+}
