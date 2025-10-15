@@ -75,8 +75,6 @@ revisium schema save --folder ./schemas --organization my-org --branch dev
 
 ## Commands
 
-For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md).
-
 ### Available Commands
 
 - **`migrate save`** - Export migrations from Revisium to JSON file
@@ -87,6 +85,7 @@ For detailed usage information and examples, see [CLI Usage Guide](CLI_USAGE.md)
 - **`rows upload`** - Upload table data from JSON files (supports `--commit`)
 - **`patches validate`** - Validate patch files against table schema
 - **`patches save`** - Save field values as patches for selective updates
+- **`patches preview`** - Preview diff between patches and current API data
 
 ### Global Options
 
@@ -124,6 +123,9 @@ revisium rows upload --folder ./data --commit
 
 # Validate patches
 revisium patches validate --input ./patches
+
+# Preview patches
+revisium patches preview --input ./patches
 
 # Save field values as patches
 revisium patches save --table Article --paths title,status --output ./patches
@@ -171,6 +173,23 @@ revisium patches validate --input ./patches.json
 # Validate against specific branch schema
 revisium patches validate --input ./patches --branch development
 ```
+
+### Preview patches
+
+Compare patches with current API data to see what would change:
+
+```bash
+# Preview changes (compact list)
+revisium patches preview --input ./patches
+
+# Preview from merged file
+revisium patches preview --input ./patches.json
+
+# Preview against specific branch
+revisium patches preview --input ./patches --branch development
+```
+
+The preview command shows a compact list of changed rows with count of changes per row.
 
 **Patch File Format:**
 
@@ -229,7 +248,10 @@ revisium patches save --table Article --paths title,description --output ./trans
 # 3. Validate edited patches
 revisium patches validate --input ./translations
 
-# 4. (Future) Apply patches back to rows using API
+# 4. Preview changes before applying
+revisium patches preview --input ./translations
+
+# 5. (Future) Apply patches back to rows using API
 ```
 
 ## Foreign Key Dependencies

@@ -12,10 +12,12 @@ import { SaveSchemaCommand } from 'src/commands/save-schema.command';
 import { SchemaCommand } from 'src/commands/schema.command';
 import { UploadRowsCommand } from 'src/commands/upload-rows.command';
 import { ValidatePatchesCommand } from 'src/commands/validate-patches.command';
+import { PreviewPatchesCommand } from 'src/commands/preview-patches.command';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
+import { PatchDiffService } from 'src/services/patch-diff.service';
 import { PatchGeneratorService } from 'src/services/patch-generator.service';
 import { PatchLoaderService } from 'src/services/patch-loader.service';
 import { PatchValidationService } from 'src/services/patch-validation.service';
@@ -47,6 +49,7 @@ import {
     PatchesCommand,
     SavePatchesCommand,
     ValidatePatchesCommand,
+    PreviewPatchesCommand,
     TableDependencyService,
     JsonValidatorService,
     CoreApiService,
@@ -56,6 +59,7 @@ import {
     PatchLoaderService,
     PatchValidationService,
     PatchGeneratorService,
+    PatchDiffService,
   ],
 })
 export class AppModule {}
