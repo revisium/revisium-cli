@@ -26,7 +26,22 @@ export const patchFileSchema: Schema = {
       description: 'ISO date when patches were created',
     },
     patches: {
-      $ref: 'json-value-patch-schema.json',
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'object',
+        required: ['op', 'path'],
+        properties: {
+          op: {
+            type: 'string',
+            enum: ['replace', 'add', 'remove'],
+          },
+          path: {
+            type: 'string',
+          },
+          value: {},
+        },
+      },
       description: 'Array of JSON Value Patch operations',
     },
   },
@@ -66,7 +81,22 @@ export const patchFileMergedSchema: Schema = {
             description: 'Row ID',
           },
           patches: {
-            $ref: 'json-value-patch-schema.json',
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              required: ['op', 'path'],
+              properties: {
+                op: {
+                  type: 'string',
+                  enum: ['replace', 'add', 'remove'],
+                },
+                path: {
+                  type: 'string',
+                },
+                value: {},
+              },
+            },
             description: 'Array of JSON Value Patch operations',
           },
         },
