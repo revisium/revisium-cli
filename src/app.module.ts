@@ -13,6 +13,7 @@ import { SchemaCommand } from 'src/commands/schema.command';
 import { UploadRowsCommand } from 'src/commands/upload-rows.command';
 import { ValidatePatchesCommand } from 'src/commands/validate-patches.command';
 import { PreviewPatchesCommand } from 'src/commands/preview-patches.command';
+import { ApplyPatchesCommand } from 'src/commands/apply-patches.command';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
@@ -50,6 +51,7 @@ import {
     SavePatchesCommand,
     ValidatePatchesCommand,
     PreviewPatchesCommand,
+    ApplyPatchesCommand,
     TableDependencyService,
     JsonValidatorService,
     CoreApiService,
