@@ -1,16 +1,15 @@
 import { Option, SubCommand } from 'nest-commander';
 import { PatchRow } from 'src/__generated__/api';
-import { BaseCommand, BaseOptions } from './base.command';
+import { BasePatchCommand, PatchOptions } from './base-patch.command';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
 import { PatchDiffService } from '../services/patch-diff.service';
 import { CoreApiService } from '../services/core-api.service';
 import { DraftRevisionService } from '../services/draft-revision.service';
 import { CommitRevisionService } from '../services/commit-revision.service';
-import { PatchFile } from '../types/patch.types';
+import { PatchFile, DiffResult } from '../types/patch.types';
 
-type Options = BaseOptions & {
-  input: string;
+type Options = PatchOptions & {
   commit?: boolean;
 };
 
@@ -27,72 +26,32 @@ interface ApplyStats {
   name: 'apply',
   description: 'Apply patches to rows in API',
 })
-export class ApplyPatchesCommand extends BaseCommand {
+export class ApplyPatchesCommand extends BasePatchCommand {
   constructor(
-    private readonly loaderService: PatchLoaderService,
-    private readonly validationService: PatchValidationService,
-    private readonly diffService: PatchDiffService,
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
+    loaderService: PatchLoaderService,
+    validationService: PatchValidationService,
+    diffService: PatchDiffService,
+    coreApiService: CoreApiService,
+    draftRevisionService: DraftRevisionService,
     private readonly commitRevisionService: CommitRevisionService,
   ) {
-    super();
+    super(
+      loaderService,
+      validationService,
+      diffService,
+      coreApiService,
+      draftRevisionService,
+    );
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
-    if (!options.input) {
-      throw new Error('Error: --input option is required');
-    }
+    const result = await this.loadAndValidatePatches(options);
 
-    await this.coreApiService.tryToLogin(options);
-
-    console.log(`🔍 Loading patches from ${options.input}...`);
-    const patches = await this.loaderService.loadPatches(options.input);
-    console.log(`✅ Loaded ${patches.length} patch file(s)\n`);
-
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
-
-    console.log('🔍 Validating patches...');
-    const results = await this.validationService.validateAllWithRevisionId(
-      patches,
-      revisionId,
-    );
-
-    let hasErrors = false;
-    for (let i = 0; i < patches.length; i++) {
-      const patch = patches[i];
-      const result = results[i];
-
-      if (!result.valid) {
-        console.error(
-          `❌ Validation failed for ${patch.table}/${patch.rowId}:`,
-        );
-        for (const error of result.errors) {
-          const errorPath = error.path ? ` [${error.path}]` : '';
-          console.error(`   - ${error.message}${errorPath}`);
-        }
-        hasErrors = true;
-      }
-    }
-
-    if (hasErrors) {
-      console.error('\n❌ Validation failed. Fix errors before applying.');
-      process.exit(1);
-    }
-
-    console.log('✅ Validation passed\n');
-
-    console.log('🔍 Comparing with current data...');
-    const diff = await this.diffService.compareWithApi(patches, revisionId);
-    console.log(`✅ Compared ${diff.summary.totalRows} row(s)\n`);
-
-    if (diff.summary.totalChanges === 0) {
-      console.log(
-        '✅ No changes detected. All values are identical to current data.',
-      );
+    if (!result) {
       return;
     }
+
+    const { patches, revisionId, diff } = result;
 
     console.log('📝 Applying patches...');
     const stats = await this.applyAllPatches(patches, diff, revisionId);
@@ -116,10 +75,7 @@ export class ApplyPatchesCommand extends BaseCommand {
 
   private async applyAllPatches(
     patchFiles: PatchFile[],
-    diff: {
-      table: string;
-      rows: Array<{ rowId: string; patches: Array<{ status: string }> }>;
-    },
+    diff: DiffResult,
     revisionId: string,
   ): Promise<ApplyStats> {
     const stats: ApplyStats = {
@@ -135,7 +91,8 @@ export class ApplyPatchesCommand extends BaseCommand {
     for (const row of diff.rows) {
       const hasChanges = row.patches.some((p) => p.status === 'CHANGE');
       if (hasChanges) {
-        rowsWithChanges.set(row.rowId, true);
+        const compositeKey = `${diff.table}:${row.rowId}`;
+        rowsWithChanges.set(compositeKey, true);
       }
     }
 
@@ -152,7 +109,8 @@ export class ApplyPatchesCommand extends BaseCommand {
       console.log(`\n📋 Applying patches to table: ${table}`);
 
       for (const patchFile of tablePatchFiles) {
-        if (!rowsWithChanges.has(patchFile.rowId)) {
+        const compositeKey = `${table}:${patchFile.rowId}`;
+        if (!rowsWithChanges.has(compositeKey)) {
           stats.skipped++;
           continue;
         }

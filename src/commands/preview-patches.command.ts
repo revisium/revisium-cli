@@ -1,5 +1,5 @@
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand, BaseOptions } from './base.command';
+import { BasePatchCommand, PatchOptions } from './base-patch.command';
 import { PatchDiffService } from '../services/patch-diff.service';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
@@ -7,80 +7,35 @@ import { CoreApiService } from '../services/core-api.service';
 import { DraftRevisionService } from '../services/draft-revision.service';
 import { formatDiffAsTable } from '../utils/diff-formatter.utils';
 
-type Options = BaseOptions & {
-  input: string;
-};
-
 @SubCommand({
   name: 'preview',
   description: 'Preview diff between patches and current API data',
 })
-export class PreviewPatchesCommand extends BaseCommand {
+export class PreviewPatchesCommand extends BasePatchCommand {
   constructor(
-    private readonly diffService: PatchDiffService,
-    private readonly loaderService: PatchLoaderService,
-    private readonly validationService: PatchValidationService,
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
+    loaderService: PatchLoaderService,
+    validationService: PatchValidationService,
+    diffService: PatchDiffService,
+    coreApiService: CoreApiService,
+    draftRevisionService: DraftRevisionService,
   ) {
-    super();
+    super(
+      loaderService,
+      validationService,
+      diffService,
+      coreApiService,
+      draftRevisionService,
+    );
   }
 
-  async run(_inputs: string[], options: Options): Promise<void> {
-    if (!options.input) {
-      throw new Error('Error: --input option is required');
-    }
+  async run(_inputs: string[], options: PatchOptions): Promise<void> {
+    const result = await this.loadAndValidatePatches(options);
 
-    await this.coreApiService.tryToLogin(options);
-
-    console.log(`🔍 Loading patches from ${options.input}...`);
-    const patches = await this.loaderService.loadPatches(options.input);
-    console.log(`✅ Loaded ${patches.length} patch file(s)\n`);
-
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
-
-    console.log('🔍 Validating patches...');
-    const results = await this.validationService.validateAllWithRevisionId(
-      patches,
-      revisionId,
-    );
-
-    let hasErrors = false;
-    for (let i = 0; i < patches.length; i++) {
-      const patch = patches[i];
-      const result = results[i];
-
-      if (!result.valid) {
-        console.error(
-          `❌ Validation failed for ${patch.table}/${patch.rowId}:`,
-        );
-        for (const error of result.errors) {
-          const errorPath = error.path ? ` [${error.path}]` : '';
-          console.error(`   - ${error.message}${errorPath}`);
-        }
-        hasErrors = true;
-      }
-    }
-
-    if (hasErrors) {
-      console.error('\n❌ Validation failed. Fix errors before previewing.');
-      process.exit(1);
-    }
-
-    console.log('✅ Validation passed\n');
-
-    console.log('🔍 Comparing with current data...');
-
-    const diff = await this.diffService.compareWithApi(patches, revisionId);
-    console.log(`✅ Compared ${diff.summary.totalRows} row(s)\n`);
-
-    if (diff.summary.totalChanges === 0) {
-      console.log(
-        '✅ No changes detected. All values are identical to current data.',
-      );
+    if (!result) {
       return;
     }
+
+    const { diff } = result;
 
     console.log(formatDiffAsTable(diff));
     console.log(`\n📊 Summary:`);
