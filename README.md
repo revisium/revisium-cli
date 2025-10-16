@@ -86,6 +86,7 @@ revisium schema save --folder ./schemas --organization my-org --branch dev
 - **`patches validate`** - Validate patch files against table schema
 - **`patches save`** - Save field values as patches for selective updates
 - **`patches preview`** - Preview diff between patches and current API data
+- **`patches apply`** - Apply patches to rows in API (supports `--commit`)
 
 ### Global Options
 
@@ -126,6 +127,12 @@ revisium patches validate --input ./patches
 
 # Preview patches
 revisium patches preview --input ./patches
+
+# Apply patches
+revisium patches apply --input ./patches
+
+# Apply patches and create revision
+revisium patches apply --input ./patches --commit
 
 # Save field values as patches
 revisium patches save --table Article --paths title,status --output ./patches
@@ -191,6 +198,49 @@ revisium patches preview --input ./patches --branch development
 
 The preview command shows a compact list of changed rows with count of changes per row.
 
+### Apply patches
+
+Apply patches to update field values in the API. The command:
+- Validates patches against table schemas
+- Compares with current API data to detect changes
+- Only applies patches where values differ from current data
+- Supports automatic revision creation with `--commit` flag
+
+```bash
+# Apply patches from folder
+revisium patches apply --input ./patches
+
+# Apply patches from merged file
+revisium patches apply --input ./patches.json
+
+# Apply patches and create a revision
+revisium patches apply --input ./patches --commit
+
+# Apply to specific branch
+revisium patches apply --input ./patches --branch development
+
+# Apply and create revision on specific branch
+revisium patches apply --input ./patches --branch development --commit
+```
+
+**What happens when applying patches:**
+
+1. **Authentication** - Logs in to the API
+2. **Loading** - Loads patch files from folder or merged file
+3. **Validation** - Validates all patches against table schemas
+4. **Diff Comparison** - Compares patches with current API data
+5. **Smart Apply** - Only applies patches where values differ
+6. **Progress** - Shows detailed progress for each table and row
+7. **Statistics** - Displays summary of applied, skipped, and failed patches
+8. **Revision** - Creates revision if `--commit` flag is used
+
+**Error Handling:**
+
+- Stops if validation fails before applying any patches
+- Shows detailed error messages for validation failures
+- Stops if API returns errors during application
+- Exit code 1 on errors, 0 on success
+
 **Patch File Format:**
 
 Separate file (one per row):
@@ -251,7 +301,11 @@ revisium patches validate --input ./translations
 # 4. Preview changes before applying
 revisium patches preview --input ./translations
 
-# 5. (Future) Apply patches back to rows using API
+# 5. Apply patches to update the API
+revisium patches apply --input ./translations
+
+# 6. (Optional) Apply and create a revision
+revisium patches apply --input ./translations --commit
 ```
 
 ## Foreign Key Dependencies
