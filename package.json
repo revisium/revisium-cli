@@ -39,6 +39,7 @@
     "@revisium/schema-toolkit": "^0.4.1",
     "@types/object-hash": "^3.0.6",
     "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "nest-commander": "^3.18.0",
     "object-hash": "^3.0.0",
     "reflect-metadata": "^0.2.2",
