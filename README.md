@@ -180,7 +180,7 @@ revisium patches save --table Article --paths title,status --output ./patches.js
 **Path Syntax:**
 - Simple fields: `title`, `status`
 - Nested objects: `metadata.author`, `content.title`
-- Array elements: `tags.0`, `sections[1].name`
+- Array elements: `tags[0]`, `sections[1].name`
 - Multiple paths: Use comma-separated list (quote the entire string if it contains special characters)
 - Special characters: Always quote the entire `--paths` value when using complex paths
 
