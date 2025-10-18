@@ -39,8 +39,6 @@ npm install -g revisium
 npx revisium --help
 ```
 
-**All configuration is optional** - see [Configuration](#configuration) section for details.
-
 ### Basic Usage
 
 ```bash
@@ -68,6 +66,13 @@ revisium migrate apply --file ./migrations.json
 
 # Apply migrations and create revision
 revisium migrate apply --file ./migrations.json --commit
+
+# Work with patches (selective field updates)
+revisium patches save --table Article --paths title,status --output ./patches
+revisium patches validate --input ./patches
+revisium patches preview --input ./patches
+revisium patches apply --input ./patches
+revisium patches apply --input ./patches --commit
 
 # Override with command-line options
 revisium schema save --folder ./schemas --organization my-org --branch dev
@@ -156,8 +161,14 @@ revisium patches save --table Article --paths title,status --output ./patches.js
 # Save specific nested fields
 revisium patches save --table Article --paths "title,metadata.author,metadata.tags" --output ./patches
 
-# Save nested fields to merged file
+# Save nested object fields
 revisium patches save --table Article --paths "title,metadata.author" --output ./article-patches.json --merge
+
+# Save array element fields (use index notation)
+revisium patches save --table Article --paths "title,tags[0].name,tags[1].name" --output ./patches
+
+# Save deeply nested fields
+revisium patches save --table Article --paths "content.sections[0].title,content.sections[0].body" --output ./patches
 
 # Save from specific branch (separate files)
 revisium patches save --table Article --paths title --output ./patches --branch development
@@ -165,6 +176,13 @@ revisium patches save --table Article --paths title --output ./patches --branch 
 # Save from specific branch (merged file)
 revisium patches save --table Article --paths title,status --output ./patches.json --merge --branch development
 ```
+
+**Path Syntax:**
+- Simple fields: `title`, `status`
+- Nested objects: `metadata.author`, `content.title`
+- Array elements: `tags.0`, `sections[1].name`
+- Multiple paths: Use comma-separated list (quote the entire string if it contains special characters)
+- Special characters: Always quote the entire `--paths` value when using complex paths
 
 ### Validate patches
 
@@ -201,6 +219,7 @@ The preview command shows a compact list of changed rows with count of changes p
 ### Apply patches
 
 Apply patches to update field values in the API. The command:
+
 - Validates patches against table schemas
 - Compares with current API data to detect changes
 - Only applies patches where values differ from current data
@@ -244,6 +263,7 @@ revisium patches apply --input ./patches --branch development --commit
 **Patch File Format:**
 
 Separate file (one per row):
+
 ```json
 {
   "version": "1.0",
@@ -252,12 +272,15 @@ Separate file (one per row):
   "createdAt": "2025-10-15T12:00:00.000Z",
   "patches": [
     { "op": "replace", "path": "title", "value": "Updated Title" },
-    { "op": "replace", "path": "metadata.author", "value": "John Doe" }
+    { "op": "replace", "path": "metadata.author", "value": "John Doe" },
+    { "op": "replace", "path": "tags[0].name", "value": "Technology" },
+    { "op": "replace", "path": "content.sections[0].title", "value": "Introduction" }
   ]
 }
 ```
 
 Merged file (multiple rows):
+
 ```json
 {
   "version": "1.0",
@@ -267,18 +290,26 @@ Merged file (multiple rows):
     {
       "rowId": "article-123",
       "patches": [
-        { "op": "replace", "path": "title", "value": "Updated Title" }
+        { "op": "replace", "path": "title", "value": "Updated Title" },
+        { "op": "replace", "path": "metadata.author", "value": "Jane Smith" }
       ]
     },
     {
       "rowId": "article-456",
       "patches": [
-        { "op": "replace", "path": "status", "value": "published" }
+        { "op": "replace", "path": "status", "value": "published" },
+        { "op": "replace", "path": "tags[0]", "value": "Featured" }
       ]
     }
   ]
 }
 ```
+
+**Path Examples in Patches:**
+- Simple field: `"path": "title"`
+- Nested object: `"path": "metadata.author"`
+- Array element: `"path": "tags[0]"` or `"path": "tags[1].name"`
+- Deep nesting: `"path": "content.sections[0].body"`
 
 **Use Cases:**
 
@@ -347,7 +378,7 @@ export REVISIUM_ENV_FILE=/path/to/custom.env
 revisium schema save --folder ./schemas
 
 # Or specify relative path
-export REVISIUM_ENV_FILE=./config/production.env  
+export REVISIUM_ENV_FILE=./config/production.env
 revisium migrate apply --file ./migrations.json
 ```
 
@@ -364,6 +395,7 @@ REVISIUM_BRANCH=master                         # Default
 ```
 
 **Environment File Options:**
+
 - **`REVISIUM_ENV_FILE`** - Path to custom environment file (defaults to `.env`)
 - File must exist and be a regular file (not a directory)
 - Supports both absolute and relative paths
@@ -401,19 +433,19 @@ The Docker image includes an entrypoint script that automatically applies migrat
 
 #### Environment Variables
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `REVISIUM_API_URL` | API endpoint | - | ✅ |
-| `REVISIUM_USERNAME` | Username for authentication | - | ✅ |
-| `REVISIUM_PASSWORD` | Password for authentication | - | ✅ |
-| `REVISIUM_ORGANIZATION` | Organization name | - | ✅ |
-| `REVISIUM_PROJECT` | Project name | - | ✅ |
-| `REVISIUM_BRANCH` | Branch name | - | ✅ |
-| `REVISIUM_MIGRATE_COMMIT` | Auto-commit after migrations | `false` | ❌ |
-| `REVISIUM_UPLOAD_COMMIT` | Auto-commit after data upload | `false` | ❌ |
-| `MIGRATIONS_FILE` | Path to migrations file | `/app/migrations.json` | ❌ |
-| `DATA_DIR` | Path to data directory | `/app/data` | ❌ |
-| `DRY_RUN` | Preview mode without execution | `false` | ❌ |
+| Variable                  | Description                    | Default                | Required |
+| ------------------------- | ------------------------------ | ---------------------- | -------- |
+| `REVISIUM_API_URL`        | API endpoint                   | -                      | ✅       |
+| `REVISIUM_USERNAME`       | Username for authentication    | -                      | ✅       |
+| `REVISIUM_PASSWORD`       | Password for authentication    | -                      | ✅       |
+| `REVISIUM_ORGANIZATION`   | Organization name              | -                      | ✅       |
+| `REVISIUM_PROJECT`        | Project name                   | -                      | ✅       |
+| `REVISIUM_BRANCH`         | Branch name                    | -                      | ✅       |
+| `REVISIUM_MIGRATE_COMMIT` | Auto-commit after migrations   | `false`                | ❌       |
+| `REVISIUM_UPLOAD_COMMIT`  | Auto-commit after data upload  | `false`                | ❌       |
+| `MIGRATIONS_FILE`         | Path to migrations file        | `/app/migrations.json` | ❌       |
+| `DATA_DIR`                | Path to data directory         | `/app/data`            | ❌       |
+| `DRY_RUN`                 | Preview mode without execution | `false`                | ❌       |
 
 #### Container Behavior
 
@@ -433,6 +465,7 @@ The Docker image includes an entrypoint script that automatically applies migrat
 Create your own deployment image with migrations and data:
 
 **Dockerfile:**
+
 ```dockerfile
 FROM revisium/revisium-cli:latest
 
@@ -447,12 +480,13 @@ COPY data/ /app/data/
 ```
 
 **docker-compose.yml:**
+
 ```yaml
 version: '3.9'
 
 services:
   revisium-deployment:
-    build: .  # Uses the Dockerfile above
+    build: . # Uses the Dockerfile above
     environment:
       REVISIUM_API_URL: 'https://api.revisium.example.com'
       REVISIUM_USERNAME: 'deployment-user'
@@ -460,11 +494,11 @@ services:
       REVISIUM_ORGANIZATION: 'organization'
       REVISIUM_PROJECT: 'project'
       REVISIUM_BRANCH: 'master'
-      
+
       # Auto-commit changes for deployment
       REVISIUM_MIGRATE_COMMIT: 'true'
       REVISIUM_UPLOAD_COMMIT: 'true'
-      
+
       # Optional: preview mode
       # DRY_RUN: 'true'
 ```
@@ -474,6 +508,7 @@ services:
 Use as an init container or job for automated deployments:
 
 **k8s-migration-job.yaml:**
+
 ```yaml
 apiVersion: batch/v1
 kind: Job
@@ -483,31 +518,31 @@ spec:
   template:
     spec:
       containers:
-      - name: revisium-cli
-        image: my-registry/my-app-migrations:v1.0.0
-        env:
-        - name: REVISIUM_API_URL
-          value: "https://revisium.example.com"
-        - name: REVISIUM_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: revisium-credentials
-              key: username
-        - name: REVISIUM_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: revisium-credentials
-              key: password
-        - name: REVISIUM_ORGANIZATION
-          value: "production"
-        - name: REVISIUM_PROJECT
-          value: "main-app"
-        - name: REVISIUM_BRANCH
-          value: "master"
-        - name: REVISIUM_MIGRATE_COMMIT
-          value: "true"
-        - name: REVISIUM_UPLOAD_COMMIT
-          value: "true"
+        - name: revisium-cli
+          image: my-registry/my-app-migrations:v1.0.0
+          env:
+            - name: REVISIUM_API_URL
+              value: 'https://revisium.example.com'
+            - name: REVISIUM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: revisium-credentials
+                  key: username
+            - name: REVISIUM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: revisium-credentials
+                  key: password
+            - name: REVISIUM_ORGANIZATION
+              value: 'production'
+            - name: REVISIUM_PROJECT
+              value: 'main-app'
+            - name: REVISIUM_BRANCH
+              value: 'master'
+            - name: REVISIUM_MIGRATE_COMMIT
+              value: 'true'
+            - name: REVISIUM_UPLOAD_COMMIT
+              value: 'true'
       restartPolicy: OnFailure
 ```
 
