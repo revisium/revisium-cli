@@ -6,6 +6,7 @@ import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { Migration } from 'src/types/migration.types';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 type Options = {
   file: string;
@@ -135,6 +136,6 @@ export class ApplyMigrationsCommand extends BaseCommand {
     description: 'Create a revision after applying migrations',
   })
   parseCommit(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 }

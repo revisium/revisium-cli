@@ -6,6 +6,7 @@ import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { SyncDataService } from 'src/services/sync-data.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 type Options = {
   source?: string;
@@ -177,7 +178,11 @@ export class SyncAllCommand extends BaseCommand {
     description: 'Batch size for bulk operations (default: 100)',
   })
   parseBatchSize(value: string) {
-    return parseInt(value, 10);
+    const size = parseInt(value, 10);
+    if (isNaN(size) || size < 1) {
+      throw new Error('Batch size must be a positive integer');
+    }
+    return size;
   }
 
   @Option({
@@ -185,7 +190,7 @@ export class SyncAllCommand extends BaseCommand {
     description: 'Commit changes after sync',
   })
   parseCommit(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 
   @Option({
@@ -193,6 +198,6 @@ export class SyncAllCommand extends BaseCommand {
     description: 'Preview changes without applying',
   })
   parseDryRun(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 }

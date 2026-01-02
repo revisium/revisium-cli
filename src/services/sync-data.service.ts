@@ -200,6 +200,9 @@ export class SyncDataService {
           tableId,
         );
       } catch {
+        console.warn(
+          `    ⚠️ Could not read existing rows for table "${tableId}" in target (table may not exist yet)`,
+        );
         existingRows = new Map<string, JsonValue>();
       }
 
@@ -319,7 +322,6 @@ export class SyncDataService {
 
     const stats = await this.rowSync.syncTableRows(
       target.client.api as unknown as ApiClient,
-      source.revisionId,
       target.draftRevisionId,
       tableId,
       sourceRows,

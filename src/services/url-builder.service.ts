@@ -45,6 +45,16 @@ const LOCALHOST_HOSTS = ['localhost', '127.0.0.1'];
 const DEFAULT_HTTP_PORT = 8080;
 const DEFAULT_BRANCH = 'master';
 const DEFAULT_REVISION: RevisionTarget = 'draft';
+const MIN_PORT = 1;
+const MAX_PORT = 65535;
+
+function validatePort(port: number, context: string): void {
+  if (isNaN(port) || port < MIN_PORT || port > MAX_PORT) {
+    throw new Error(
+      `Invalid port ${context}: must be a number between ${MIN_PORT} and ${MAX_PORT}`,
+    );
+  }
+}
 
 @Injectable()
 export class UrlBuilderService {
@@ -368,6 +378,10 @@ export class UrlBuilderService {
     const [host, portStr] = hostWithPort.split(':');
     const port = portStr ? parseInt(portStr, 10) : undefined;
 
+    if (port !== undefined) {
+      validatePort(port, `in "${hostWithPort}"`);
+    }
+
     const isLocalhost = LOCALHOST_HOSTS.includes(host.toLowerCase());
     const protocol = isLocalhost ? 'http' : 'https';
 
@@ -398,6 +412,7 @@ export class UrlBuilderService {
 
     if (existingPort) {
       const port = parseInt(existingPort, 10);
+      validatePort(port, `in "${hostWithPort}"`);
       const isLocalhost = LOCALHOST_HOSTS.includes(host.toLowerCase());
       const protocol = isLocalhost ? 'http' : 'https';
       return this.buildBaseUrl(protocol, host, port);
@@ -411,6 +426,7 @@ export class UrlBuilderService {
         String(DEFAULT_HTTP_PORT),
       );
       const port = parseInt(portStr, 10);
+      validatePort(port, 'entered');
       return this.buildBaseUrl('http', host, port);
     }
 
@@ -423,6 +439,7 @@ export class UrlBuilderService {
         String(DEFAULT_HTTP_PORT),
       );
       const port = parseInt(portStr, 10);
+      validatePort(port, 'entered');
       return this.buildBaseUrl(protocol, host, port);
     }
 

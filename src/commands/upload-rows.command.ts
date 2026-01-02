@@ -9,6 +9,7 @@ import { TableDependencyService } from 'src/services/table-dependency.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 const DEFAULT_BATCH_SIZE = 100;
 
@@ -846,8 +847,8 @@ export class UploadRowsCommand extends BaseCommand {
     flags: '-c, --commit [boolean]',
     description: 'Create a revision after uploading rows',
   })
-  parseCommit(value?: string) {
-    return JSON.parse(value ?? 'true') as boolean;
+  parseCommit(value?: string): boolean {
+    return parseBooleanOption(value);
   }
 
   @Option({

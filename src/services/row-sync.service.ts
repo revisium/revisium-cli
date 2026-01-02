@@ -88,7 +88,6 @@ const DEFAULT_BATCH_SIZE = 100;
 export class RowSyncService {
   async syncTableRows(
     api: ApiClient,
-    sourceRevisionId: string,
     targetRevisionId: string,
     tableId: string,
     sourceRows: RowData[],
@@ -253,13 +252,17 @@ export class RowSyncService {
             );
             bulkFlags.bulkCreateSupported = false;
             const remainingRows = rows.slice(i);
-            return this.createRowsSingle(
+            const fallbackResult = await this.createRowsSingle(
               api,
               revisionId,
               tableId,
               remainingRows,
               onProgress,
             );
+            return {
+              success: success + fallbackResult.success,
+              errors: fallbackResult.errors,
+            };
           }
 
           const statusCode = this.getErrorStatusCode(result.error);
@@ -288,13 +291,17 @@ export class RowSyncService {
           );
           bulkFlags.bulkCreateSupported = false;
           const remainingRows = rows.slice(i);
-          return this.createRowsSingle(
+          const fallbackResult = await this.createRowsSingle(
             api,
             revisionId,
             tableId,
             remainingRows,
             onProgress,
           );
+          return {
+            success: success + fallbackResult.success,
+            errors: fallbackResult.errors,
+          };
         }
 
         const statusCode = this.getErrorStatusCode(error);
@@ -341,13 +348,17 @@ export class RowSyncService {
             );
             bulkFlags.bulkUpdateSupported = false;
             const remainingRows = rows.slice(i);
-            return this.updateRowsSingle(
+            const fallbackResult = await this.updateRowsSingle(
               api,
               revisionId,
               tableId,
               remainingRows,
               onProgress,
             );
+            return {
+              success: success + fallbackResult.success,
+              errors: fallbackResult.errors,
+            };
           }
 
           const statusCode = this.getErrorStatusCode(result.error);
@@ -376,13 +387,17 @@ export class RowSyncService {
           );
           bulkFlags.bulkUpdateSupported = false;
           const remainingRows = rows.slice(i);
-          return this.updateRowsSingle(
+          const fallbackResult = await this.updateRowsSingle(
             api,
             revisionId,
             tableId,
             remainingRows,
             onProgress,
           );
+          return {
+            success: success + fallbackResult.success,
+            errors: fallbackResult.errors,
+          };
         }
 
         const statusCode = this.getErrorStatusCode(error);

@@ -5,6 +5,7 @@ import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 type Options = {
   source?: string;
@@ -117,7 +118,7 @@ export class SyncSchemaCommand extends BaseCommand {
     description: 'Commit changes after sync',
   })
   parseCommit(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 
   @Option({
@@ -125,6 +126,6 @@ export class SyncSchemaCommand extends BaseCommand {
     description: 'Preview changes without applying',
   })
   parseDryRun(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 }
