@@ -657,6 +657,57 @@ describe('ApplyPatchesCommand', () => {
     expect(coreApiServiceFake.bulkPatchSupported).toBe(false);
   });
 
+  it('handles batch patchRows with no data returned', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({});
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '\n❌ Batch patch failed: No data returned from API',
+    );
+
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
   it('handles batch exception that is not 404', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 

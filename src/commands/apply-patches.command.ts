@@ -212,6 +212,12 @@ export class ApplyPatchesCommand extends BasePatchCommand {
           continue;
         }
 
+        if (!result.data) {
+          console.error(`\n❌ Batch patch failed: No data returned from API`);
+          stats.applyErrors += batch.length;
+          continue;
+        }
+
         this.coreApiService.bulkPatchSupported = true;
         stats.applied += batch.length;
         batchApplied += batch.length;
