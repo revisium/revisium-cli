@@ -10,10 +10,20 @@ import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
 
+const DEFAULT_BATCH_SIZE = 100;
+
+interface ProgressState {
+  tableId: string;
+  operation: 'create' | 'update' | 'fetch';
+  current: number;
+  total: number;
+}
+
 type Options = {
   folder: string;
   tables?: string;
   commit?: boolean;
+  batchSize?: number;
   organization?: string;
   project?: string;
   branch?: string;
@@ -59,10 +69,12 @@ export class UploadRowsCommand extends BaseCommand {
     await this.coreApiService.tryToLogin(options);
     const revisionId =
       await this.draftRevisionService.getDraftRevisionId(options);
+    const batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
     const totalStats = await this.uploadAllTableRows(
       revisionId,
       options.folder,
       options.tables,
+      batchSize,
     );
 
     const totalChanges = totalStats.uploaded + totalStats.updated;
@@ -76,7 +88,8 @@ export class UploadRowsCommand extends BaseCommand {
   private async uploadAllTableRows(
     revisionId: string,
     folderPath: string,
-    tableFilter?: string,
+    tableFilter: string | undefined,
+    batchSize: number,
   ): Promise<UploadStats> {
     try {
       const originalTables = await this.getTargetTables(
@@ -86,7 +99,6 @@ export class UploadRowsCommand extends BaseCommand {
 
       console.log(`📊 Found ${originalTables.length} tables to process`);
 
-      // Get schemas for dependency analysis
       const tableSchemas: Record<string, JsonSchema> = {};
       for (const tableId of originalTables) {
         try {
@@ -100,11 +112,9 @@ export class UploadRowsCommand extends BaseCommand {
         }
       }
 
-      // Analyze dependencies and sort tables
       const dependencyResult =
         this.tableDependencyService.analyzeDependencies(tableSchemas);
 
-      // Show dependency information
       console.log(
         this.tableDependencyService.formatDependencyInfo(
           dependencyResult,
@@ -112,7 +122,6 @@ export class UploadRowsCommand extends BaseCommand {
         ),
       );
 
-      // Log warnings for circular dependencies
       for (const warning of dependencyResult.warnings) {
         console.warn(warning);
       }
@@ -137,6 +146,7 @@ export class UploadRowsCommand extends BaseCommand {
           revisionId,
           tableId,
           folderPath,
+          batchSize,
         );
         this.aggregateStats(totalStats, tableStats);
       }
@@ -160,7 +170,6 @@ export class UploadRowsCommand extends BaseCommand {
       return tableFilter.split(',').map((id) => id.trim());
     }
 
-    // Scan folder for table directories
     const entries = await readdir(folderPath, { withFileTypes: true });
     return entries
       .filter((entry) => entry.isDirectory())
@@ -171,6 +180,7 @@ export class UploadRowsCommand extends BaseCommand {
     revisionId: string,
     tableId: string,
     folderPath: string,
+    batchSize: number,
   ): Promise<UploadStats> {
     const stats: UploadStats = {
       totalRows: 0,
@@ -186,60 +196,55 @@ export class UploadRowsCommand extends BaseCommand {
     try {
       console.log(`📋 Processing table: ${tableId}`);
 
-      // Get table schema for validation
       const schemaResult = await this.api.tableSchema(revisionId, tableId);
       const tableSchema = schemaResult.data as JsonSchema;
       const validator = this.createDataValidator(tableSchema);
 
-      // Get all row files from table folder
       const tableFolderPath = join(folderPath, tableId);
-      const rowFiles = await readdir(tableFolderPath);
-      const jsonFiles = rowFiles.filter((file) => file.endsWith('.json'));
+      const allRows = await this.collectAndValidateRows(
+        tableFolderPath,
+        validator,
+        stats,
+      );
 
-      stats.totalRows = jsonFiles.length;
       console.log(`  📊 Found ${stats.totalRows} rows in table ${tableId}`);
 
-      // Process each row file
-      for (const fileName of jsonFiles) {
-        const filePath = join(tableFolderPath, fileName);
-        try {
-          const fileContent = await readFile(filePath, 'utf-8');
-          const rowData = JSON.parse(fileContent) as RowData;
+      const existingRows = await this.getExistingRows(revisionId, tableId);
+      console.log(`  📥 Fetched ${existingRows.size} existing rows from API`);
 
-          // Validate entire row against schema
-          if (!validator(rowData.data)) {
-            stats.invalidSchema++;
-            continue;
-          }
+      const { rowsToCreate, rowsToUpdate, skippedCount } = this.categorizeRows(
+        allRows,
+        existingRows,
+      );
+      stats.skipped = skippedCount;
 
-          // Check if row exists and upload/update accordingly
-          const uploadResult = await this.uploadOrUpdateRow(
-            revisionId,
-            tableId,
-            rowData,
-          );
-
-          switch (uploadResult) {
-            case 'uploaded':
-              stats.uploaded++;
-              break;
-            case 'updated':
-              stats.updated++;
-              break;
-            case 'skipped':
-              stats.skipped++;
-              break;
-            case 'createError':
-              stats.createErrors++;
-              break;
-            case 'updateError':
-              stats.updateErrors++;
-              break;
-          }
-        } catch {
-          stats.otherErrors++;
-        }
+      if (rowsToCreate.length > 0 && rowsToCreate.length <= 20) {
+        console.log(
+          `  📝 Rows to create: ${rowsToCreate.map((r) => r.id).join(', ')}`,
+        );
+      } else if (rowsToCreate.length > 20) {
+        console.log(
+          `  📝 Rows to create (first 20): ${rowsToCreate
+            .slice(0, 20)
+            .map((r) => r.id)
+            .join(', ')}...`,
+        );
       }
+
+      await this.processBatchCreate(
+        revisionId,
+        tableId,
+        rowsToCreate,
+        stats,
+        batchSize,
+      );
+      await this.processBatchUpdate(
+        revisionId,
+        tableId,
+        rowsToUpdate,
+        stats,
+        batchSize,
+      );
 
       console.log(
         `✅ Table ${tableId}: ${stats.uploaded} uploaded, ${stats.updated} updated, ${stats.skipped} skipped, ${stats.invalidSchema} invalid schema, ${stats.createErrors} create errors, ${stats.updateErrors} update errors, ${stats.otherErrors} other errors`,
@@ -253,107 +258,392 @@ export class UploadRowsCommand extends BaseCommand {
     }
   }
 
+  private async collectAndValidateRows(
+    tableFolderPath: string,
+    validator: (data: JsonValue) => boolean,
+    stats: UploadStats,
+  ): Promise<RowData[]> {
+    const rowFiles = await readdir(tableFolderPath);
+    const jsonFiles = rowFiles.filter((file) => file.endsWith('.json'));
+    stats.totalRows = jsonFiles.length;
+
+    const validRows: RowData[] = [];
+
+    for (const fileName of jsonFiles) {
+      const filePath = join(tableFolderPath, fileName);
+      try {
+        const fileContent = await readFile(filePath, 'utf-8');
+        const rowData = JSON.parse(fileContent) as RowData;
+
+        if (!validator(rowData.data)) {
+          stats.invalidSchema++;
+          continue;
+        }
+
+        validRows.push(rowData);
+      } catch {
+        stats.otherErrors++;
+      }
+    }
+
+    return validRows;
+  }
+
+  private async getExistingRows(
+    revisionId: string,
+    tableId: string,
+  ): Promise<Map<string, JsonValue>> {
+    const existingRows = new Map<string, JsonValue>();
+    let after: string | undefined;
+    let hasMore = true;
+    let pageCount = 0;
+
+    this.printProgress({
+      tableId,
+      operation: 'fetch',
+      current: 0,
+      total: 0,
+    });
+
+    while (hasMore) {
+      // Sort by unique field (id) to ensure stable pagination.
+      // Without explicit ordering, PostgreSQL may return rows in inconsistent order
+      // between paginated requests, causing some rows to be skipped.
+      const result = await this.api.rows(revisionId, tableId, {
+        first: 100,
+        after,
+        orderBy: [{ field: 'id', direction: 'asc' }],
+      });
+
+      pageCount++;
+
+      if (result.error) {
+        this.clearProgressLine();
+        console.warn(
+          `  ⚠️ Error fetching rows (page ${pageCount}):`,
+          result.error,
+        );
+        break;
+      }
+
+      if (!result.data) {
+        this.clearProgressLine();
+        console.warn(`  ⚠️ No data in response (page ${pageCount})`);
+        break;
+      }
+
+      const { edges, pageInfo } = result.data;
+
+      for (const edge of edges) {
+        existingRows.set(edge.node.id, edge.node.data);
+      }
+
+      this.printProgress({
+        tableId,
+        operation: 'fetch',
+        current: existingRows.size,
+        total: 0,
+      });
+
+      hasMore = pageInfo.hasNextPage;
+      after = pageInfo.endCursor;
+    }
+
+    this.clearProgressLine();
+    return existingRows;
+  }
+
+  private categorizeRows(
+    allRows: RowData[],
+    existingRows: Map<string, JsonValue>,
+  ): {
+    rowsToCreate: RowData[];
+    rowsToUpdate: RowData[];
+    skippedCount: number;
+  } {
+    const rowsToCreate: RowData[] = [];
+    const rowsToUpdate: RowData[] = [];
+    let skippedCount = 0;
+
+    for (const row of allRows) {
+      const existingData = existingRows.get(row.id);
+
+      if (existingData === undefined) {
+        rowsToCreate.push(row);
+      } else if (!this.isDataIdentical(row.data, existingData)) {
+        rowsToUpdate.push(row);
+      } else {
+        skippedCount++;
+      }
+    }
+
+    return { rowsToCreate, rowsToUpdate, skippedCount };
+  }
+
+  private async processBatchCreate(
+    revisionId: string,
+    tableId: string,
+    rows: RowData[],
+    stats: UploadStats,
+    batchSize: number,
+  ): Promise<void> {
+    if (rows.length === 0) {
+      return;
+    }
+
+    if (this.coreApiService.bulkCreateSupported === false) {
+      await this.createRowsSingle(revisionId, tableId, rows, stats);
+      return;
+    }
+
+    let processed = 0;
+    for (let i = 0; i < rows.length; i += batchSize) {
+      const batch = rows.slice(i, i + batchSize);
+
+      this.printProgress({
+        tableId,
+        operation: 'create',
+        current: processed,
+        total: rows.length,
+      });
+
+      try {
+        const result = await this.api.createRows(revisionId, tableId, {
+          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+          isRestore: true,
+        });
+
+        if (result.error) {
+          if (this.is404Error(result.error)) {
+            this.clearProgressLine();
+            console.log(
+              `  ⚠️ Bulk createRows not supported, falling back to single-row mode`,
+            );
+            this.coreApiService.bulkCreateSupported = false;
+            const remainingRows = rows.slice(i);
+            await this.createRowsSingle(
+              revisionId,
+              tableId,
+              remainingRows,
+              stats,
+            );
+            return;
+          }
+          this.clearProgressLine();
+          console.error(`❌ Batch create failed:`, result.error);
+          stats.createErrors += batch.length;
+          processed += batch.length;
+          continue;
+        }
+
+        this.coreApiService.bulkCreateSupported = true;
+        stats.uploaded += batch.length;
+        processed += batch.length;
+      } catch (error: unknown) {
+        if (this.is404Error(error)) {
+          this.clearProgressLine();
+          console.log(
+            `  ⚠️ Bulk createRows not supported, falling back to single-row mode`,
+          );
+          this.coreApiService.bulkCreateSupported = false;
+          const remainingRows = rows.slice(i);
+          await this.createRowsSingle(
+            revisionId,
+            tableId,
+            remainingRows,
+            stats,
+          );
+          return;
+        }
+        this.clearProgressLine();
+        console.error(`❌ Batch create exception:`, error);
+        stats.createErrors += batch.length;
+        processed += batch.length;
+      }
+    }
+
+    this.clearProgressLine();
+  }
+
+  private async processBatchUpdate(
+    revisionId: string,
+    tableId: string,
+    rows: RowData[],
+    stats: UploadStats,
+    batchSize: number,
+  ): Promise<void> {
+    if (rows.length === 0) {
+      return;
+    }
+
+    if (this.coreApiService.bulkUpdateSupported === false) {
+      await this.updateRowsSingle(revisionId, tableId, rows, stats);
+      return;
+    }
+
+    let processed = 0;
+    for (let i = 0; i < rows.length; i += batchSize) {
+      const batch = rows.slice(i, i + batchSize);
+
+      this.printProgress({
+        tableId,
+        operation: 'update',
+        current: processed,
+        total: rows.length,
+      });
+
+      try {
+        const result = await this.api.updateRows(revisionId, tableId, {
+          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+        });
+
+        if (result.error) {
+          if (this.is404Error(result.error)) {
+            this.clearProgressLine();
+            console.log(
+              `  ⚠️ Bulk updateRows not supported, falling back to single-row mode`,
+            );
+            this.coreApiService.bulkUpdateSupported = false;
+            const remainingRows = rows.slice(i);
+            await this.updateRowsSingle(
+              revisionId,
+              tableId,
+              remainingRows,
+              stats,
+            );
+            return;
+          }
+          this.clearProgressLine();
+          console.error(`❌ Batch update failed:`, result.error);
+          stats.updateErrors += batch.length;
+          processed += batch.length;
+          continue;
+        }
+
+        this.coreApiService.bulkUpdateSupported = true;
+        stats.updated += batch.length;
+        processed += batch.length;
+      } catch (error: unknown) {
+        if (this.is404Error(error)) {
+          this.clearProgressLine();
+          console.log(
+            `  ⚠️ Bulk updateRows not supported, falling back to single-row mode`,
+          );
+          this.coreApiService.bulkUpdateSupported = false;
+          const remainingRows = rows.slice(i);
+          await this.updateRowsSingle(
+            revisionId,
+            tableId,
+            remainingRows,
+            stats,
+          );
+          return;
+        }
+        this.clearProgressLine();
+        console.error(`❌ Batch update exception:`, error);
+        stats.updateErrors += batch.length;
+        processed += batch.length;
+      }
+    }
+
+    this.clearProgressLine();
+  }
+
+  private async createRowsSingle(
+    revisionId: string,
+    tableId: string,
+    rows: RowData[],
+    stats: UploadStats,
+  ): Promise<void> {
+    let processed = 0;
+    for (const row of rows) {
+      this.printProgress({
+        tableId,
+        operation: 'create',
+        current: processed,
+        total: rows.length,
+      });
+
+      try {
+        const result = await this.api.createRow(revisionId, tableId, {
+          rowId: row.id,
+          data: row.data as object,
+          isRestore: true,
+        });
+        if (result.error) {
+          stats.createErrors++;
+        } else {
+          stats.uploaded++;
+        }
+      } catch {
+        stats.createErrors++;
+      }
+      processed++;
+    }
+
+    this.clearProgressLine();
+  }
+
+  private async updateRowsSingle(
+    revisionId: string,
+    tableId: string,
+    rows: RowData[],
+    stats: UploadStats,
+  ): Promise<void> {
+    let processed = 0;
+    for (const row of rows) {
+      this.printProgress({
+        tableId,
+        operation: 'update',
+        current: processed,
+        total: rows.length,
+      });
+
+      try {
+        const result = await this.api.updateRow(revisionId, tableId, row.id, {
+          data: row.data as object,
+          isRestore: true,
+        });
+        if (result.error) {
+          stats.updateErrors++;
+        } else {
+          stats.updated++;
+        }
+      } catch {
+        stats.updateErrors++;
+      }
+      processed++;
+    }
+
+    this.clearProgressLine();
+  }
+
+  private is404Error(error: unknown): boolean {
+    if (typeof error === 'object' && error !== null) {
+      const err = error as Record<string, unknown>;
+      if (err.status === 404 || err.statusCode === 404) {
+        return true;
+      }
+      if (
+        typeof err.response === 'object' &&
+        err.response !== null &&
+        (err.response as Record<string, unknown>).status === 404
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private createDataValidator(
     tableSchema: JsonSchema,
   ): (rowData: JsonValue) => boolean {
-    // Table schema is ready to validate the entire JSON row file
     if (tableSchema) {
       const validate = this.jsonValidatorService.validateSchema(tableSchema);
       return (rowData: JsonValue) => validate(rowData);
     }
 
-    // If no schema found, accept all data
     return () => false;
-  }
-
-  private async uploadOrUpdateRow(
-    revisionId: string,
-    tableId: string,
-    rowData: RowData,
-  ): Promise<
-    'uploaded' | 'updated' | 'skipped' | 'createError' | 'updateError'
-  > {
-    try {
-      // Check if row exists
-      const existingRowResult = await this.api.row(
-        revisionId,
-        tableId,
-        rowData.id,
-      );
-
-      if (existingRowResult.data) {
-        // Row exists, check if data is different
-        const existingRow = existingRowResult.data as RowData;
-
-        if (this.isDataIdentical(rowData.data, existingRow.data)) {
-          return 'skipped'; // No changes needed
-        }
-
-        // Update existing row
-        try {
-          const updateResult = await this.api.updateRow(
-            revisionId,
-            tableId,
-            rowData.id,
-            {
-              data: rowData.data as object,
-              isRestore: true,
-            },
-          );
-
-          if (updateResult.error) {
-            console.error(
-              `❌ Update failed for row ${rowData.id}:`,
-              updateResult.error,
-            );
-            return 'updateError';
-          }
-
-          if (updateResult.data) {
-            return 'updated';
-          }
-
-          console.error(
-            `❌ Update failed for row ${rowData.id}: No data or error in response`,
-          );
-          return 'updateError';
-        } catch (error) {
-          console.error(`❌ Update exception for row ${rowData.id}:`, error);
-          return 'updateError';
-        }
-      }
-    } catch {
-      // Row doesn't exist or error occurred, try to create new row
-    }
-
-    // Create new row
-    try {
-      const createResult = await this.api.createRow(revisionId, tableId, {
-        rowId: rowData.id,
-        data: rowData.data as object,
-        isRestore: true,
-      });
-
-      if (createResult.error) {
-        console.error(
-          `❌ Create failed for row ${rowData.id}:`,
-          createResult.error,
-        );
-        return 'createError';
-      }
-
-      if (createResult.data) {
-        return 'uploaded';
-      }
-
-      console.error(
-        `❌ Create failed for row ${rowData.id}: No data or error in response`,
-      );
-      return 'createError';
-    } catch (error) {
-      console.error(`❌ Create exception for row ${rowData.id}:`, error);
-      return 'createError';
-    }
   }
 
   private isDataIdentical(data1: JsonValue, data2: JsonValue): boolean {
@@ -397,6 +687,25 @@ export class UploadRowsCommand extends BaseCommand {
     return this.coreApiService.api;
   }
 
+  private printProgress(state: ProgressState): void {
+    let operationLabel: string;
+    let progress: string;
+
+    if (state.operation === 'fetch') {
+      operationLabel = 'Fetching existing';
+      progress = `  ${operationLabel}: ${state.current} rows`;
+    } else {
+      operationLabel = state.operation === 'create' ? 'Creating' : 'Updating';
+      progress = `  ${operationLabel}: ${state.current}/${state.total} rows`;
+    }
+
+    process.stdout.write(`\r${progress}`);
+  }
+
+  private clearProgressLine(): void {
+    process.stdout.write('\r\x1b[K');
+  }
+
   @Option({
     flags: '-f, --folder <folder>',
     description: 'Folder path containing row files',
@@ -422,5 +731,18 @@ export class UploadRowsCommand extends BaseCommand {
   })
   parseCommit(value?: string) {
     return JSON.parse(value ?? 'true') as boolean;
+  }
+
+  @Option({
+    flags: '--batch-size <size>',
+    description: `Number of rows per batch for bulk operations (default: ${DEFAULT_BATCH_SIZE})`,
+    required: false,
+  })
+  parseBatchSize(val: string) {
+    const size = parseInt(val, 10);
+    if (isNaN(size) || size < 1) {
+      throw new Error('Batch size must be a positive integer');
+    }
+    return size;
   }
 }

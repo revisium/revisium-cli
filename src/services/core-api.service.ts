@@ -10,6 +10,25 @@ export const SKIPPING_LOGIN =
 export class CoreApiService extends Api<unknown> {
   public token: string | undefined = undefined;
 
+  private _bulkCreateSupported: boolean | undefined = undefined;
+  private _bulkUpdateSupported: boolean | undefined = undefined;
+
+  public get bulkCreateSupported(): boolean | undefined {
+    return this._bulkCreateSupported;
+  }
+
+  public set bulkCreateSupported(value: boolean) {
+    this._bulkCreateSupported = value;
+  }
+
+  public get bulkUpdateSupported(): boolean | undefined {
+    return this._bulkUpdateSupported;
+  }
+
+  public set bulkUpdateSupported(value: boolean) {
+    this._bulkUpdateSupported = value;
+  }
+
   constructor(private readonly configService: ConfigService) {
     super({
       baseUrl:

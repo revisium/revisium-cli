@@ -21,6 +21,7 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - 🚀 **Migration Management** - Save and apply database migrations with optional auto-commit
 - 📋 **Schema Export/Import** - Export table schemas to JSON files and convert to migrations
 - 📊 **Data Export/Upload** - Export and upload table rows with smart dependency handling
+- ⚡ **Bulk Operations** - Efficient batch create/update with configurable batch size
 - 🔗 **Foreign Key Dependencies** - Automatic table sorting based on relationships
 - 💾 **Revision Control** - Create revisions automatically with --commit flag
 - 🐳 **Docker Deployment** - Containerized automation for CI/CD and production deployments
@@ -56,6 +57,9 @@ revisium rows save --folder ./data
 
 # Upload table data
 revisium rows upload --folder ./data
+
+# Upload with custom batch size (default: 100)
+revisium rows upload --folder ./data --batch-size 500
 
 # Upload and create revision automatically
 revisium rows upload --folder ./data --commit
@@ -338,6 +342,51 @@ revisium patches apply --input ./translations
 # 6. (Optional) Apply and create a revision
 revisium patches apply --input ./translations --commit
 ```
+
+## Rows Upload
+
+The `rows upload` command uploads table data from JSON files with smart handling:
+
+### Features
+
+- **Bulk Operations** - Uses batch create/update API for efficient uploads
+- **Smart Diff** - Only creates new rows and updates changed rows, skips identical data
+- **Backward Compatible** - Falls back to single-row operations for older API versions
+- **Progress Tracking** - Real-time progress indicator during upload
+- **Configurable Batch Size** - Adjust batch size for optimal performance
+
+### Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-f, --folder <path>` | Folder containing row JSON files | Required |
+| `-t, --tables <list>` | Comma-separated table IDs to upload | All tables |
+| `--batch-size <n>` | Number of rows per batch | 100 |
+| `-c, --commit` | Create revision after upload | false |
+
+### Examples
+
+```bash
+# Basic upload
+revisium rows upload --folder ./data
+
+# Upload specific tables
+revisium rows upload --folder ./data --tables users,posts
+
+# Upload with larger batch size for better performance
+revisium rows upload --folder ./data --batch-size 500
+
+# Upload and commit changes
+revisium rows upload --folder ./data --commit
+```
+
+### How it works
+
+1. **Fetch existing rows** - Loads all existing rows from the API for comparison
+2. **Categorize rows** - Determines which rows to create, update, or skip
+3. **Batch upload** - Uses bulk API operations with configurable batch size
+4. **Fallback mode** - If bulk API is unavailable, falls back to single-row operations
+5. **Progress display** - Shows real-time progress with row counts
 
 ## Foreign Key Dependencies
 
