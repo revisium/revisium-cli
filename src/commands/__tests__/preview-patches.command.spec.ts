@@ -147,6 +147,7 @@ describe('PreviewPatchesCommand', () => {
     expect(diffServiceFake.compareWithApi).toHaveBeenCalledWith(
       mockPatches,
       'revision-123',
+      expect.any(Function),
     );
   });
 

@@ -1,5 +1,5 @@
 import { Option, SubCommand } from 'nest-commander';
-import { PatchRow } from 'src/__generated__/api';
+import { PatchRow, PatchRowsRowDto } from 'src/__generated__/api';
 import { BasePatchCommand, PatchOptions } from './base-patch.command';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
@@ -9,9 +9,18 @@ import { DraftRevisionService } from '../services/draft-revision.service';
 import { CommitRevisionService } from '../services/commit-revision.service';
 import { PatchFile, DiffResult } from '../types/patch.types';
 
+const DEFAULT_BATCH_SIZE = 100;
+
 type Options = PatchOptions & {
   commit?: boolean;
+  batchSize?: number;
 };
+
+interface ProgressState {
+  tableId: string;
+  current: number;
+  total: number;
+}
 
 interface ApplyStats {
   totalPatches: number;
@@ -53,8 +62,15 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
     const { patches, revisionId, diff } = result;
 
+    const batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
+
     console.log('📝 Applying patches...');
-    const stats = await this.applyAllPatches(patches, diff, revisionId);
+    const stats = await this.applyAllPatches(
+      patches,
+      diff,
+      revisionId,
+      batchSize,
+    );
 
     this.printStats(stats);
 
@@ -77,6 +93,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     patchFiles: PatchFile[],
     diff: DiffResult,
     revisionId: string,
+    batchSize: number,
   ): Promise<ApplyStats> {
     const stats: ApplyStats = {
       totalPatches: 0,
@@ -108,37 +125,176 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     for (const [table, tablePatchFiles] of patchesByTable) {
       console.log(`\n📋 Applying patches to table: ${table}`);
 
+      const rowsToApply: PatchFile[] = [];
       for (const patchFile of tablePatchFiles) {
         const compositeKey = `${table}:${patchFile.rowId}`;
         if (!rowsWithChanges.has(compositeKey)) {
           stats.skipped++;
           continue;
         }
-
-        const result = await this.applyPatchFile(patchFile, revisionId, table);
-
-        switch (result) {
-          case 'applied':
-            stats.applied++;
-            console.log(`  ✅ Applied: ${patchFile.rowId}`);
-            break;
-          case 'skipped':
-            stats.skipped++;
-            console.log(`  ⏭️  Skipped (empty): ${patchFile.rowId}`);
-            break;
-          case 'validationError':
-            stats.validationErrors++;
-            console.error(`  ❌ Validation error: ${patchFile.rowId}`);
-            break;
-          case 'applyError':
-            stats.applyErrors++;
-            console.error(`  ❌ Apply error: ${patchFile.rowId}`);
-            break;
+        if (patchFile.patches.length === 0) {
+          stats.skipped++;
+          continue;
         }
+        rowsToApply.push(patchFile);
       }
+
+      if (rowsToApply.length === 0) {
+        console.log(`  ⏭️  No changes to apply`);
+        continue;
+      }
+
+      await this.processBatchPatch(
+        revisionId,
+        table,
+        rowsToApply,
+        stats,
+        batchSize,
+      );
     }
 
     return stats;
+  }
+
+  private async processBatchPatch(
+    revisionId: string,
+    tableId: string,
+    patchFiles: PatchFile[],
+    stats: ApplyStats,
+    batchSize: number,
+  ): Promise<void> {
+    if (patchFiles.length === 0) {
+      return;
+    }
+
+    if (this.coreApiService.bulkPatchSupported === false) {
+      await this.patchRowsSingle(revisionId, tableId, patchFiles, stats);
+      return;
+    }
+
+    for (let i = 0; i < patchFiles.length; i += batchSize) {
+      const batch = patchFiles.slice(i, i + batchSize);
+
+      this.printProgress({
+        tableId,
+        current: i,
+        total: patchFiles.length,
+      });
+
+      try {
+        const rows: PatchRowsRowDto[] = batch.map((pf) => ({
+          rowId: pf.rowId,
+          patches: pf.patches as PatchRow[],
+        }));
+
+        const result = await this.api.patchRows(revisionId, tableId, { rows });
+
+        if (result.error) {
+          if (this.is404Error(result.error)) {
+            this.clearProgressLine();
+            console.log(
+              `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
+            );
+            this.coreApiService.bulkPatchSupported = false;
+            const remainingRows = patchFiles.slice(i);
+            await this.patchRowsSingle(
+              revisionId,
+              tableId,
+              remainingRows,
+              stats,
+            );
+            return;
+          }
+          console.error(`\n❌ Batch patch failed:`, result.error);
+          stats.applyErrors += batch.length;
+          continue;
+        }
+
+        this.coreApiService.bulkPatchSupported = true;
+        stats.applied += batch.length;
+      } catch (error) {
+        if (this.is404Error(error)) {
+          this.clearProgressLine();
+          console.log(
+            `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
+          );
+          this.coreApiService.bulkPatchSupported = false;
+          const remainingRows = patchFiles.slice(i);
+          await this.patchRowsSingle(revisionId, tableId, remainingRows, stats);
+          return;
+        }
+        console.error(`\n❌ Batch patch exception:`, error);
+        stats.applyErrors += batch.length;
+      }
+    }
+
+    this.printProgress({
+      tableId,
+      current: patchFiles.length,
+      total: patchFiles.length,
+    });
+    this.clearProgressLine();
+    console.log(`  ✅ Applied ${patchFiles.length} rows`);
+  }
+
+  private async patchRowsSingle(
+    revisionId: string,
+    tableId: string,
+    patchFiles: PatchFile[],
+    stats: ApplyStats,
+  ): Promise<void> {
+    for (let i = 0; i < patchFiles.length; i++) {
+      const patchFile = patchFiles[i];
+
+      this.printProgress({
+        tableId,
+        current: i,
+        total: patchFiles.length,
+      });
+
+      const result = await this.applyPatchFile(patchFile, revisionId, tableId);
+
+      if (result === 'applied') {
+        stats.applied++;
+      } else if (result === 'skipped') {
+        stats.skipped++;
+      } else if (result === 'validationError') {
+        stats.validationErrors++;
+      } else {
+        stats.applyErrors++;
+      }
+    }
+
+    this.printProgress({
+      tableId,
+      current: patchFiles.length,
+      total: patchFiles.length,
+    });
+    this.clearProgressLine();
+    console.log(`  ✅ Applied ${stats.applied} rows (single-row mode)`);
+  }
+
+  private is404Error(error: unknown): boolean {
+    if (typeof error === 'object' && error !== null) {
+      const errorObj = error as Record<string, unknown>;
+      return (
+        errorObj['status'] === 404 ||
+        (errorObj['response'] as Record<string, unknown> | undefined)?.[
+          'status'
+        ] === 404 ||
+        errorObj['statusCode'] === 404
+      );
+    }
+    return false;
+  }
+
+  private printProgress(state: ProgressState): void {
+    const progress = `  Patching: ${state.current}/${state.total} rows`;
+    process.stdout.write(`\r${progress}`);
+  }
+
+  private clearProgressLine(): void {
+    process.stdout.write('\r\x1b[K');
   }
 
   private async applyPatchFile(
@@ -217,5 +373,18 @@ export class ApplyPatchesCommand extends BasePatchCommand {
   })
   parseCommit(value?: string): boolean {
     return JSON.parse(value ?? 'true') as boolean;
+  }
+
+  @Option({
+    flags: '--batch-size <size>',
+    description: `Number of rows per batch for bulk operations (default: ${DEFAULT_BATCH_SIZE})`,
+    required: false,
+  })
+  parseBatchSize(val: string) {
+    const size = parseInt(val, 10);
+    if (isNaN(size) || size < 1) {
+      throw new Error('Batch size must be a positive integer');
+    }
+    return size;
   }
 }

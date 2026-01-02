@@ -12,6 +12,7 @@ export class CoreApiService extends Api<unknown> {
 
   private _bulkCreateSupported: boolean | undefined = undefined;
   private _bulkUpdateSupported: boolean | undefined = undefined;
+  private _bulkPatchSupported: boolean | undefined = undefined;
 
   public get bulkCreateSupported(): boolean | undefined {
     return this._bulkCreateSupported;
@@ -27,6 +28,14 @@ export class CoreApiService extends Api<unknown> {
 
   public set bulkUpdateSupported(value: boolean) {
     this._bulkUpdateSupported = value;
+  }
+
+  public get bulkPatchSupported(): boolean | undefined {
+    return this._bulkPatchSupported;
+  }
+
+  public set bulkPatchSupported(value: boolean) {
+    this._bulkPatchSupported = value;
   }
 
   constructor(private readonly configService: ConfigService) {

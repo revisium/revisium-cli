@@ -10,7 +10,7 @@ describe('PatchDiffService', () => {
   beforeEach(async () => {
     const mockCoreApi = {
       api: {
-        row: jest.fn(),
+        rows: jest.fn(),
       },
     };
 
@@ -32,6 +32,16 @@ describe('PatchDiffService', () => {
     jest.clearAllMocks();
   });
 
+  function mockRowsResponse(rows: { id: string; data: unknown }[]) {
+    (coreApiService.api.rows as jest.Mock).mockResolvedValue({
+      data: {
+        edges: rows.map((row) => ({ node: row })),
+        pageInfo: { hasNextPage: false },
+      },
+      error: null,
+    });
+  }
+
   describe('compareWithApi', () => {
     it('compares patches with API data and identifies changes', async () => {
       const patches: PatchFile[] = [
@@ -47,15 +57,15 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: {
+      mockRowsResponse([
+        {
+          id: 'row-1',
           data: {
             title: 'Old Title',
             status: 'published',
           },
         },
-        error: null,
-      });
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -96,15 +106,15 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: {
+      mockRowsResponse([
+        {
+          id: 'row-1',
           data: {
             title: 'Old Title',
             count: 10,
           },
         },
-        error: null,
-      });
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -127,15 +137,15 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: {
+      mockRowsResponse([
+        {
+          id: 'row-1',
           data: {
             title: 'Same Title',
             count: 42,
           },
         },
-        error: null,
-      });
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -158,8 +168,9 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: {
+      mockRowsResponse([
+        {
+          id: 'row-1',
           data: {
             metadata: {
               author: 'Jane Doe',
@@ -167,8 +178,7 @@ describe('PatchDiffService', () => {
             },
           },
         },
-        error: null,
-      });
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -199,14 +209,14 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: {
+      mockRowsResponse([
+        {
+          id: 'row-1',
           data: {
             tags: ['old-tag', 'tag2'],
           },
         },
-        error: null,
-      });
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -226,10 +236,7 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      mockRowsResponse([]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -249,16 +256,14 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
+      (coreApiService.api.rows as jest.Mock).mockResolvedValue({
         data: null,
         error: { message: 'Network error' },
       });
 
-      const result = await service.compareWithApi(patches, 'revision-123');
-
-      expect(result.summary.errors).toBe(1);
-      expect(result.rows[0].patches[0].status).toBe('ERROR');
-      expect(result.rows[0].patches[0].error).toContain('Failed to fetch row');
+      await expect(
+        service.compareWithApi(patches, 'revision-123'),
+      ).rejects.toThrow('Failed to fetch rows');
     });
 
     it('handles multiple rows correctly', async () => {
@@ -279,15 +284,10 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock)
-        .mockResolvedValueOnce({
-          data: { data: { title: 'Old Title 1' } },
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: { data: { title: 'Old Title 2' } },
-          error: null,
-        });
+      mockRowsResponse([
+        { id: 'row-1', data: { title: 'Old Title 1' } },
+        { id: 'row-2', data: { title: 'Old Title 2' } },
+      ]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -309,10 +309,7 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.row as jest.Mock).mockResolvedValue({
-        data: { data: { title: 'Title' } },
-        error: null,
-      });
+      mockRowsResponse([{ id: 'row-1', data: { title: 'Title' } }]);
 
       const result = await service.compareWithApi(patches, 'revision-123');
 
@@ -348,6 +345,65 @@ describe('PatchDiffService', () => {
       await expect(
         service.compareWithApi(patches, 'revision-123'),
       ).rejects.toThrow('All patches must be from the same table');
+    });
+
+    it('uses bulk loading with where.id.in filter', async () => {
+      const patches: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-15T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 1' }],
+        },
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-2',
+          createdAt: '2025-10-15T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 2' }],
+        },
+      ];
+
+      mockRowsResponse([
+        { id: 'row-1', data: { title: 'Old 1' } },
+        { id: 'row-2', data: { title: 'Old 2' } },
+      ]);
+
+      await service.compareWithApi(patches, 'revision-123');
+
+      expect(coreApiService.api.rows).toHaveBeenCalledWith(
+        'revision-123',
+        'Article',
+        {
+          first: 100,
+          where: {
+            id: {
+              in: ['row-1', 'row-2'],
+            },
+          },
+        },
+      );
+    });
+
+    it('calls progress callback during batch loading', async () => {
+      const patches: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-15T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title' }],
+        },
+      ];
+
+      mockRowsResponse([{ id: 'row-1', data: { title: 'Old' } }]);
+
+      const progressCallback = jest.fn();
+      await service.compareWithApi(patches, 'revision-123', progressCallback);
+
+      expect(progressCallback).toHaveBeenCalledWith(0, 1);
+      expect(progressCallback).toHaveBeenCalledWith(1, 1);
     });
   });
 });

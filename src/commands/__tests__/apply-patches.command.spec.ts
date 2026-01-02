@@ -21,8 +21,10 @@ describe('ApplyPatchesCommand', () => {
   };
   let coreApiServiceFake: {
     tryToLogin: jest.Mock;
+    bulkPatchSupported: boolean | undefined;
     api: {
       patchRow: jest.Mock;
+      patchRows: jest.Mock;
     };
   };
   let draftRevisionServiceFake: {
@@ -64,8 +66,10 @@ describe('ApplyPatchesCommand', () => {
 
     coreApiServiceFake = {
       tryToLogin: jest.fn(),
+      bulkPatchSupported: undefined,
       api: {
         patchRow: jest.fn(),
+        patchRows: jest.fn(),
       },
     };
 
@@ -157,28 +161,70 @@ describe('ApplyPatchesCommand', () => {
     mockExit.mockRestore();
   });
 
-  it('applies patches to API after successful validation', async () => {
+  it('applies patches to API using bulk patchRows', async () => {
     setupSuccessfulFlow();
 
     await command.run([], { input: './patches' });
 
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
+      'revision-123',
+      'Article',
+      {
+        rows: [
+          {
+            rowId: 'row-1',
+            patches: [{ op: 'replace', path: 'title', value: 'New Title' }],
+          },
+          {
+            rowId: 'row-2',
+            patches: [{ op: 'replace', path: 'status', value: 'published' }],
+          },
+        ],
+      },
+    );
+  });
+
+  it('falls back to single-row mode on 404', async () => {
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({
+      error: { status: 404 },
+    });
+    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
     expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledWith(
-      'revision-123',
-      'Article',
-      'row-1',
-      {
-        patches: [{ op: 'replace', path: 'title', value: 'New Title' }],
-      },
-    );
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledWith(
-      'revision-123',
-      'Article',
-      'row-2',
-      {
-        patches: [{ op: 'replace', path: 'status', value: 'published' }],
-      },
-    );
+    expect(coreApiServiceFake.bulkPatchSupported).toBe(false);
   });
 
   it('exits early when no changes detected', async () => {
@@ -209,6 +255,7 @@ describe('ApplyPatchesCommand', () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       '✅ No changes detected. All values are identical to current data.',
     );
+    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
     expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
@@ -243,17 +290,22 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledWith(
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
       'revision-123',
       'Article',
-      'row-2',
       {
-        patches: [{ op: 'replace', path: 'status', value: 'published' }],
+        rows: [
+          {
+            rowId: 'row-2',
+            patches: [{ op: 'replace', path: 'status', value: 'published' }],
+          },
+        ],
       },
     );
   });
@@ -292,7 +344,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({
+    coreApiServiceFake.api.patchRows.mockResolvedValue({
       error: { message: 'API error' },
     });
 
@@ -367,7 +419,8 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
@@ -435,7 +488,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
   }
 });
