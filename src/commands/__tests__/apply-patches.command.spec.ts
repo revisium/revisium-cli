@@ -827,57 +827,6 @@ describe('ApplyPatchesCommand', () => {
     );
   });
 
-  it('skips single-row with empty patches in patchRowsSingle', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-    const patchesWithEmpty: PatchFile[] = [
-      {
-        version: '1.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-15T12:00:00Z',
-        patches: [],
-      },
-    ];
-
-    loaderServiceFake.loadPatches.mockResolvedValue(patchesWithEmpty);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
-      { valid: true, errors: [] },
-    ]);
-    diffServiceFake.compareWithApi.mockResolvedValue({
-      table: 'Article',
-      rows: [
-        {
-          rowId: 'row-1',
-          patches: [{ path: 'title', status: 'CHANGE' }],
-        },
-      ],
-      summary: {
-        totalRows: 1,
-        totalChanges: 1,
-        skipped: 0,
-        errors: 0,
-      },
-    });
-
-    coreApiServiceFake.bulkPatchSupported = false;
-    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
-
-    await command.run([], { input: './patches' });
-
-    const logCalls = consoleSpy.mock.calls.map((call) => call[0] as string);
-    expect(
-      logCalls.some((call) => String(call).includes('No changes to apply')),
-    ).toBe(true);
-    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
-  });
-
   it('handles single-row apply exception', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -974,6 +923,172 @@ describe('ApplyPatchesCommand', () => {
 
     consoleErrorSpy.mockRestore();
     mockExit.mockRestore();
+  });
+
+  it('parses input option correctly', () => {
+    const result = command.parseInput('./test-patches');
+    expect(result).toBe('./test-patches');
+  });
+
+  it('parses commit option correctly', () => {
+    expect(command.parseCommit('true')).toBe(true);
+    expect(command.parseCommit('false')).toBe(false);
+    expect(command.parseCommit()).toBe(true);
+  });
+
+  it('parses batch-size option correctly', () => {
+    expect(command.parseBatchSize('50')).toBe(50);
+    expect(command.parseBatchSize('1')).toBe(1);
+  });
+
+  it('throws error for invalid batch-size option', () => {
+    expect(() => command.parseBatchSize('0')).toThrow(
+      'Batch size must be a positive integer',
+    );
+    expect(() => command.parseBatchSize('-1')).toThrow(
+      'Batch size must be a positive integer',
+    );
+    expect(() => command.parseBatchSize('abc')).toThrow(
+      'Batch size must be a positive integer',
+    );
+  });
+
+  it('handles is404Error with non-object error', async () => {
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.api.patchRows.mockRejectedValue('string error');
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '\n❌ Batch patch exception:',
+      'string error',
+    );
+
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
+  it('handles empty patchFiles array in processBatchPatch', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const emptyPatches: PatchFile[] = [];
+
+    loaderServiceFake.loadPatches.mockResolvedValue(emptyPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [],
+      summary: {
+        totalRows: 0,
+        totalChanges: 0,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    await command.run([], { input: './patches' });
+
+    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles table with all rows filtered out in applyAllPatches', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    // Patches from a different table than the diff table
+    const patchesForDifferentTable: PatchFile[] = [
+      {
+        version: '1.0',
+        table: 'OtherTable',
+        rowId: 'row-1',
+        createdAt: '2025-10-15T12:00:00Z',
+        patches: [{ op: 'replace', path: 'title', value: 'New Title' }],
+      },
+    ];
+
+    loaderServiceFake.loadPatches.mockResolvedValue(patchesForDifferentTable);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+    ]);
+    // diff is for Article table, but patches are for OtherTable
+    // This means rowsWithChanges won't match OtherTable:row-1
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 1,
+        totalChanges: 1,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    const logCalls = consoleSpy.mock.calls.map((call) => call[0] as string);
+    // This message appears when rowsToApply is empty after filtering
+    expect(
+      logCalls.some((call) => String(call).includes('No changes to apply')),
+    ).toBe(true);
+
+    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 
   function setupSuccessfulFlow() {

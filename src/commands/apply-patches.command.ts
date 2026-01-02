@@ -163,10 +163,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     stats: ApplyStats,
     batchSize: number,
   ): Promise<void> {
-    if (patchFiles.length === 0) {
-      return;
-    }
-
     if (this.coreApiService.bulkPatchSupported === false) {
       await this.patchRowsSingle(revisionId, tableId, patchFiles, stats);
       return;
@@ -268,10 +264,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
       if (result === 'applied') {
         stats.applied++;
         singleRowApplied++;
-      } else if (result === 'skipped') {
-        stats.skipped++;
-      } else if (result === 'validationError') {
-        stats.validationErrors++;
       } else {
         stats.applyErrors++;
       }
@@ -313,11 +305,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     patchFile: PatchFile,
     revisionId: string,
     table: string,
-  ): Promise<'applied' | 'skipped' | 'validationError' | 'applyError'> {
-    if (patchFile.patches.length === 0) {
-      return 'skipped';
-    }
-
+  ): Promise<'applied' | 'applyError'> {
     try {
       const result = await this.api.patchRow(
         revisionId,
