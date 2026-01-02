@@ -747,9 +747,10 @@ describe('UploadRowsCommand', () => {
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Batch create failed:', {
-      message: 'Validation failed',
-    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '❌ Failed to process table posts:',
+      expect.any(Error),
+    );
 
     consoleErrorSpy.mockRestore();
   });

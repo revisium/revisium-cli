@@ -8,6 +8,7 @@ import { CoreApiService } from '../services/core-api.service';
 import { DraftRevisionService } from '../services/draft-revision.service';
 import { CommitRevisionService } from '../services/commit-revision.service';
 import { PatchFile, DiffResult } from '../types/patch.types';
+import { parseBooleanOption } from '../utils/parse-boolean.utils';
 
 const DEFAULT_BATCH_SIZE = 100;
 
@@ -372,7 +373,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     description: 'Create a revision after applying patches',
   })
   parseCommit(value?: string): boolean {
-    return JSON.parse(value ?? 'true') as boolean;
+    return parseBooleanOption(value);
   }
 
   @Option({

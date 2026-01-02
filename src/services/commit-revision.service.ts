@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CoreApiService } from './core-api.service';
 import { ResolveOptionsService } from './resolve-options.service';
+import { ConnectionInfo } from './sync-api.service';
 
 interface CommitOptions {
   organization?: string;
@@ -67,6 +68,41 @@ export class CommitRevisionService {
       console.log(
         '⚠️  Changes applied to draft. Use --commit to create a revision.',
       );
+    }
+  }
+
+  async handleCommitFlowForSync(
+    connection: ConnectionInfo,
+    actionDescription: string,
+    changeCount: number,
+  ): Promise<void> {
+    if (!changeCount) {
+      return;
+    }
+
+    console.log('💾 Creating revision...');
+
+    const comment = this.generateCommitComment(actionDescription, changeCount);
+
+    try {
+      const result = await connection.client.api.createRevision(
+        connection.url.organization,
+        connection.url.project,
+        connection.url.branch,
+        { comment },
+      );
+
+      if (result.data) {
+        console.log(`✅ Created revision: ${result.data.id}`);
+      } else {
+        console.error('❌ Failed to create revision: No data returned');
+        throw new Error('Failed to create revision');
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(`❌ Failed to create revision: ${errorMessage}`);
+      throw error;
     }
   }
 

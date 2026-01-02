@@ -9,6 +9,7 @@ import { TableDependencyService } from 'src/services/table-dependency.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 const DEFAULT_BATCH_SIZE = 100;
 
@@ -44,6 +45,18 @@ interface RowData {
   id: string;
   data: JsonValue;
   [key: string]: any;
+}
+
+class UploadError extends Error {
+  constructor(
+    message: string,
+    public readonly tableId: string,
+    public readonly statusCode?: number,
+    public readonly batchSize?: number,
+  ) {
+    super(message);
+    this.name = 'UploadError';
+  }
 }
 
 @SubCommand({
@@ -142,23 +155,55 @@ export class UploadRowsCommand extends BaseCommand {
       };
 
       for (const tableId of tablesToProcess) {
-        const tableStats = await this.uploadRowsToTable(
-          revisionId,
-          tableId,
-          folderPath,
-          batchSize,
-        );
-        this.aggregateStats(totalStats, tableStats);
+        try {
+          const tableStats = await this.uploadRowsToTable(
+            revisionId,
+            tableId,
+            folderPath,
+            batchSize,
+          );
+          this.aggregateStats(totalStats, tableStats);
+        } catch (error) {
+          if (error instanceof UploadError) {
+            this.printUploadError(error, batchSize);
+          } else {
+            console.error(
+              `\n❌ Upload stopped due to error in table "${tableId}":`,
+              error instanceof Error ? error.message : String(error),
+            );
+          }
+          throw error;
+        }
       }
 
       this.printFinalStats(totalStats);
       return totalStats;
     } catch (error) {
-      console.error(
-        'Error uploading table rows:',
-        error instanceof Error ? error.message : String(error),
-      );
+      if (!(error instanceof UploadError)) {
+        console.error(
+          'Error uploading table rows:',
+          error instanceof Error ? error.message : String(error),
+        );
+      }
       throw error;
+    }
+  }
+
+  private printUploadError(error: UploadError, batchSize: number): void {
+    console.error(
+      `\n❌ Upload stopped due to error in table "${error.tableId}"`,
+    );
+    console.error(`   Error: ${error.message}`);
+
+    if (error.statusCode === 413) {
+      console.error(`\n💡 The request payload is too large (HTTP 413).`);
+      console.error(
+        `   Current batch size: ${error.batchSize ?? batchSize} rows`,
+      );
+      console.error(`   Try reducing the batch size with --batch-size option.`);
+      console.error(`   Example: --batch-size 50 or --batch-size 10`);
+    } else if (error.statusCode) {
+      console.error(`   HTTP status code: ${error.statusCode}`);
     }
   }
 
@@ -429,17 +474,25 @@ export class UploadRowsCommand extends BaseCommand {
             );
             return;
           }
+
           this.clearProgressLine();
-          console.error(`❌ Batch create failed:`, result.error);
-          stats.createErrors += batch.length;
-          processed += batch.length;
-          continue;
+          const statusCode = this.getErrorStatusCode(result.error);
+          throw new UploadError(
+            `Batch create failed: ${JSON.stringify(result.error)}`,
+            tableId,
+            statusCode,
+            batchSize,
+          );
         }
 
         this.coreApiService.bulkCreateSupported = true;
         stats.uploaded += batch.length;
         processed += batch.length;
       } catch (error: unknown) {
+        if (error instanceof UploadError) {
+          throw error;
+        }
+
         if (this.is404Error(error)) {
           this.clearProgressLine();
           console.log(
@@ -455,10 +508,15 @@ export class UploadRowsCommand extends BaseCommand {
           );
           return;
         }
+
         this.clearProgressLine();
-        console.error(`❌ Batch create exception:`, error);
-        stats.createErrors += batch.length;
-        processed += batch.length;
+        const statusCode = this.getErrorStatusCode(error);
+        throw new UploadError(
+          `Batch create exception: ${error instanceof Error ? error.message : String(error)}`,
+          tableId,
+          statusCode,
+          batchSize,
+        );
       }
     }
 
@@ -513,17 +571,25 @@ export class UploadRowsCommand extends BaseCommand {
             );
             return;
           }
+
           this.clearProgressLine();
-          console.error(`❌ Batch update failed:`, result.error);
-          stats.updateErrors += batch.length;
-          processed += batch.length;
-          continue;
+          const statusCode = this.getErrorStatusCode(result.error);
+          throw new UploadError(
+            `Batch update failed: ${JSON.stringify(result.error)}`,
+            tableId,
+            statusCode,
+            batchSize,
+          );
         }
 
         this.coreApiService.bulkUpdateSupported = true;
         stats.updated += batch.length;
         processed += batch.length;
       } catch (error: unknown) {
+        if (error instanceof UploadError) {
+          throw error;
+        }
+
         if (this.is404Error(error)) {
           this.clearProgressLine();
           console.log(
@@ -539,10 +605,15 @@ export class UploadRowsCommand extends BaseCommand {
           );
           return;
         }
+
         this.clearProgressLine();
-        console.error(`❌ Batch update exception:`, error);
-        stats.updateErrors += batch.length;
-        processed += batch.length;
+        const statusCode = this.getErrorStatusCode(error);
+        throw new UploadError(
+          `Batch update exception: ${error instanceof Error ? error.message : String(error)}`,
+          tableId,
+          statusCode,
+          batchSize,
+        );
       }
     }
 
@@ -570,13 +641,30 @@ export class UploadRowsCommand extends BaseCommand {
           data: row.data as object,
           isRestore: true,
         });
+
         if (result.error) {
-          stats.createErrors++;
-        } else {
-          stats.uploaded++;
+          this.clearProgressLine();
+          const statusCode = this.getErrorStatusCode(result.error);
+          throw new UploadError(
+            `Failed to create row ${row.id}: ${JSON.stringify(result.error)}`,
+            tableId,
+            statusCode,
+          );
         }
-      } catch {
-        stats.createErrors++;
+
+        stats.uploaded++;
+      } catch (error) {
+        if (error instanceof UploadError) {
+          throw error;
+        }
+
+        this.clearProgressLine();
+        const statusCode = this.getErrorStatusCode(error);
+        throw new UploadError(
+          `Failed to create row ${row.id}: ${error instanceof Error ? error.message : String(error)}`,
+          tableId,
+          statusCode,
+        );
       }
       processed++;
     }
@@ -604,13 +692,30 @@ export class UploadRowsCommand extends BaseCommand {
           data: row.data as object,
           isRestore: true,
         });
+
         if (result.error) {
-          stats.updateErrors++;
-        } else {
-          stats.updated++;
+          this.clearProgressLine();
+          const statusCode = this.getErrorStatusCode(result.error);
+          throw new UploadError(
+            `Failed to update row ${row.id}: ${JSON.stringify(result.error)}`,
+            tableId,
+            statusCode,
+          );
         }
-      } catch {
-        stats.updateErrors++;
+
+        stats.updated++;
+      } catch (error) {
+        if (error instanceof UploadError) {
+          throw error;
+        }
+
+        this.clearProgressLine();
+        const statusCode = this.getErrorStatusCode(error);
+        throw new UploadError(
+          `Failed to update row ${row.id}: ${error instanceof Error ? error.message : String(error)}`,
+          tableId,
+          statusCode,
+        );
       }
       processed++;
     }
@@ -633,6 +738,19 @@ export class UploadRowsCommand extends BaseCommand {
       }
     }
     return false;
+  }
+
+  private getErrorStatusCode(error: unknown): number | undefined {
+    if (typeof error === 'object' && error !== null) {
+      const err = error as Record<string, unknown>;
+      if (typeof err['statusCode'] === 'number') {
+        return err['statusCode'];
+      }
+      if (typeof err['status'] === 'number') {
+        return err['status'];
+      }
+    }
+    return undefined;
   }
 
   private createDataValidator(
@@ -729,8 +847,8 @@ export class UploadRowsCommand extends BaseCommand {
     flags: '-c, --commit [boolean]',
     description: 'Create a revision after uploading rows',
   })
-  parseCommit(value?: string) {
-    return JSON.parse(value ?? 'true') as boolean;
+  parseCommit(value?: string): boolean {
+    return parseBooleanOption(value);
   }
 
   @Option({
