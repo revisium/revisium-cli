@@ -74,7 +74,14 @@ export abstract class BasePatchCommand extends BaseCommand {
     console.log('✅ Validation passed\n');
 
     console.log('🔍 Comparing with current data...');
-    const diff = await this.diffService.compareWithApi(patches, revisionId);
+    const diff = await this.diffService.compareWithApi(
+      patches,
+      revisionId,
+      (current, total) => {
+        process.stdout.write(`\r  Comparing: ${current}/${total} rows`);
+      },
+    );
+    process.stdout.write('\r\x1b[K');
     console.log(`✅ Compared ${diff.summary.totalRows} row(s)\n`);
 
     if (diff.summary.totalChanges === 0) {

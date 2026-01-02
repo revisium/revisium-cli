@@ -8,6 +8,17 @@ import {
   PatchDiff,
 } from '../types/patch.types';
 
+const BATCH_SIZE = 100;
+
+export interface CompareProgressCallback {
+  (current: number, total: number): void;
+}
+
+interface RowData {
+  id: string;
+  data: unknown;
+}
+
 @Injectable()
 export class PatchDiffService {
   constructor(private readonly coreApi: CoreApiService) {}
@@ -15,6 +26,7 @@ export class PatchDiffService {
   public async compareWithApi(
     patches: PatchFile[],
     revisionId: string,
+    onProgress?: CompareProgressCallback,
   ): Promise<DiffResult> {
     if (patches.length === 0) {
       throw new Error('No patches provided');
@@ -26,79 +38,23 @@ export class PatchDiffService {
       throw new Error('All patches must be from the same table');
     }
 
+    const rowIds = patches.map((p) => p.rowId);
+    const rowsMap = await this.loadRowsBatch(
+      revisionId,
+      table,
+      rowIds,
+      onProgress,
+    );
+
     const rowDiffs: RowDiff[] = [];
     let totalChanges = 0;
     let skipped = 0;
     let errors = 0;
 
     for (const patchFile of patches) {
-      try {
-        const currentRow = await this.loadRow(
-          revisionId,
-          table,
-          patchFile.rowId,
-        );
+      const currentRow = rowsMap.get(patchFile.rowId);
 
-        if (!currentRow) {
-          rowDiffs.push({
-            rowId: patchFile.rowId,
-            patches: [
-              {
-                path: '',
-                currentValue: null,
-                newValue: null,
-                op: 'error',
-                status: 'ERROR',
-                error: 'Row not found in API',
-              },
-            ],
-          });
-          errors++;
-          continue;
-        }
-
-        const patchDiffs: PatchDiff[] = [];
-
-        for (const patch of patchFile.patches) {
-          try {
-            const currentValue = getValueByPath(currentRow, patch.path);
-            const newValue = (patch as { value?: unknown }).value;
-
-            let status: 'CHANGE' | 'SKIP' | 'ERROR';
-
-            if (deepEqual(currentValue, newValue)) {
-              status = 'SKIP';
-              skipped++;
-            } else {
-              status = 'CHANGE';
-              totalChanges++;
-            }
-
-            patchDiffs.push({
-              path: patch.path,
-              currentValue,
-              newValue,
-              op: patch.op,
-              status,
-            });
-          } catch (error) {
-            patchDiffs.push({
-              path: patch.path,
-              currentValue: null,
-              newValue: (patch as { value?: unknown }).value ?? null,
-              op: patch.op,
-              status: 'ERROR',
-              error: `Failed to get value: ${error instanceof Error ? error.message : String(error)}`,
-            });
-            errors++;
-          }
-        }
-
-        rowDiffs.push({
-          rowId: patchFile.rowId,
-          patches: patchDiffs,
-        });
-      } catch (error) {
+      if (currentRow === undefined) {
         rowDiffs.push({
           rowId: patchFile.rowId,
           patches: [
@@ -108,12 +64,55 @@ export class PatchDiffService {
               newValue: null,
               op: 'error',
               status: 'ERROR',
-              error: `Failed to load row: ${error instanceof Error ? error.message : String(error)}`,
+              error: 'Row not found in API',
             },
           ],
         });
         errors++;
+        continue;
       }
+
+      const patchDiffs: PatchDiff[] = [];
+
+      for (const patch of patchFile.patches) {
+        try {
+          const currentValue = getValueByPath(currentRow, patch.path);
+          const newValue = (patch as { value?: unknown }).value;
+
+          let status: 'CHANGE' | 'SKIP' | 'ERROR';
+
+          if (deepEqual(currentValue, newValue)) {
+            status = 'SKIP';
+            skipped++;
+          } else {
+            status = 'CHANGE';
+            totalChanges++;
+          }
+
+          patchDiffs.push({
+            path: patch.path,
+            currentValue,
+            newValue,
+            op: patch.op,
+            status,
+          });
+        } catch (error) {
+          patchDiffs.push({
+            path: patch.path,
+            currentValue: null,
+            newValue: (patch as { value?: unknown }).value ?? null,
+            op: patch.op,
+            status: 'ERROR',
+            error: `Failed to get value: ${error instanceof Error ? error.message : String(error)}`,
+          });
+          errors++;
+        }
+      }
+
+      rowDiffs.push({
+        rowId: patchFile.rowId,
+        patches: patchDiffs,
+      });
     }
 
     return {
@@ -128,21 +127,48 @@ export class PatchDiffService {
     };
   }
 
-  private async loadRow(
+  private async loadRowsBatch(
     revisionId: string,
     tableId: string,
-    rowId: string,
-  ): Promise<unknown> {
-    const response = await this.coreApi.api.row(revisionId, tableId, rowId);
+    rowIds: string[],
+    onProgress?: CompareProgressCallback,
+  ): Promise<Map<string, unknown>> {
+    const rowsMap = new Map<string, unknown>();
 
-    if (response.error) {
-      throw new Error(`Failed to fetch row: ${JSON.stringify(response.error)}`);
+    for (let i = 0; i < rowIds.length; i += BATCH_SIZE) {
+      const batchIds = rowIds.slice(i, i + BATCH_SIZE);
+
+      if (onProgress) {
+        onProgress(i, rowIds.length);
+      }
+
+      const response = await this.coreApi.api.rows(revisionId, tableId, {
+        first: BATCH_SIZE,
+        where: {
+          id: {
+            in: batchIds,
+          },
+        },
+      });
+
+      if (response.error) {
+        throw new Error(
+          `Failed to fetch rows: ${JSON.stringify(response.error)}`,
+        );
+      }
+
+      if (response.data?.edges) {
+        for (const edge of response.data.edges) {
+          const row = edge.node as RowData;
+          rowsMap.set(row.id, row.data);
+        }
+      }
     }
 
-    if (!response.data) {
-      return null;
+    if (onProgress) {
+      onProgress(rowIds.length, rowIds.length);
     }
 
-    return (response.data as { data?: unknown }).data ?? null;
+    return rowsMap;
   }
 }
