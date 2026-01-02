@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { SaveRowsCommand } from '../save-rows.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
-jest.mock('fs/promises');
+jest.mock('node:fs/promises');
 
 const mockMkdir = mkdir as jest.MockedFunction<typeof mkdir>;
 const mockWriteFile = writeFile as jest.MockedFunction<typeof writeFile>;

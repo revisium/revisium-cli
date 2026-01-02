@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { getValueByPath, hasPath } from '@revisium/schema-toolkit/lib';
-import { JsonValue } from '@revisium/schema-toolkit/types';
-import { JsonValuePatch } from '@revisium/schema-toolkit/types';
+import { JsonValue, JsonValuePatch } from '@revisium/schema-toolkit/types';
 
 @Injectable()
 export class PatchGeneratorService {

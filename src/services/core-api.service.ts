@@ -84,9 +84,7 @@ export class CoreApiService extends Api<unknown> {
   ): RequestParams {
     const params = super.mergeRequestParams(params1, params2);
 
-    if (!params.headers) {
-      params.headers = {};
-    }
+    params.headers ??= {};
 
     if (this.token) {
       (params.headers as Record<string, string>)['Authorization'] =

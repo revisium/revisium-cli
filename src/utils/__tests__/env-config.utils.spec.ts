@@ -1,9 +1,9 @@
-import { existsSync, statSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { getEnvFilePath, shouldIgnoreEnvFile } from '../env-config.utils';
 
-jest.mock('fs');
-jest.mock('path');
+jest.mock('node:fs');
+jest.mock('node:path');
 
 const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
 const mockStatSync = statSync as jest.MockedFunction<typeof statSync>;

@@ -75,58 +75,87 @@ export class PatchValidationService {
     patchFile: PatchFile,
     tableSchema: JsonSchema,
   ): ValidationResult {
-    const errors: ValidationError[] = [];
-
     try {
       const schemaStore = createJsonSchemaStore(tableSchema, this.refs);
-
-      for (const patch of patchFile.patches) {
-        try {
-          const schemaPath = convertJsonPathToSchemaPath(patch.path);
-          const fieldSchema = getJsonSchemaStoreByPath(schemaStore, schemaPath);
-
-          if (!fieldSchema) {
-            errors.push({
-              rowId: patchFile.rowId,
-              path: patch.path,
-              message: `Path '${patch.path}' does not exist in table schema`,
-            });
-            continue;
-          }
-
-          if (
-            (patch.op === 'replace' || patch.op === 'add') &&
-            'value' in patch
-          ) {
-            const typeError = this.validateValueType(
-              patch.value,
-              fieldSchema,
-              patch.path,
-            );
-            if (typeError) {
-              errors.push({
-                rowId: patchFile.rowId,
-                path: patch.path,
-                message: typeError,
-              });
-            }
-          }
-        } catch (error) {
-          errors.push({
-            rowId: patchFile.rowId,
-            path: patch.path,
-            message: `Invalid path '${patch.path}': ${error instanceof Error ? error.message : String(error)}`,
-          });
-        }
-      }
+      const errors = patchFile.patches.flatMap((patch) =>
+        this.validatePatch(patch, schemaStore, patchFile.rowId),
+      );
+      return { valid: errors.length === 0, errors };
     } catch (error) {
-      errors.push({
-        rowId: patchFile.rowId,
-        message: `Schema validation error: ${error instanceof Error ? error.message : String(error)}`,
-      });
+      return {
+        valid: false,
+        errors: [
+          {
+            rowId: patchFile.rowId,
+            message: `Schema validation error: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+      };
+    }
+  }
+
+  private validatePatch(
+    patch: PatchFile['patches'][number],
+    schemaStore: JsonSchemaStore,
+    rowId: string,
+  ): ValidationError[] {
+    try {
+      return this.validatePatchAgainstSchema(patch, schemaStore, rowId);
+    } catch (error) {
+      return [
+        {
+          rowId,
+          path: patch.path,
+          message: `Invalid path '${patch.path}': ${error instanceof Error ? error.message : String(error)}`,
+        },
+      ];
+    }
+  }
+
+  private validatePatchAgainstSchema(
+    patch: PatchFile['patches'][number],
+    schemaStore: JsonSchemaStore,
+    rowId: string,
+  ): ValidationError[] {
+    const schemaPath = convertJsonPathToSchemaPath(patch.path);
+    const fieldSchema = getJsonSchemaStoreByPath(schemaStore, schemaPath);
+
+    if (!fieldSchema) {
+      return [
+        {
+          rowId,
+          path: patch.path,
+          message: `Path '${patch.path}' does not exist in table schema`,
+        },
+      ];
     }
 
-    return { valid: errors.length === 0, errors };
+    return this.validatePatchValue(patch, fieldSchema, rowId);
+  }
+
+  private validatePatchValue(
+    patch: PatchFile['patches'][number],
+    fieldSchema: JsonSchemaStore,
+    rowId: string,
+  ): ValidationError[] {
+    const isValuePatch =
+      (patch.op === 'replace' || patch.op === 'add') && 'value' in patch;
+
+    if (!isValuePatch) {
+      return [];
+    }
+
+    const typeError = this.validateValueType(
+      patch.value,
+      fieldSchema,
+      patch.path,
+    );
+
+    if (typeError) {
+      return [{ rowId, path: patch.path, message: typeError }];
+    }
+
+    return [];
   }
 
   public async validate(

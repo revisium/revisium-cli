@@ -227,94 +227,35 @@ export class RowSyncService {
     bulkFlags: BulkSupportFlags,
     onProgress?: ProgressCallback,
   ): Promise<{ success: number; errors: number }> {
-    let success = 0;
-    const total = rows.length;
-
     if (bulkFlags.bulkCreateSupported === false) {
       return this.createRowsSingle(api, revisionId, tableId, rows, onProgress);
     }
 
-    for (let i = 0; i < rows.length; i += batchSize) {
-      const batch = rows.slice(i, i + batchSize);
-
-      try {
-        const requestData = {
+    return this.processBatches({
+      rows,
+      batchSize,
+      tableId,
+      operation: 'create',
+      onProgress,
+      executeBatch: (batch) =>
+        api.createRows(revisionId, tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
-        };
-
-        const result = await api.createRows(revisionId, tableId, requestData);
-
-        if (result.error) {
-          if (this.is404Error(result.error)) {
-            console.log(
-              '    ⚠️ Bulk create not supported, falling back to single-row mode',
-            );
-            bulkFlags.bulkCreateSupported = false;
-            const remainingRows = rows.slice(i);
-            const fallbackResult = await this.createRowsSingle(
-              api,
-              revisionId,
-              tableId,
-              remainingRows,
-              onProgress,
-            );
-            return {
-              success: success + fallbackResult.success,
-              errors: fallbackResult.errors,
-            };
-          }
-
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new RowSyncError(
-            `Batch create failed: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-            batchSize,
-          );
-        }
-
-        if (bulkFlags.bulkCreateSupported === undefined) {
-          console.log('    ✓ Bulk create supported');
-        }
-        bulkFlags.bulkCreateSupported = true;
-        success += batch.length;
-        onProgress?.({ operation: 'create', current: success, total });
-      } catch (error: unknown) {
-        if (error instanceof RowSyncError) {
-          throw error;
-        }
-
-        if (this.is404Error(error)) {
-          console.log(
-            '    ⚠️ Bulk create not supported, falling back to single-row mode',
-          );
-          bulkFlags.bulkCreateSupported = false;
-          const remainingRows = rows.slice(i);
-          const fallbackResult = await this.createRowsSingle(
-            api,
-            revisionId,
-            tableId,
-            remainingRows,
-            onProgress,
-          );
-          return {
-            success: success + fallbackResult.success,
-            errors: fallbackResult.errors,
-          };
-        }
-
-        const statusCode = this.getErrorStatusCode(error);
-        throw new RowSyncError(
-          `Batch create exception: ${error instanceof Error ? error.message : String(error)}`,
+        }),
+      fallbackSingle: (remainingRows) =>
+        this.createRowsSingle(
+          api,
+          revisionId,
           tableId,
-          statusCode,
-          batchSize,
-        );
-      }
-    }
-
-    return { success, errors: 0 };
+          remainingRows,
+          onProgress,
+        ),
+      getBulkSupported: () => bulkFlags.bulkCreateSupported,
+      setBulkSupported: (value) => {
+        bulkFlags.bulkCreateSupported = value;
+      },
+      operationName: 'create',
+    });
   }
 
   private async processBatchUpdate(
@@ -326,91 +267,197 @@ export class RowSyncService {
     bulkFlags: BulkSupportFlags,
     onProgress?: ProgressCallback,
   ): Promise<{ success: number; errors: number }> {
-    let success = 0;
-    const total = rows.length;
-
     if (bulkFlags.bulkUpdateSupported === false) {
       return this.updateRowsSingle(api, revisionId, tableId, rows, onProgress);
     }
 
+    return this.processBatches({
+      rows,
+      batchSize,
+      tableId,
+      operation: 'update',
+      onProgress,
+      executeBatch: (batch) =>
+        api.updateRows(revisionId, tableId, {
+          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+        }),
+      fallbackSingle: (remainingRows) =>
+        this.updateRowsSingle(
+          api,
+          revisionId,
+          tableId,
+          remainingRows,
+          onProgress,
+        ),
+      getBulkSupported: () => bulkFlags.bulkUpdateSupported,
+      setBulkSupported: (value) => {
+        bulkFlags.bulkUpdateSupported = value;
+      },
+      operationName: 'update',
+    });
+  }
+
+  private async processBatches(config: {
+    rows: RowData[];
+    batchSize: number;
+    tableId: string;
+    operation: ProgressOperation;
+    onProgress?: ProgressCallback;
+    executeBatch: (
+      batch: RowData[],
+    ) => Promise<{ data?: unknown; error?: unknown }>;
+    fallbackSingle: (
+      rows: RowData[],
+    ) => Promise<{ success: number; errors: number }>;
+    getBulkSupported: () => boolean | undefined;
+    setBulkSupported: (value: boolean) => void;
+    operationName: string;
+  }): Promise<{ success: number; errors: number }> {
+    let success = 0;
+    const { rows, batchSize, tableId, operation, onProgress } = config;
+    const total = rows.length;
+
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
+      const remainingRows = rows.slice(i);
 
       try {
-        const result = await api.updateRows(revisionId, tableId, {
-          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
-        });
+        const result = await config.executeBatch(batch);
 
         if (result.error) {
-          if (this.is404Error(result.error)) {
-            console.log(
-              '    ⚠️ Bulk update not supported, falling back to single-row mode',
-            );
-            bulkFlags.bulkUpdateSupported = false;
-            const remainingRows = rows.slice(i);
-            const fallbackResult = await this.updateRowsSingle(
-              api,
-              revisionId,
-              tableId,
-              remainingRows,
-              onProgress,
-            );
-            return {
-              success: success + fallbackResult.success,
-              errors: fallbackResult.errors,
-            };
-          }
-
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new RowSyncError(
-            `Batch update failed: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-            batchSize,
-          );
-        }
-
-        if (bulkFlags.bulkUpdateSupported === undefined) {
-          console.log('    ✓ Bulk update supported');
-        }
-        bulkFlags.bulkUpdateSupported = true;
-        success += batch.length;
-        onProgress?.({ operation: 'update', current: success, total });
-      } catch (error: unknown) {
-        if (error instanceof RowSyncError) {
-          throw error;
-        }
-
-        if (this.is404Error(error)) {
-          console.log(
-            '    ⚠️ Bulk update not supported, falling back to single-row mode',
-          );
-          bulkFlags.bulkUpdateSupported = false;
-          const remainingRows = rows.slice(i);
-          const fallbackResult = await this.updateRowsSingle(
-            api,
-            revisionId,
-            tableId,
+          const fallbackResult = await this.handleBatchError(
+            result.error,
             remainingRows,
-            onProgress,
+            config,
+            success,
+            batchSize,
+            tableId,
           );
-          return {
-            success: success + fallbackResult.success,
-            errors: fallbackResult.errors,
-          };
+          if (fallbackResult) {
+            return fallbackResult;
+          }
         }
 
-        const statusCode = this.getErrorStatusCode(error);
-        throw new RowSyncError(
-          `Batch update exception: ${error instanceof Error ? error.message : String(error)}`,
-          tableId,
-          statusCode,
+        this.logBulkSupportedOnce(config);
+        config.setBulkSupported(true);
+        success += batch.length;
+        onProgress?.({ operation, current: success, total });
+      } catch (error: unknown) {
+        const fallbackResult = await this.handleBatchException(
+          error,
+          remainingRows,
+          config,
+          success,
           batchSize,
+          tableId,
         );
+        if (fallbackResult) {
+          return fallbackResult;
+        }
       }
     }
 
     return { success, errors: 0 };
+  }
+
+  private async handleBatchError(
+    error: unknown,
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (
+        rows: RowData[],
+      ) => Promise<{ success: number; errors: number }>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    currentSuccess: number,
+    batchSize: number,
+    tableId: string,
+  ): Promise<{ success: number; errors: number } | null> {
+    if (this.is404Error(error)) {
+      return this.fallbackToSingleMode(
+        remainingRows,
+        config,
+        currentSuccess,
+        'Bulk',
+      );
+    }
+
+    const statusCode = this.getErrorStatusCode(error);
+    throw new RowSyncError(
+      `Batch ${config.operationName} failed: ${JSON.stringify(error)}`,
+      tableId,
+      statusCode,
+      batchSize,
+    );
+  }
+
+  private async handleBatchException(
+    error: unknown,
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (
+        rows: RowData[],
+      ) => Promise<{ success: number; errors: number }>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    currentSuccess: number,
+    batchSize: number,
+    tableId: string,
+  ): Promise<{ success: number; errors: number } | null> {
+    if (error instanceof RowSyncError) {
+      throw error;
+    }
+
+    if (this.is404Error(error)) {
+      return this.fallbackToSingleMode(
+        remainingRows,
+        config,
+        currentSuccess,
+        'Bulk',
+      );
+    }
+
+    const statusCode = this.getErrorStatusCode(error);
+    throw new RowSyncError(
+      `Batch ${config.operationName} exception: ${error instanceof Error ? error.message : String(error)}`,
+      tableId,
+      statusCode,
+      batchSize,
+    );
+  }
+
+  private async fallbackToSingleMode(
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (
+        rows: RowData[],
+      ) => Promise<{ success: number; errors: number }>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    currentSuccess: number,
+    prefix: string,
+  ): Promise<{ success: number; errors: number }> {
+    console.log(
+      `    ⚠️ ${prefix} ${config.operationName} not supported, falling back to single-row mode`,
+    );
+    config.setBulkSupported(false);
+    const fallbackResult = await config.fallbackSingle(remainingRows);
+    return {
+      success: currentSuccess + fallbackResult.success,
+      errors: fallbackResult.errors,
+    };
+  }
+
+  private logBulkSupportedOnce(config: {
+    getBulkSupported: () => boolean | undefined;
+    operationName: string;
+  }): void {
+    if (config.getBulkSupported() === undefined) {
+      console.log(`    ✓ Bulk ${config.operationName} supported`);
+    }
   }
 
   private async createRowsSingle(

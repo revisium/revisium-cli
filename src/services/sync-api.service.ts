@@ -77,9 +77,7 @@ class RevisiumApiClient extends Api<unknown> {
   ): RequestParams {
     const params = super.mergeRequestParams(params1, params2);
 
-    if (!params.headers) {
-      params.headers = {};
-    }
+    params.headers ??= {};
 
     if (this.authToken) {
       (params.headers as Record<string, string>)['Authorization'] =

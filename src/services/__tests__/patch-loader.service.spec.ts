@@ -1,7 +1,7 @@
 import { PatchLoaderService } from '../patch-loader.service';
 import { PatchFile, PatchFileMerged } from '../../types/patch.types';
-import { readFile, readdir, writeFile, mkdir, rm } from 'fs/promises';
-import { join } from 'path';
+import { readFile, readdir, writeFile, mkdir, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import * as os from 'os';
 
 describe('PatchLoaderService', () => {

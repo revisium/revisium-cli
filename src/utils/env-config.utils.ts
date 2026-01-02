@@ -1,5 +1,5 @@
-import { existsSync, statSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 /**
  * Check if a path exists and is a regular file (not a directory)

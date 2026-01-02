@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
-import { readdir, readFile, writeFile } from 'fs/promises';
-import { mkdir, rm } from 'fs/promises';
-import { join } from 'path';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import * as os from 'os';
 import { CreateMigrationsCommand } from '../create-migrations.command';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 
-jest.mock('fs/promises');
+jest.mock('node:fs/promises');
 
 const mockReaddir = readdir as jest.MockedFunction<typeof readdir>;
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;

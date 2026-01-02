@@ -1,5 +1,5 @@
-import { readdir, readFile, writeFile } from 'fs/promises';
-import { join, extname } from 'path';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { join, extname } from 'node:path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';

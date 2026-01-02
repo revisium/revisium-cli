@@ -1,5 +1,5 @@
-import { readdir, readFile } from 'fs/promises';
-import { join } from 'path';
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
@@ -109,83 +109,146 @@ export class UploadRowsCommand extends BaseCommand {
         folderPath,
         tableFilter,
       );
-
       console.log(`📊 Found ${originalTables.length} tables to process`);
 
-      const tableSchemas: Record<string, JsonSchema> = {};
-      for (const tableId of originalTables) {
-        try {
-          const schemaResult = await this.api.tableSchema(revisionId, tableId);
-          tableSchemas[tableId] = schemaResult.data as JsonSchema;
-        } catch (error) {
-          console.warn(
-            `⚠️  Could not fetch schema for table ${tableId}:`,
-            error,
-          );
-        }
-      }
-
-      const dependencyResult =
-        this.tableDependencyService.analyzeDependencies(tableSchemas);
-
-      console.log(
-        this.tableDependencyService.formatDependencyInfo(
-          dependencyResult,
-          originalTables,
-        ),
+      const tableSchemas = await this.fetchTableSchemas(
+        revisionId,
+        originalTables,
+      );
+      const tablesToProcess = this.analyzeDependenciesAndGetOrder(
+        tableSchemas,
+        originalTables,
       );
 
-      for (const warning of dependencyResult.warnings) {
-        console.warn(warning);
-      }
-
-      const tablesToProcess = dependencyResult.sortedTables.filter((tableId) =>
-        originalTables.includes(tableId),
+      const totalStats = this.createEmptyStats();
+      await this.processAllTables(
+        tablesToProcess,
+        revisionId,
+        folderPath,
+        batchSize,
+        totalStats,
       );
-
-      const totalStats: UploadStats = {
-        totalRows: 0,
-        uploaded: 0,
-        updated: 0,
-        skipped: 0,
-        invalidSchema: 0,
-        createErrors: 0,
-        updateErrors: 0,
-        otherErrors: 0,
-      };
-
-      for (const tableId of tablesToProcess) {
-        try {
-          const tableStats = await this.uploadRowsToTable(
-            revisionId,
-            tableId,
-            folderPath,
-            batchSize,
-          );
-          this.aggregateStats(totalStats, tableStats);
-        } catch (error) {
-          if (error instanceof UploadError) {
-            this.printUploadError(error, batchSize);
-          } else {
-            console.error(
-              `\n❌ Upload stopped due to error in table "${tableId}":`,
-              error instanceof Error ? error.message : String(error),
-            );
-          }
-          throw error;
-        }
-      }
 
       this.printFinalStats(totalStats);
       return totalStats;
     } catch (error) {
-      if (!(error instanceof UploadError)) {
-        console.error(
-          'Error uploading table rows:',
-          error instanceof Error ? error.message : String(error),
-        );
-      }
+      this.handleUploadError(error);
       throw error;
+    }
+  }
+
+  private async fetchTableSchemas(
+    revisionId: string,
+    tables: string[],
+  ): Promise<Record<string, JsonSchema>> {
+    const tableSchemas: Record<string, JsonSchema> = {};
+    for (const tableId of tables) {
+      try {
+        const schemaResult = await this.api.tableSchema(revisionId, tableId);
+        tableSchemas[tableId] = schemaResult.data as JsonSchema;
+      } catch (error) {
+        console.warn(`⚠️  Could not fetch schema for table ${tableId}:`, error);
+      }
+    }
+    return tableSchemas;
+  }
+
+  private analyzeDependenciesAndGetOrder(
+    tableSchemas: Record<string, JsonSchema>,
+    originalTables: string[],
+  ): string[] {
+    const dependencyResult =
+      this.tableDependencyService.analyzeDependencies(tableSchemas);
+
+    console.log(
+      this.tableDependencyService.formatDependencyInfo(
+        dependencyResult,
+        originalTables,
+      ),
+    );
+
+    for (const warning of dependencyResult.warnings) {
+      console.warn(warning);
+    }
+
+    return dependencyResult.sortedTables.filter((tableId) =>
+      originalTables.includes(tableId),
+    );
+  }
+
+  private createEmptyStats(): UploadStats {
+    return {
+      totalRows: 0,
+      uploaded: 0,
+      updated: 0,
+      skipped: 0,
+      invalidSchema: 0,
+      createErrors: 0,
+      updateErrors: 0,
+      otherErrors: 0,
+    };
+  }
+
+  private async processAllTables(
+    tablesToProcess: string[],
+    revisionId: string,
+    folderPath: string,
+    batchSize: number,
+    totalStats: UploadStats,
+  ): Promise<void> {
+    for (const tableId of tablesToProcess) {
+      await this.processTableWithErrorHandling(
+        tableId,
+        revisionId,
+        folderPath,
+        batchSize,
+        totalStats,
+      );
+    }
+  }
+
+  private async processTableWithErrorHandling(
+    tableId: string,
+    revisionId: string,
+    folderPath: string,
+    batchSize: number,
+    totalStats: UploadStats,
+  ): Promise<void> {
+    try {
+      const tableStats = await this.uploadRowsToTable(
+        revisionId,
+        tableId,
+        folderPath,
+        batchSize,
+      );
+      this.aggregateStats(totalStats, tableStats);
+    } catch (error) {
+      this.handleTableUploadError(error, tableId, batchSize);
+      throw error;
+    }
+  }
+
+  private handleTableUploadError(
+    error: unknown,
+    tableId: string,
+    batchSize: number,
+  ): void {
+    if (error instanceof UploadError) {
+      this.printUploadError(error, batchSize);
+    } else {
+      console.error(
+        `\n❌ Upload stopped due to error in table "${tableId}":`,
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  private handleUploadError(error: unknown): void {
+    if (!(error instanceof UploadError)) {
+      console.error(
+        'Error uploading table rows:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -441,86 +504,27 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
-    let processed = 0;
-    for (let i = 0; i < rows.length; i += batchSize) {
-      const batch = rows.slice(i, i + batchSize);
-
-      this.printProgress({
-        tableId,
-        operation: 'create',
-        current: processed,
-        total: rows.length,
-      });
-
-      try {
-        const result = await this.api.createRows(revisionId, tableId, {
+    await this.processBulkOperation({
+      rows,
+      batchSize,
+      tableId,
+      operation: 'create',
+      executeBatch: (batch) =>
+        this.api.createRows(revisionId, tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
-        });
-
-        if (result.error) {
-          if (this.is404Error(result.error)) {
-            this.clearProgressLine();
-            console.log(
-              `  ⚠️ Bulk createRows not supported, falling back to single-row mode`,
-            );
-            this.coreApiService.bulkCreateSupported = false;
-            const remainingRows = rows.slice(i);
-            await this.createRowsSingle(
-              revisionId,
-              tableId,
-              remainingRows,
-              stats,
-            );
-            return;
-          }
-
-          this.clearProgressLine();
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new UploadError(
-            `Batch create failed: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-            batchSize,
-          );
-        }
-
-        this.coreApiService.bulkCreateSupported = true;
-        stats.uploaded += batch.length;
-        processed += batch.length;
-      } catch (error: unknown) {
-        if (error instanceof UploadError) {
-          throw error;
-        }
-
-        if (this.is404Error(error)) {
-          this.clearProgressLine();
-          console.log(
-            `  ⚠️ Bulk createRows not supported, falling back to single-row mode`,
-          );
-          this.coreApiService.bulkCreateSupported = false;
-          const remainingRows = rows.slice(i);
-          await this.createRowsSingle(
-            revisionId,
-            tableId,
-            remainingRows,
-            stats,
-          );
-          return;
-        }
-
-        this.clearProgressLine();
-        const statusCode = this.getErrorStatusCode(error);
-        throw new UploadError(
-          `Batch create exception: ${error instanceof Error ? error.message : String(error)}`,
-          tableId,
-          statusCode,
-          batchSize,
-        );
-      }
-    }
-
-    this.clearProgressLine();
+        }),
+      fallbackSingle: (remaining) =>
+        this.createRowsSingle(revisionId, tableId, remaining, stats),
+      getBulkSupported: () => this.coreApiService.bulkCreateSupported,
+      setBulkSupported: (value) => {
+        this.coreApiService.bulkCreateSupported = value;
+      },
+      updateStats: (count) => {
+        stats.uploaded += count;
+      },
+      operationName: 'createRows',
+    });
   }
 
   private async processBatchUpdate(
@@ -539,85 +543,183 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
+    await this.processBulkOperation({
+      rows,
+      batchSize,
+      tableId,
+      operation: 'update',
+      executeBatch: (batch) =>
+        this.api.updateRows(revisionId, tableId, {
+          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+        }),
+      fallbackSingle: (remaining) =>
+        this.updateRowsSingle(revisionId, tableId, remaining, stats),
+      getBulkSupported: () => this.coreApiService.bulkUpdateSupported,
+      setBulkSupported: (value) => {
+        this.coreApiService.bulkUpdateSupported = value;
+      },
+      updateStats: (count) => {
+        stats.updated += count;
+      },
+      operationName: 'updateRows',
+    });
+  }
+
+  private async processBulkOperation(config: {
+    rows: RowData[];
+    batchSize: number;
+    tableId: string;
+    operation: 'create' | 'update';
+    executeBatch: (
+      batch: RowData[],
+    ) => Promise<{ data?: unknown; error?: unknown }>;
+    fallbackSingle: (rows: RowData[]) => Promise<void>;
+    getBulkSupported: () => boolean | undefined;
+    setBulkSupported: (value: boolean) => void;
+    updateStats: (count: number) => void;
+    operationName: string;
+  }): Promise<void> {
+    const { rows, batchSize, tableId, operation } = config;
     let processed = 0;
+
     for (let i = 0; i < rows.length; i += batchSize) {
       const batch = rows.slice(i, i + batchSize);
 
       this.printProgress({
         tableId,
-        operation: 'update',
+        operation,
         current: processed,
         total: rows.length,
       });
 
-      try {
-        const result = await this.api.updateRows(revisionId, tableId, {
-          rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
-        });
+      const shouldReturn = await this.executeBatchWithFallback(
+        batch,
+        rows.slice(i),
+        config,
+        batchSize,
+        tableId,
+      );
 
-        if (result.error) {
-          if (this.is404Error(result.error)) {
-            this.clearProgressLine();
-            console.log(
-              `  ⚠️ Bulk updateRows not supported, falling back to single-row mode`,
-            );
-            this.coreApiService.bulkUpdateSupported = false;
-            const remainingRows = rows.slice(i);
-            await this.updateRowsSingle(
-              revisionId,
-              tableId,
-              remainingRows,
-              stats,
-            );
-            return;
-          }
-
-          this.clearProgressLine();
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new UploadError(
-            `Batch update failed: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-            batchSize,
-          );
-        }
-
-        this.coreApiService.bulkUpdateSupported = true;
-        stats.updated += batch.length;
-        processed += batch.length;
-      } catch (error: unknown) {
-        if (error instanceof UploadError) {
-          throw error;
-        }
-
-        if (this.is404Error(error)) {
-          this.clearProgressLine();
-          console.log(
-            `  ⚠️ Bulk updateRows not supported, falling back to single-row mode`,
-          );
-          this.coreApiService.bulkUpdateSupported = false;
-          const remainingRows = rows.slice(i);
-          await this.updateRowsSingle(
-            revisionId,
-            tableId,
-            remainingRows,
-            stats,
-          );
-          return;
-        }
-
-        this.clearProgressLine();
-        const statusCode = this.getErrorStatusCode(error);
-        throw new UploadError(
-          `Batch update exception: ${error instanceof Error ? error.message : String(error)}`,
-          tableId,
-          statusCode,
-          batchSize,
-        );
+      if (shouldReturn) {
+        return;
       }
+
+      config.setBulkSupported(true);
+      config.updateStats(batch.length);
+      processed += batch.length;
     }
 
     this.clearProgressLine();
+  }
+
+  private async executeBatchWithFallback(
+    batch: RowData[],
+    remainingRows: RowData[],
+    config: {
+      executeBatch: (
+        batch: RowData[],
+      ) => Promise<{ data?: unknown; error?: unknown }>;
+      fallbackSingle: (rows: RowData[]) => Promise<void>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    batchSize: number,
+    tableId: string,
+  ): Promise<boolean> {
+    try {
+      const result = await config.executeBatch(batch);
+
+      if (result.error) {
+        return this.handleBulkError(
+          result.error,
+          remainingRows,
+          config,
+          batchSize,
+          tableId,
+        );
+      }
+      return false;
+    } catch (error: unknown) {
+      return this.handleBulkException(
+        error,
+        remainingRows,
+        config,
+        batchSize,
+        tableId,
+      );
+    }
+  }
+
+  private async handleBulkError(
+    error: unknown,
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (rows: RowData[]) => Promise<void>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    batchSize: number,
+    tableId: string,
+  ): Promise<boolean> {
+    if (this.is404Error(error)) {
+      await this.fallbackToSingleRowMode(remainingRows, config);
+      return true;
+    }
+
+    this.clearProgressLine();
+    const statusCode = this.getErrorStatusCode(error);
+    throw new UploadError(
+      `Batch ${config.operationName.replace('Rows', '')} failed: ${JSON.stringify(error)}`,
+      tableId,
+      statusCode,
+      batchSize,
+    );
+  }
+
+  private async handleBulkException(
+    error: unknown,
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (rows: RowData[]) => Promise<void>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+    batchSize: number,
+    tableId: string,
+  ): Promise<boolean> {
+    if (error instanceof UploadError) {
+      throw error;
+    }
+
+    if (this.is404Error(error)) {
+      await this.fallbackToSingleRowMode(remainingRows, config);
+      return true;
+    }
+
+    this.clearProgressLine();
+    const statusCode = this.getErrorStatusCode(error);
+    throw new UploadError(
+      `Batch ${config.operationName.replace('Rows', '')} exception: ${error instanceof Error ? error.message : String(error)}`,
+      tableId,
+      statusCode,
+      batchSize,
+    );
+  }
+
+  private async fallbackToSingleRowMode(
+    remainingRows: RowData[],
+    config: {
+      fallbackSingle: (rows: RowData[]) => Promise<void>;
+      setBulkSupported: (value: boolean) => void;
+      operationName: string;
+    },
+  ): Promise<void> {
+    this.clearProgressLine();
+    console.log(
+      `  ⚠️ Bulk ${config.operationName} not supported, falling back to single-row mode`,
+    );
+    config.setBulkSupported(false);
+    await config.fallbackSingle(remainingRows);
   }
 
   private async createRowsSingle(
@@ -857,8 +959,8 @@ export class UploadRowsCommand extends BaseCommand {
     required: false,
   })
   parseBatchSize(val: string) {
-    const size = parseInt(val, 10);
-    if (isNaN(size) || size < 1) {
+    const size = Number.parseInt(val, 10);
+    if (Number.isNaN(size) || size < 1) {
       throw new Error('Batch size must be a positive integer');
     }
     return size;

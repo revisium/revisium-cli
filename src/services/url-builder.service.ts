@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InteractiveService } from './interactive.service';
 
-export type RevisionTarget = string;
 export type AuthMethod = 'token' | 'apikey' | 'password';
 
 export interface AuthCredentials {
@@ -21,7 +20,7 @@ export interface RevisiumUrl {
   organization?: string;
   project?: string;
   branch?: string;
-  revision?: RevisionTarget;
+  revision?: string;
 }
 
 export interface RevisiumUrlComplete {
@@ -30,7 +29,7 @@ export interface RevisiumUrlComplete {
   organization: string;
   project: string;
   branch: string;
-  revision: RevisionTarget;
+  revision: string;
 }
 
 export interface UrlEnvConfig {
@@ -41,15 +40,15 @@ export interface UrlEnvConfig {
   password?: string;
 }
 
-const LOCALHOST_HOSTS = ['localhost', '127.0.0.1'];
+const LOCALHOST_HOSTS = new Set(['localhost', '127.0.0.1']);
 const DEFAULT_HTTP_PORT = 8080;
 const DEFAULT_BRANCH = 'master';
-const DEFAULT_REVISION: RevisionTarget = 'draft';
+const DEFAULT_REVISION = 'draft';
 const MIN_PORT = 1;
 const MAX_PORT = 65535;
 
 function validatePort(port: number, context: string): void {
-  if (isNaN(port) || port < MIN_PORT || port > MAX_PORT) {
+  if (Number.isNaN(port) || port < MIN_PORT || port > MAX_PORT) {
     throw new Error(
       `Invalid port ${context}: must be a number between ${MIN_PORT} and ${MAX_PORT}`,
     );
@@ -376,13 +375,13 @@ export class UrlBuilderService {
 
   private buildBaseUrlFromHost(hostWithPort: string): string {
     const [host, portStr] = hostWithPort.split(':');
-    const port = portStr ? parseInt(portStr, 10) : undefined;
+    const port = portStr ? Number.parseInt(portStr, 10) : undefined;
 
     if (port !== undefined) {
       validatePort(port, `in "${hostWithPort}"`);
     }
 
-    const isLocalhost = LOCALHOST_HOSTS.includes(host.toLowerCase());
+    const isLocalhost = LOCALHOST_HOSTS.has(host.toLowerCase());
     const protocol = isLocalhost ? 'http' : 'https';
 
     if (port) {
@@ -411,21 +410,21 @@ export class UrlBuilderService {
     const [host, existingPort] = hostWithPort.split(':');
 
     if (existingPort) {
-      const port = parseInt(existingPort, 10);
+      const port = Number.parseInt(existingPort, 10);
       validatePort(port, `in "${hostWithPort}"`);
-      const isLocalhost = LOCALHOST_HOSTS.includes(host.toLowerCase());
+      const isLocalhost = LOCALHOST_HOSTS.has(host.toLowerCase());
       const protocol = isLocalhost ? 'http' : 'https';
       return this.buildBaseUrl(protocol, host, port);
     }
 
-    const isLocalhost = LOCALHOST_HOSTS.includes(host.toLowerCase());
+    const isLocalhost = LOCALHOST_HOSTS.has(host.toLowerCase());
 
     if (isLocalhost) {
       const portStr = await this.interactive.promptText(
         `Enter port:`,
         String(DEFAULT_HTTP_PORT),
       );
-      const port = parseInt(portStr, 10);
+      const port = Number.parseInt(portStr, 10);
       validatePort(port, 'entered');
       return this.buildBaseUrl('http', host, port);
     }
@@ -438,7 +437,7 @@ export class UrlBuilderService {
         `Enter port:`,
         String(DEFAULT_HTTP_PORT),
       );
-      const port = parseInt(portStr, 10);
+      const port = Number.parseInt(portStr, 10);
       validatePort(port, 'entered');
       return this.buildBaseUrl(protocol, host, port);
     }
