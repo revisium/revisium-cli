@@ -21,7 +21,8 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - 🚀 **Migration Management** - Save and apply database migrations with optional auto-commit
 - 📋 **Schema Export/Import** - Export table schemas to JSON files and convert to migrations
 - 📊 **Data Export/Upload** - Export and upload table rows with smart dependency handling
-- ⚡ **Bulk Operations** - Efficient batch create/update with configurable batch size
+- ✏️ **Patches** - Selective field updates with validation, preview, and bulk apply
+- ⚡ **Bulk Operations** - Efficient batch create/update/patch with configurable batch size
 - 🔗 **Foreign Key Dependencies** - Automatic table sorting based on relationships
 - 💾 **Revision Control** - Create revisions automatically with --commit flag
 - 🐳 **Docker Deployment** - Containerized automation for CI/CD and production deployments
@@ -225,8 +226,10 @@ The preview command shows a compact list of changed rows with count of changes p
 Apply patches to update field values in the API. The command:
 
 - Validates patches against table schemas
-- Compares with current API data to detect changes
+- Compares with current API data to detect changes (bulk loading for speed)
 - Only applies patches where values differ from current data
+- Uses bulk API operations for efficient patching
+- Falls back to single-row operations for older API versions
 - Supports automatic revision creation with `--commit` flag
 
 ```bash
@@ -239,12 +242,23 @@ revisium patches apply --input ./patches.json
 # Apply patches and create a revision
 revisium patches apply --input ./patches --commit
 
+# Apply with custom batch size (default: 100)
+revisium patches apply --input ./patches --batch-size 500
+
 # Apply to specific branch
 revisium patches apply --input ./patches --branch development
 
 # Apply and create revision on specific branch
 revisium patches apply --input ./patches --branch development --commit
 ```
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--input <path>` | Folder or file with patch files | Required |
+| `--batch-size <n>` | Number of rows per batch | 100 |
+| `-c, --commit` | Create revision after applying | false |
 
 **What happens when applying patches:**
 
