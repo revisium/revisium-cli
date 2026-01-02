@@ -459,6 +459,472 @@ describe('ApplyPatchesCommand', () => {
     consoleSpy.mockRestore();
   });
 
+  it('logs correct count when some batches fail', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const manyPatches: PatchFile[] = Array.from({ length: 3 }, (_, i) => ({
+      version: '1.0',
+      table: 'Article',
+      rowId: `row-${i + 1}`,
+      createdAt: '2025-10-15T12:00:00Z',
+      patches: [{ op: 'replace', path: 'title', value: `Title ${i + 1}` }],
+    }));
+
+    loaderServiceFake.loadPatches.mockResolvedValue(manyPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue(
+      manyPatches.map(() => ({ valid: true, errors: [] })),
+    );
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: manyPatches.map((p) => ({
+        rowId: p.rowId,
+        patches: [{ path: 'title', status: 'CHANGE' }],
+      })),
+      summary: {
+        totalRows: 3,
+        totalChanges: 3,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.api.patchRows
+      .mockResolvedValueOnce({ data: {} })
+      .mockResolvedValueOnce({ error: { message: 'Server error' } });
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches', batchSize: 2 });
+    } catch {
+      // Expected
+    }
+
+    const logCalls = consoleSpy.mock.calls.map((call) => call[0] as string);
+    expect(
+      logCalls.some((call) => String(call).includes('Applied 2 rows')),
+    ).toBe(true);
+
+    consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
+  it('uses single-row mode when bulkPatchSupported is false', async () => {
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.bulkPatchSupported = false;
+    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
+  });
+
+  it('logs correct single-row count when some rows fail', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.bulkPatchSupported = false;
+    coreApiServiceFake.api.patchRow
+      .mockResolvedValueOnce({ data: {} })
+      .mockResolvedValueOnce({ error: { message: 'Failed' } });
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    const logCalls = consoleSpy.mock.calls.map((call) => call[0] as string);
+    expect(
+      logCalls.some((call) =>
+        String(call).includes('Applied 1 rows (single-row mode)'),
+      ),
+    ).toBe(true);
+
+    consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
+  it('falls back to single-row mode on 404 exception', async () => {
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+    coreApiServiceFake.api.patchRows.mockRejectedValue({ status: 404 });
+    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
+    expect(coreApiServiceFake.bulkPatchSupported).toBe(false);
+  });
+
+  it('handles batch exception that is not 404', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 2,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+    coreApiServiceFake.api.patchRows.mockRejectedValue(
+      new Error('Network error'),
+    );
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '\n❌ Batch patch exception:',
+      expect.any(Error),
+    );
+
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
+  it('skips rows with empty patches array', async () => {
+    const patchesWithEmpty: PatchFile[] = [
+      {
+        version: '1.0',
+        table: 'Article',
+        rowId: 'row-1',
+        createdAt: '2025-10-15T12:00:00Z',
+        patches: [],
+      },
+      {
+        version: '1.0',
+        table: 'Article',
+        rowId: 'row-2',
+        createdAt: '2025-10-15T12:00:00Z',
+        patches: [{ op: 'replace', path: 'status', value: 'published' }],
+      },
+    ];
+
+    loaderServiceFake.loadPatches.mockResolvedValue(patchesWithEmpty);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [],
+        },
+        {
+          rowId: 'row-2',
+          patches: [{ path: 'status', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 2,
+        totalChanges: 1,
+        skipped: 1,
+        errors: 0,
+      },
+    });
+    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
+      'revision-123',
+      'Article',
+      {
+        rows: [
+          {
+            rowId: 'row-2',
+            patches: [{ op: 'replace', path: 'status', value: 'published' }],
+          },
+        ],
+      },
+    );
+  });
+
+  it('skips single-row with empty patches in patchRowsSingle', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    const patchesWithEmpty: PatchFile[] = [
+      {
+        version: '1.0',
+        table: 'Article',
+        rowId: 'row-1',
+        createdAt: '2025-10-15T12:00:00Z',
+        patches: [],
+      },
+    ];
+
+    loaderServiceFake.loadPatches.mockResolvedValue(patchesWithEmpty);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 1,
+        totalChanges: 1,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.bulkPatchSupported = false;
+    commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
+
+    await command.run([], { input: './patches' });
+
+    const logCalls = consoleSpy.mock.calls.map((call) => call[0] as string);
+    expect(
+      logCalls.some((call) => String(call).includes('No changes to apply')),
+    ).toBe(true);
+    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('handles single-row apply exception', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    loaderServiceFake.loadPatches.mockResolvedValue([mockPatches[0]]);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 1,
+        totalChanges: 1,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.bulkPatchSupported = false;
+    coreApiServiceFake.api.patchRow.mockRejectedValue(
+      new Error('Connection failed'),
+    );
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '    Exception: Connection failed',
+    );
+
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
+  it('handles single-row apply with no data returned', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    loaderServiceFake.loadPatches.mockResolvedValue([mockPatches[0]]);
+    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
+      'revision-123',
+    );
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
+      { valid: true, errors: [] },
+    ]);
+    diffServiceFake.compareWithApi.mockResolvedValue({
+      table: 'Article',
+      rows: [
+        {
+          rowId: 'row-1',
+          patches: [{ path: 'title', status: 'CHANGE' }],
+        },
+      ],
+      summary: {
+        totalRows: 1,
+        totalChanges: 1,
+        skipped: 0,
+        errors: 0,
+      },
+    });
+
+    coreApiServiceFake.bulkPatchSupported = false;
+    coreApiServiceFake.api.patchRow.mockResolvedValue({});
+
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+      throw new Error('process.exit called');
+    }) as never);
+
+    try {
+      await command.run([], { input: './patches' });
+    } catch {
+      // Expected
+    }
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '    Error: No data returned from API',
+    );
+
+    consoleErrorSpy.mockRestore();
+    mockExit.mockRestore();
+  });
+
   function setupSuccessfulFlow() {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
     coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);

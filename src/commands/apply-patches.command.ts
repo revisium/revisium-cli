@@ -172,12 +172,14 @@ export class ApplyPatchesCommand extends BasePatchCommand {
       return;
     }
 
+    let batchApplied = 0;
+
     for (let i = 0; i < patchFiles.length; i += batchSize) {
       const batch = patchFiles.slice(i, i + batchSize);
 
       this.printProgress({
         tableId,
-        current: i,
+        current: batchApplied,
         total: patchFiles.length,
       });
 
@@ -212,6 +214,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
         this.coreApiService.bulkPatchSupported = true;
         stats.applied += batch.length;
+        batchApplied += batch.length;
       } catch (error) {
         if (this.is404Error(error)) {
           this.clearProgressLine();
@@ -230,11 +233,11 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
     this.printProgress({
       tableId,
-      current: patchFiles.length,
+      current: batchApplied,
       total: patchFiles.length,
     });
     this.clearProgressLine();
-    console.log(`  ✅ Applied ${patchFiles.length} rows`);
+    console.log(`  ✅ Applied ${batchApplied} rows`);
   }
 
   private async patchRowsSingle(

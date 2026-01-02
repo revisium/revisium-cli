@@ -232,6 +232,30 @@ describe('CoreApiService', () => {
     consoleSpy.mockRestore();
   });
 
+  describe('bulkPatchSupported', () => {
+    it('returns undefined by default', () => {
+      const service = createService({});
+
+      expect(service.bulkPatchSupported).toBeUndefined();
+    });
+
+    it('stores and retrieves true value', () => {
+      const service = createService({});
+
+      service.bulkPatchSupported = true;
+
+      expect(service.bulkPatchSupported).toBe(true);
+    });
+
+    it('stores and retrieves false value', () => {
+      const service = createService({});
+
+      service.bulkPatchSupported = false;
+
+      expect(service.bulkPatchSupported).toBe(false);
+    });
+  });
+
   const createService = (config: Record<string, string>) => {
     const configService = new ConfigService(config);
     return new CoreApiService(configService);
