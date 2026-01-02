@@ -292,11 +292,11 @@ export class UrlBuilderService {
 
     if (auth) {
       const firstColonIndex = auth.indexOf(':');
-      if (firstColonIndex !== -1) {
+      if (firstColonIndex === -1) {
+        username = auth;
+      } else {
         username = auth.substring(0, firstColonIndex);
         password = auth.substring(firstColonIndex + 1);
-      } else {
-        username = auth;
       }
     }
 
@@ -312,11 +312,11 @@ export class UrlBuilderService {
 
     if (branchWithRevision) {
       const colonIndex = branchWithRevision.indexOf(':');
-      if (colonIndex !== -1) {
+      if (colonIndex === -1) {
+        branch = branchWithRevision;
+      } else {
         branch = branchWithRevision.substring(0, colonIndex);
         revision = branchWithRevision.substring(colonIndex + 1);
-      } else {
-        branch = branchWithRevision;
       }
     }
 

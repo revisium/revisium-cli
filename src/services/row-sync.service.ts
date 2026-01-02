@@ -201,10 +201,10 @@ export class RowSyncService {
 
       if (existingData === undefined) {
         rowsToCreate.push(row);
-      } else if (!this.isDataIdentical(row.data, existingData)) {
-        rowsToUpdate.push(row);
-      } else {
+      } else if (this.isDataIdentical(row.data, existingData)) {
         skippedCount++;
+      } else {
+        rowsToUpdate.push(row);
       }
     }
 

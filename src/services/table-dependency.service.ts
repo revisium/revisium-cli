@@ -322,8 +322,10 @@ export class TableDependencyService {
 
       const reordered = !this.arraysEqual(originalOrder, result.sortedTables);
       if (reordered) {
-        lines.push(`📊 Original order: ${originalOrder.join(' → ')}`);
-        lines.push('✅ Tables reordered based on foreign key dependencies');
+        lines.push(
+          `📊 Original order: ${originalOrder.join(' → ')}`,
+          '✅ Tables reordered based on foreign key dependencies',
+        );
       } else {
         lines.push(
           'ℹ️  No reordering needed - tables already in correct order',
