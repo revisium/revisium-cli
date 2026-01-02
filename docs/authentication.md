@@ -8,17 +8,17 @@ JWT token from Revisium UI. Best for interactive use.
 
 ### Get Your Token
 
-- **Cloud:** https://cloud.revisium.io/get-mcp-token
+- **Cloud:** <https://cloud.revisium.io/get-mcp-token>
 - **Self-hosted:** `https://your-host/get-mcp-token`
 
 ### Usage
 
 ```bash
 # In URL query parameter
-revisium://cloud.revisium.io/org/proj?token=eyJhbGciOiJIUzI1NiIs...
+revisium://cloud.revisium.io/org/proj?token=<YOUR_TOKEN>
 
 # Via environment variable
-export REVISIUM_SOURCE_TOKEN=eyJhbGciOiJIUzI1NiIs...
+export REVISIUM_SOURCE_TOKEN=<YOUR_TOKEN>
 revisium sync all --source revisium://cloud.revisium.io/org/proj
 ```
 
@@ -55,7 +55,7 @@ export REVISIUM_SOURCE_PASSWORD=secret
 
 If no credentials are provided, you'll be prompted:
 
-```
+```text
 [source] Choose authentication method:
   ❯ Token (copy from https://cloud.revisium.io/get-mcp-token)
     API Key (for automated access)

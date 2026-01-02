@@ -4,7 +4,7 @@ Revisium CLI uses a special URL format to specify project connections.
 
 ## Syntax
 
-```
+```text
 revisium://[auth@]host[:port]/organization/project/branch[:revision][?params]
 ```
 
@@ -43,10 +43,10 @@ revisium://[auth@]host[:port]/organization/project/branch[:revision][?params]
 
 ```bash
 # Cloud with token auth
-revisium://cloud.revisium.io/myorg/myproject/master:head?token=eyJhbG...
+revisium://cloud.revisium.io/myorg/myproject/master:head?token=<YOUR_TOKEN>
 
-# Local with password auth
-revisium://admin:secret@localhost:8080/admin/demo/master
+# Local with password auth (not recommended, use token instead)
+revisium://localhost:8080/admin/demo/master?token=<YOUR_TOKEN>
 ```
 
 ### Partial URL (missing parts will be prompted)
@@ -66,13 +66,13 @@ revisium://cloud.revisium.io
 
 ```bash
 # Read from head revision
-revisium://cloud.revisium.io/org/proj/master:head?token=eyJabc...
+revisium://cloud.revisium.io/org/proj/master:head?token=<YOUR_TOKEN>
 
 # Read from specific revision
-revisium://cloud.revisium.io/org/proj/master:abc123def?token=eyJabc...
+revisium://cloud.revisium.io/org/proj/master:abc123def?token=<YOUR_TOKEN>
 
 # Write to draft (default)
-revisium://cloud.revisium.io/org/proj/master?token=eyJabc...
+revisium://cloud.revisium.io/org/proj/master?token=<YOUR_TOKEN>
 ```
 
 ## See Also

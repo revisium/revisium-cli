@@ -30,7 +30,7 @@ revisium schema save --folder ./schemas --branch develop
 
 Creates one JSON file per table in the specified folder:
 
-```
+```text
 schemas/
 ├── users.json
 ├── posts.json

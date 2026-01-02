@@ -34,7 +34,7 @@ revisium rows save --folder ./data --branch develop
 
 Creates a folder structure with one JSON file per row:
 
-```
+```text
 data/
 ├── users/
 │   ├── user-1.json
@@ -108,7 +108,7 @@ Uses batch API for efficient uploads:
 
 Tables are automatically sorted based on foreign key relationships:
 
-```
+```text
 # Given these dependencies:
 # users → posts (users references posts)
 # posts → images (posts references images)

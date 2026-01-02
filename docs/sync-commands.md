@@ -140,11 +140,11 @@ For non-interactive usage:
 ```bash
 # Source
 REVISIUM_SOURCE_URL=revisium://cloud.revisium.io/org/proj/master:head
-REVISIUM_SOURCE_TOKEN=eyJhbGciOiJIUzI1NiIs...
+REVISIUM_SOURCE_TOKEN=<YOUR_SOURCE_TOKEN>
 
 # Target
 REVISIUM_TARGET_URL=revisium://localhost:8080/org/proj
-REVISIUM_TARGET_TOKEN=eyJhbGciOiJIUzI1NiIs...
+REVISIUM_TARGET_TOKEN=<YOUR_TARGET_TOKEN>
 ```
 
 Then run without URL arguments:
@@ -158,9 +158,12 @@ revisium sync all --commit
 ### Cloud to Local
 
 ```bash
+export REVISIUM_SOURCE_TOKEN=<YOUR_SOURCE_TOKEN>
+export REVISIUM_TARGET_TOKEN=<YOUR_TARGET_TOKEN>
+
 revisium sync all \
-  --source revisium://admin:pass@cloud.revisium.io/sandbox/demo/master:head \
-  --target revisium://admin:pass@localhost:8080/admin/local/master \
+  --source revisium://cloud.revisium.io/sandbox/demo/master:head \
+  --target revisium://localhost:8080/admin/local/master \
   --commit
 ```
 
