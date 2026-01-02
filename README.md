@@ -22,6 +22,7 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - 📋 **Schema Export/Import** - Export table schemas to JSON files and convert to migrations
 - 📊 **Data Export/Upload** - Export and upload table rows with smart dependency handling
 - ✏️ **Patches** - Selective field updates with validation, preview, and bulk apply
+- 🔄 **Project Sync** - Synchronize schema and data between Revisium projects
 - ⚡ **Bulk Operations** - Efficient batch create/update/patch with configurable batch size
 - 🔗 **Foreign Key Dependencies** - Automatic table sorting based on relationships
 - 💾 **Revision Control** - Create revisions automatically with --commit flag
@@ -97,6 +98,9 @@ revisium schema save --folder ./schemas --organization my-org --branch dev
 - **`patches save`** - Save field values as patches for selective updates
 - **`patches preview`** - Preview diff between patches and current API data
 - **`patches apply`** - Apply patches to rows in API (supports `--commit`)
+- **`sync schema`** - Synchronize schema migrations between Revisium projects
+- **`sync data`** - Synchronize table data between Revisium projects
+- **`sync all`** - Full synchronization (schema + data) between Revisium projects
 
 ### Global Options
 
@@ -401,6 +405,273 @@ revisium rows upload --folder ./data --commit
 3. **Batch upload** - Uses bulk API operations with configurable batch size
 4. **Fallback mode** - If bulk API is unavailable, falls back to single-row operations
 5. **Progress display** - Shows real-time progress with row counts
+
+## Sync Commands
+
+The sync commands enable synchronization between two Revisium projects, potentially on different instances. This is useful for:
+
+- **Content Migration**: Move content between environments (staging → production)
+- **Schema Replication**: Keep schemas in sync across multiple instances
+- **Backup/Restore**: Replicate data to backup instances
+- **Multi-tenant Sync**: Synchronize content across tenant projects
+
+### URL Format
+
+Sync commands use a special URL format to specify source and target projects:
+
+```
+revisium://[username[:password]@]host[:port]/organization/project/branch[:revision][?token=...]
+```
+
+**URL Parts:**
+
+| Part | Description | Default |
+|------|-------------|---------|
+| `host` | Revisium server hostname | Required |
+| `port` | Server port | 443 (https) or 8080 (http) |
+| `organization` | Organization name | Prompted |
+| `project` | Project name | Prompted |
+| `branch` | Branch name | `master` |
+| `revision` | Revision target (after `:`) | `draft` |
+
+**Revision Values:**
+
+| Value | Description |
+|-------|-------------|
+| `draft` | Draft (uncommitted) revision - **default** |
+| `head` | Head (last committed) revision |
+| `<revision-id>` | Specific revision by ID |
+
+**Important:** Target revision must always be `draft` (sync writes to draft). Source can be any revision.
+
+### Authentication Methods
+
+Three authentication methods are supported (mutually exclusive):
+
+| Method | URL Format | Description |
+|--------|------------|-------------|
+| **Token** | `?token=eyJ...` | JWT token from UI (recommended) |
+| **API Key** | `?apikey=ak_...` | API key for automation (future) |
+| **Password** | `user:pass@host` | Username and password |
+
+**Token Authentication (Recommended):**
+
+Get your token from the Revisium UI:
+- For cloud.revisium.io: https://cloud.revisium.io/get-mcp-token
+- For self-hosted: `https://your-host/get-mcp-token`
+
+```bash
+# Using token (query parameter)
+revisium://cloud.revisium.io/org/proj/master:head?token=eyJhbGciOiJIUzI1NiIs...
+
+# Token via environment variable
+export REVISIUM_SOURCE_TOKEN=eyJhbGciOiJIUzI1NiIs...
+revisium sync all --source revisium://cloud.revisium.io/org/proj/master:head
+```
+
+**Password Authentication:**
+
+```bash
+# Credentials in URL
+revisium://admin:secret@cloud.revisium.io/org/proj/master:head
+
+# Credentials via environment variables
+export REVISIUM_SOURCE_USERNAME=admin
+export REVISIUM_SOURCE_PASSWORD=secret
+```
+
+**Interactive Mode:**
+
+If no credentials are provided, you'll be prompted to choose:
+
+```
+[source] Choose authentication method:
+  ❯ Token (copy from https://cloud.revisium.io/get-mcp-token)
+    API Key (for automated access)
+    Username & Password
+
+[source] Paste token: ****
+  ✓ Authenticated as admin
+```
+
+**Validation:**
+
+You cannot mix authentication methods. These will fail:
+
+```bash
+# ❌ Cannot use both credentials and token
+revisium://admin:pass@host/org/proj?token=xxx
+
+# ❌ Cannot use both token and apikey
+revisium://host/org/proj?token=xxx&apikey=yyy
+```
+
+**Examples:**
+
+```bash
+# Token auth - source from head revision
+revisium://cloud.revisium.io/org/proj/master:head?token=eyJhbG...
+
+# Password auth - source from draft (default)
+revisium://admin:secret@cloud.revisium.io/myorg/myproject/develop
+
+# Source from specific revision ID with token
+revisium://cloud.revisium.io/org/proj/master:abc123def?token=eyJhbG...
+
+# Localhost with port, reading from head
+revisium://localhost:8080/org/proj/master:head?token=eyJhbG...
+
+# URL without auth (will prompt interactively)
+revisium://cloud.revisium.io/org/proj
+```
+
+**Protocol Detection:**
+
+| Host | Protocol | Port |
+|------|----------|------|
+| `localhost` | http | Prompted (default: 8080) |
+| `127.0.0.1` | http | Prompted (default: 8080) |
+| Other hosts | Prompted (default: https) | Auto (443 for https) |
+
+### Sync Schema
+
+Synchronize schema migrations from source to target:
+
+```bash
+revisium sync schema \
+  --source revisium://admin:pass@source.example.com/org/proj/master \
+  --target revisium://admin:pass@target.example.com/org/proj/master \
+  [--commit] \
+  [--dry-run]
+```
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-s, --source <url>` | Source project URL | Required |
+| `-t, --target <url>` | Target project URL | Required |
+| `-c, --commit` | Create revision after sync | false |
+| `--dry-run` | Preview without applying | false |
+
+**What it does:**
+
+1. Connects to source and target projects
+2. Fetches migrations from source revision (default: draft, can specify head or revision ID)
+3. Applies migrations to target draft revision
+4. Optionally commits changes
+
+### Sync Data
+
+Synchronize table rows from source to target:
+
+```bash
+revisium sync data \
+  --source revisium://admin:pass@source.example.com/org/proj/master \
+  --target revisium://admin:pass@target.example.com/org/proj/master \
+  [--tables Article,Category] \
+  [--batch-size 100] \
+  [--commit] \
+  [--dry-run]
+```
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-s, --source <url>` | Source project URL | Required |
+| `-t, --target <url>` | Target project URL | Required |
+| `--tables <list>` | Comma-separated tables to sync | All tables |
+| `--batch-size <n>` | Rows per batch for bulk operations | 100 |
+| `-c, --commit` | Create revision after sync | false |
+| `--dry-run` | Preview without applying | false |
+
+**What it does:**
+
+1. Connects to source and target projects
+2. Fetches rows from source revision (default: draft, can specify head or revision ID)
+3. Compares with target draft rows (using object-hash)
+4. Creates missing rows, updates changed rows, skips identical
+5. Uses bulk operations with fallback to single-row
+6. Optionally commits changes
+
+### Sync All
+
+Full synchronization: schema first, then data:
+
+```bash
+revisium sync all \
+  --source revisium://admin:pass@source.example.com/org/proj/master \
+  --target revisium://admin:pass@target.example.com/org/proj/master \
+  [--tables Article,Category] \
+  [--batch-size 100] \
+  [--commit] \
+  [--dry-run]
+```
+
+**Options:**
+
+Combines all options from `sync schema` and `sync data`.
+
+### Environment Variables
+
+Sync commands support environment variables for non-interactive usage:
+
+```bash
+# Source configuration
+REVISIUM_SOURCE_URL=revisium://cloud.revisium.io/org/proj/master:head
+REVISIUM_SOURCE_TOKEN=eyJhbGciOiJIUzI1NiIs...    # Token auth (recommended)
+# OR
+REVISIUM_SOURCE_API_KEY=ak_xxx...                 # API key auth (future)
+# OR
+REVISIUM_SOURCE_USERNAME=admin                    # Password auth
+REVISIUM_SOURCE_PASSWORD=secret
+
+# Target configuration
+REVISIUM_TARGET_URL=revisium://localhost:8080/org/proj/master
+REVISIUM_TARGET_TOKEN=eyJhbGciOiJIUzI1NiIs...
+# OR
+REVISIUM_TARGET_USERNAME=admin
+REVISIUM_TARGET_PASSWORD=local-pass
+```
+
+**Priority:**
+
+1. URL auth (`?token=...` or `user:pass@host`)
+2. Environment variables (`TOKEN` > `API_KEY` > `USERNAME/PASSWORD`)
+3. Interactive prompts (for missing values)
+
+### Examples
+
+```bash
+# Full sync from cloud to local
+revisium sync all \
+  --source revisium://admin:cloud-pass@cloud.revisium.io/sandbox/demo/master \
+  --target revisium://admin:local-pass@localhost:8080/admin/local-copy/master \
+  --commit
+
+# Sync only schema (dry run)
+revisium sync schema \
+  --source revisium://cloud.revisium.io/org/proj \
+  --target revisium://localhost:8080/org/proj \
+  --dry-run
+
+# Sync specific tables
+revisium sync data \
+  --source revisium://admin@cloud.revisium.io/org/proj/master \
+  --target revisium://admin@localhost:8080/org/proj/master \
+  --tables Article,Category,Tag
+
+# Using environment variables (non-interactive)
+export REVISIUM_SOURCE_URL=revisium://cloud.revisium.io/org/proj/master
+export REVISIUM_SOURCE_USERNAME=admin
+export REVISIUM_SOURCE_PASSWORD=secret
+export REVISIUM_TARGET_URL=revisium://localhost:8080/org/proj/master
+export REVISIUM_TARGET_USERNAME=admin
+export REVISIUM_TARGET_PASSWORD=local
+
+revisium sync all --commit
+```
 
 ## Foreign Key Dependencies
 
