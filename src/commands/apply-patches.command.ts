@@ -243,6 +243,8 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     patchFiles: PatchFile[],
     stats: ApplyStats,
   ): Promise<void> {
+    let singleRowApplied = 0;
+
     for (let i = 0; i < patchFiles.length; i++) {
       const patchFile = patchFiles[i];
 
@@ -256,6 +258,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
       if (result === 'applied') {
         stats.applied++;
+        singleRowApplied++;
       } else if (result === 'skipped') {
         stats.skipped++;
       } else if (result === 'validationError') {
@@ -271,7 +274,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
       total: patchFiles.length,
     });
     this.clearProgressLine();
-    console.log(`  ✅ Applied ${stats.applied} rows (single-row mode)`);
+    console.log(`  ✅ Applied ${singleRowApplied} rows (single-row mode)`);
   }
 
   private is404Error(error: unknown): boolean {
