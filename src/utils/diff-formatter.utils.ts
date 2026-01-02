@@ -15,10 +15,9 @@ export function formatDiffAsTable(diff: DiffResult): string {
 
     const changesText =
       changes.length === 1 ? '1 change' : `${changes.length} changes`;
+    const errorSuffix = errors.length === 1 ? '' : 's';
     const errorsText =
-      errors.length > 0
-        ? `, ${errors.length} error${errors.length === 1 ? '' : 's'}`
-        : '';
+      errors.length > 0 ? `, ${errors.length} error${errorSuffix}` : '';
 
     lines.push(`🔄 ${row.rowId} (${changesText}${errorsText})`);
   }
@@ -39,7 +38,7 @@ export function formatValue(value: unknown): string {
     const str = JSON.stringify(value);
     return str.length > 100 ? str.slice(0, 97) + '...' : str;
   } catch {
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === 'object') {
       return '[Object]';
     }
     if (typeof value === 'string') {

@@ -1,5 +1,5 @@
+import { readFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
-import { readFile } from 'fs/promises';
 import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';

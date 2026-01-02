@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { UploadRowsCommand } from '../upload-rows.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
@@ -10,7 +10,7 @@ import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 
-jest.mock('fs/promises');
+jest.mock('node:fs/promises');
 
 const mockReaddir = readdir as jest.MockedFunction<typeof readdir>;
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;

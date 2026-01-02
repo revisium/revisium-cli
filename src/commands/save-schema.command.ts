@@ -1,5 +1,5 @@
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';

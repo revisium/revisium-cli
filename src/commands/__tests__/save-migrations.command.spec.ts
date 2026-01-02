@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { writeFile } from 'fs/promises';
-import { mkdir, rm } from 'fs/promises';
-import { join } from 'path';
+import { writeFile } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import * as os from 'os';
 import { SaveMigrationsCommand } from '../save-migrations.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 
-jest.mock('fs/promises');
+jest.mock('node:fs/promises');
 
 const mockWriteFile = writeFile as jest.MockedFunction<typeof writeFile>;
 const mockMkdir = mkdir as jest.MockedFunction<typeof mkdir>;

@@ -105,15 +105,35 @@ export class ApplyPatchesCommand extends BasePatchCommand {
       applyErrors: 0,
     };
 
+    const rowsWithChanges = this.buildRowsWithChangesMap(diff);
+    const patchesByTable = this.groupPatchesByTable(patchFiles, stats);
+
+    await this.processAllTables(
+      patchesByTable,
+      rowsWithChanges,
+      stats,
+      revisionId,
+      batchSize,
+    );
+
+    return stats;
+  }
+
+  private buildRowsWithChangesMap(diff: DiffResult): Map<string, boolean> {
     const rowsWithChanges = new Map<string, boolean>();
     for (const row of diff.rows) {
       const hasChanges = row.patches.some((p) => p.status === 'CHANGE');
       if (hasChanges) {
-        const compositeKey = `${diff.table}:${row.rowId}`;
-        rowsWithChanges.set(compositeKey, true);
+        rowsWithChanges.set(`${diff.table}:${row.rowId}`, true);
       }
     }
+    return rowsWithChanges;
+  }
 
+  private groupPatchesByTable(
+    patchFiles: PatchFile[],
+    stats: ApplyStats,
+  ): Map<string, PatchFile[]> {
     const patchesByTable = new Map<string, PatchFile[]>();
     for (const patchFile of patchFiles) {
       if (!patchesByTable.has(patchFile.table)) {
@@ -122,39 +142,82 @@ export class ApplyPatchesCommand extends BasePatchCommand {
       patchesByTable.get(patchFile.table)?.push(patchFile);
       stats.totalPatches += patchFile.patches.length;
     }
+    return patchesByTable;
+  }
 
+  private async processAllTables(
+    patchesByTable: Map<string, PatchFile[]>,
+    rowsWithChanges: Map<string, boolean>,
+    stats: ApplyStats,
+    revisionId: string,
+    batchSize: number,
+  ): Promise<void> {
     for (const [table, tablePatchFiles] of patchesByTable) {
       console.log(`\n📋 Applying patches to table: ${table}`);
-
-      const rowsToApply: PatchFile[] = [];
-      for (const patchFile of tablePatchFiles) {
-        const compositeKey = `${table}:${patchFile.rowId}`;
-        if (!rowsWithChanges.has(compositeKey)) {
-          stats.skipped++;
-          continue;
-        }
-        if (patchFile.patches.length === 0) {
-          stats.skipped++;
-          continue;
-        }
-        rowsToApply.push(patchFile);
-      }
-
-      if (rowsToApply.length === 0) {
-        console.log(`  ⏭️  No changes to apply`);
-        continue;
-      }
-
-      await this.processBatchPatch(
-        revisionId,
+      await this.processTablePatches(
         table,
-        rowsToApply,
+        tablePatchFiles,
+        rowsWithChanges,
         stats,
+        revisionId,
         batchSize,
       );
     }
+  }
 
-    return stats;
+  private async processTablePatches(
+    table: string,
+    tablePatchFiles: PatchFile[],
+    rowsWithChanges: Map<string, boolean>,
+    stats: ApplyStats,
+    revisionId: string,
+    batchSize: number,
+  ): Promise<void> {
+    const rowsToApply = this.filterApplicableRows(
+      table,
+      tablePatchFiles,
+      rowsWithChanges,
+      stats,
+    );
+
+    if (rowsToApply.length === 0) {
+      console.log(`  ⏭️  No changes to apply`);
+      return;
+    }
+
+    await this.processBatchPatch(
+      revisionId,
+      table,
+      rowsToApply,
+      stats,
+      batchSize,
+    );
+  }
+
+  private filterApplicableRows(
+    table: string,
+    tablePatchFiles: PatchFile[],
+    rowsWithChanges: Map<string, boolean>,
+    stats: ApplyStats,
+  ): PatchFile[] {
+    const rowsToApply: PatchFile[] = [];
+    for (const patchFile of tablePatchFiles) {
+      if (this.shouldSkipPatch(table, patchFile, rowsWithChanges)) {
+        stats.skipped++;
+        continue;
+      }
+      rowsToApply.push(patchFile);
+    }
+    return rowsToApply;
+  }
+
+  private shouldSkipPatch(
+    table: string,
+    patchFile: PatchFile,
+    rowsWithChanges: Map<string, boolean>,
+  ): boolean {
+    const compositeKey = `${table}:${patchFile.rowId}`;
+    return !rowsWithChanges.has(compositeKey) || patchFile.patches.length === 0;
   }
 
   private async processBatchPatch(
@@ -382,8 +445,8 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     required: false,
   })
   parseBatchSize(val: string) {
-    const size = parseInt(val, 10);
-    if (isNaN(size) || size < 1) {
+    const size = Number.parseInt(val, 10);
+    if (Number.isNaN(size) || size < 1) {
       throw new Error('Batch size must be a positive integer');
     }
     return size;

@@ -148,8 +148,8 @@ export class SyncDataCommand extends BaseCommand {
     description: 'Batch size for bulk operations (default: 100)',
   })
   parseBatchSize(value: string) {
-    const size = parseInt(value, 10);
-    if (isNaN(size) || size < 1) {
+    const size = Number.parseInt(value, 10);
+    if (Number.isNaN(size) || size < 1) {
       throw new Error('Batch size must be a positive integer');
     }
     return size;

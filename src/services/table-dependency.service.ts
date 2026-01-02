@@ -148,42 +148,82 @@ export class TableDependencyService {
     dependencies: TableDependency[],
     circularDependencies: string[][],
   ): string[] {
-    const dependencyMap = new Map<string, string[]>();
-    const inDegree = new Map<string, number>();
-    const circularTables = new Set<string>();
+    const circularTables = this.collectCircularTables(circularDependencies);
+    const dependencyMap = this.buildDependencyMap(dependencies);
+    const inDegree = this.calculateInDegrees(dependencies, circularTables);
 
-    // Collect all circular tables
+    const result = this.runKahnsAlgorithm(
+      dependencyMap,
+      inDegree,
+      circularTables,
+    );
+
+    this.appendRemainingCircularTables(result, circularTables);
+
+    return result;
+  }
+
+  private collectCircularTables(circularDependencies: string[][]): Set<string> {
+    const circularTables = new Set<string>();
     for (const cycle of circularDependencies) {
       for (const table of cycle) {
         circularTables.add(table);
       }
     }
+    return circularTables;
+  }
 
-    // Build dependency map and calculate in-degrees
+  private buildDependencyMap(
+    dependencies: TableDependency[],
+  ): Map<string, string[]> {
+    const dependencyMap = new Map<string, string[]>();
     for (const dep of dependencies) {
       dependencyMap.set(dep.tableId, dep.dependsOn);
+    }
+    return dependencyMap;
+  }
+
+  private calculateInDegrees(
+    dependencies: TableDependency[],
+    circularTables: Set<string>,
+  ): Map<string, number> {
+    const inDegree = new Map<string, number>();
+
+    for (const dep of dependencies) {
       inDegree.set(dep.tableId, 0);
     }
 
-    // Calculate in-degrees (excluding circular dependencies to break cycles)
     for (const dep of dependencies) {
       for (const target of dep.dependsOn) {
-        if (inDegree.has(target)) {
-          // Skip edges that are part of circular dependencies
-          if (circularTables.has(dep.tableId) && circularTables.has(target)) {
-            continue;
-          }
-          // Increment in-degree for the dependent table, not the dependency
-          inDegree.set(dep.tableId, (inDegree.get(dep.tableId) || 0) + 1);
+        if (!inDegree.has(target)) {
+          continue;
         }
+        if (this.isCircularEdge(dep.tableId, target, circularTables)) {
+          continue;
+        }
+        inDegree.set(dep.tableId, (inDegree.get(dep.tableId) ?? 0) + 1);
       }
     }
 
-    // Kahn's algorithm for topological sorting
+    return inDegree;
+  }
+
+  private isCircularEdge(
+    from: string,
+    to: string,
+    circularTables: Set<string>,
+  ): boolean {
+    return circularTables.has(from) && circularTables.has(to);
+  }
+
+  private runKahnsAlgorithm(
+    dependencyMap: Map<string, string[]>,
+    inDegree: Map<string, number>,
+    circularTables: Set<string>,
+  ): string[] {
     const result: string[] = [];
     const queue: string[] = [];
 
-    // Find all tables with no dependencies
     for (const [tableId, degree] of inDegree.entries()) {
       if (degree === 0) {
         queue.push(tableId);
@@ -194,37 +234,54 @@ export class TableDependencyService {
       const currentTable = queue.shift()!;
       result.push(currentTable);
 
-      // Find all tables that depend on the current table
-      for (const [tableId, deps] of dependencyMap.entries()) {
-        if (deps.includes(currentTable)) {
-          if (inDegree.has(tableId)) {
-            // Skip edges that are part of circular dependencies
-            if (
-              circularTables.has(currentTable) &&
-              circularTables.has(tableId)
-            ) {
-              continue;
-            }
-
-            const newDegree = (inDegree.get(tableId) || 0) - 1;
-            inDegree.set(tableId, newDegree);
-
-            if (newDegree === 0) {
-              queue.push(tableId);
-            }
-          }
-        }
-      }
+      this.updateDependentTables(
+        currentTable,
+        dependencyMap,
+        inDegree,
+        circularTables,
+        queue,
+      );
     }
 
-    // Add any remaining circular tables at the end
+    return result;
+  }
+
+  private updateDependentTables(
+    currentTable: string,
+    dependencyMap: Map<string, string[]>,
+    inDegree: Map<string, number>,
+    circularTables: Set<string>,
+    queue: string[],
+  ): void {
+    for (const [tableId, deps] of dependencyMap.entries()) {
+      if (!deps.includes(currentTable)) {
+        continue;
+      }
+      if (!inDegree.has(tableId)) {
+        continue;
+      }
+      if (this.isCircularEdge(currentTable, tableId, circularTables)) {
+        continue;
+      }
+
+      const newDegree = (inDegree.get(tableId) ?? 0) - 1;
+      inDegree.set(tableId, newDegree);
+
+      if (newDegree === 0) {
+        queue.push(tableId);
+      }
+    }
+  }
+
+  private appendRemainingCircularTables(
+    result: string[],
+    circularTables: Set<string>,
+  ): void {
     for (const tableId of circularTables) {
       if (!result.includes(tableId)) {
         result.push(tableId);
       }
     }
-
-    return result;
   }
 
   /**

@@ -1,4 +1,4 @@
-import { writeFile } from 'fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { CoreApiService } from 'src/services/core-api.service';

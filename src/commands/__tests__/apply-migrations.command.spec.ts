@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import { ApplyMigrationsCommand } from '../apply-migrations.command';
 import { CoreApiService } from 'src/services/core-api.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 
-jest.mock('fs/promises');
+jest.mock('node:fs/promises');
 
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 
