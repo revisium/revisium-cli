@@ -104,6 +104,15 @@ export class CommitRevisionService {
       throw error;
     }
 
+    if (result.error) {
+      const errorMessage =
+        typeof result.error === 'string'
+          ? result.error
+          : JSON.stringify(result.error);
+      this.logger.commitError(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     if (result.data) {
       this.logger.commitSuccess(result.data.id);
       return { revisionId: result.data.id };
