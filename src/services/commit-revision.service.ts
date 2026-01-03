@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConnectionInfo as SyncConnectionInfo } from './sync-api.service';
 import { ConnectionService } from './connection.service';
+import { LoggerService } from './logger.service';
 
 export interface CommitResult {
   revisionId: string;
@@ -8,13 +9,16 @@ export interface CommitResult {
 
 @Injectable()
 export class CommitRevisionService {
-  constructor(private readonly connectionService: ConnectionService) {}
+  constructor(
+    private readonly connectionService: ConnectionService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async commitChanges(
     actionDescription: string,
     changeCount: number,
   ): Promise<CommitResult> {
-    console.log('💾 Creating revision...');
+    this.logger.commit();
 
     const connection = this.connectionService.connection;
     const comment = this.generateCommitComment(actionDescription, changeCount);
@@ -28,16 +32,16 @@ export class CommitRevisionService {
       );
 
       if (result.data) {
-        console.log(`✅ Created revision: ${result.data.id}`);
+        this.logger.commitSuccess(result.data.id);
         return { revisionId: result.data.id };
       } else {
-        console.error('❌ Failed to create revision: No data returned');
+        this.logger.commitError('No data returned');
         throw new Error('Failed to create revision');
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(`❌ Failed to create revision: ${errorMessage}`);
+      this.logger.commitError(errorMessage);
       throw error;
     }
   }
@@ -50,8 +54,8 @@ export class CommitRevisionService {
     if (changeCount && commit) {
       await this.commitChanges(actionDescription, changeCount);
     } else if (changeCount && !commit) {
-      console.log(
-        '⚠️  Changes applied to draft. Use --commit to create a revision.',
+      this.logger.warn(
+        'Changes applied to draft. Use --commit to create a revision.',
       );
     }
   }
@@ -65,7 +69,7 @@ export class CommitRevisionService {
       return;
     }
 
-    console.log('💾 Creating revision...');
+    this.logger.commit();
 
     const comment = this.generateCommitComment(actionDescription, changeCount);
 
@@ -78,15 +82,15 @@ export class CommitRevisionService {
       );
 
       if (result.data) {
-        console.log(`✅ Created revision: ${result.data.id}`);
+        this.logger.commitSuccess(result.data.id);
       } else {
-        console.error('❌ Failed to create revision: No data returned');
+        this.logger.commitError('No data returned');
         throw new Error('Failed to create revision');
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(`❌ Failed to create revision: ${errorMessage}`);
+      this.logger.commitError(errorMessage);
       throw error;
     }
   }

@@ -8,6 +8,7 @@ import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncDataService } from 'src/services/sync-data.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { LoggerService } from 'src/services/logger.service';
 
 type DataSyncResult = {
   totalRowsCreated: number;
@@ -32,12 +33,13 @@ export class SyncDataCommand extends BaseSyncCommand {
     syncApi: SyncApiService,
     commitRevision: CommitRevisionService,
     private readonly syncData: SyncDataService,
+    private readonly logger: LoggerService,
   ) {
     super(configService, urlBuilder, syncApi, commitRevision);
   }
 
   async run(_inputs: string[], options: DataSyncOptions): Promise<void> {
-    console.log('\n🔄 Starting data synchronization...\n');
+    this.logger.section('🔄 Starting data synchronization...\n');
 
     await this.connectSourceAndTarget(options);
 
@@ -50,7 +52,7 @@ export class SyncDataCommand extends BaseSyncCommand {
     });
 
     if (options.dryRun) {
-      console.log('\n📋 Dry run complete - no changes were made');
+      this.logger.section('📋 Dry run complete - no changes were made');
       this.printDataSummary(result);
       return;
     }
@@ -58,22 +60,22 @@ export class SyncDataCommand extends BaseSyncCommand {
     const totalChanges = result.totalRowsCreated + result.totalRowsUpdated;
 
     if (totalChanges === 0) {
-      console.log('\n✅ Data is already in sync - no changes needed');
+      this.logger.section('✅ Data is already in sync - no changes needed');
       return;
     }
 
-    console.log('\n✅ Data sync complete');
+    this.logger.section('✅ Data sync complete');
     this.printDataSummary(result);
 
     await this.commitIfNeeded(options.commit, 'Synced', totalChanges);
   }
 
   private printDataSummary(result: DataSyncResult): void {
-    console.log(`   Rows created: ${result.totalRowsCreated}`);
-    console.log(`   Rows updated: ${result.totalRowsUpdated}`);
-    console.log(`   Rows skipped: ${result.totalRowsSkipped}`);
+    this.logger.info(`   Rows created: ${result.totalRowsCreated}`);
+    this.logger.info(`   Rows updated: ${result.totalRowsUpdated}`);
+    this.logger.info(`   Rows skipped: ${result.totalRowsSkipped}`);
     if (result.totalErrors > 0) {
-      console.log(`   Errors: ${result.totalErrors}`);
+      this.logger.info(`   Errors: ${result.totalErrors}`);
     }
   }
 }

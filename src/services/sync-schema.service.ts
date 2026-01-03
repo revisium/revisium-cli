@@ -1,22 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { SyncApiService, ConnectionInfo } from './sync-api.service';
+import { LoggerService } from './logger.service';
 import { SchemaSyncResult } from '../types/sync.types';
 import { Migration } from '../types/migration.types';
 
 @Injectable()
 export class SyncSchemaService {
-  constructor(private readonly syncApi: SyncApiService) {}
+  constructor(
+    private readonly syncApi: SyncApiService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async sync(dryRun: boolean = false): Promise<SchemaSyncResult> {
     const source = this.syncApi.source;
     const target = this.syncApi.target;
 
-    console.log('\n📋 Syncing schema...');
+    this.logger.syncSection('Syncing schema...');
 
     const migrations = await this.getMigrations(source);
 
     if (migrations.length === 0) {
-      console.log('  ✓ No migrations found in source');
+      this.logger.syncSuccess('No migrations found in source');
       return {
         migrationsApplied: 0,
         tablesCreated: [],
@@ -25,7 +29,7 @@ export class SyncSchemaService {
       };
     }
 
-    console.log(`  Found ${migrations.length} migration(s) in source`);
+    this.logger.indent(`Found ${migrations.length} migration(s) in source`);
 
     if (dryRun) {
       return this.analyzeMigrations(migrations);
@@ -67,15 +71,15 @@ export class SyncSchemaService {
       }
     }
 
-    console.log('\n  📊 Dry run summary:');
+    this.logger.dryRunSection();
     if (tablesCreated.length > 0) {
-      console.log(`    Tables to create: ${tablesCreated.join(', ')}`);
+      this.logger.dryRunResult(`Tables to create: ${tablesCreated.join(', ')}`);
     }
     if (tablesUpdated.length > 0) {
-      console.log(`    Tables to update: ${tablesUpdated.join(', ')}`);
+      this.logger.dryRunResult(`Tables to update: ${tablesUpdated.join(', ')}`);
     }
     if (tablesRemoved.length > 0) {
-      console.log(`    Tables to remove: ${tablesRemoved.join(', ')}`);
+      this.logger.dryRunResult(`Tables to remove: ${tablesRemoved.join(', ')}`);
     }
 
     return {
@@ -120,25 +124,26 @@ export class SyncSchemaService {
 
         if (migration.changeType === 'init') {
           tablesCreated.push(migration.tableId);
-          console.log(`    ✓ Created table: ${migration.tableId}`);
+          this.logger.indent(`✓ Created table: ${migration.tableId}`, 2);
         } else if (migration.changeType === 'update') {
           tablesUpdated.push(migration.tableId);
-          console.log(`    ✓ Updated table: ${migration.tableId}`);
+          this.logger.indent(`✓ Updated table: ${migration.tableId}`, 2);
         } else if (migration.changeType === 'remove') {
           tablesRemoved.push(migration.tableId);
-          console.log(`    ✓ Removed table: ${migration.tableId}`);
+          this.logger.indent(`✓ Removed table: ${migration.tableId}`, 2);
         } else if (migration.changeType === 'rename') {
           tablesUpdated.push(`${migration.tableId} → ${migration.nextTableId}`);
-          console.log(
-            `    ✓ Renamed table: ${migration.tableId} → ${migration.nextTableId}`,
+          this.logger.indent(
+            `✓ Renamed table: ${migration.tableId} → ${migration.nextTableId}`,
+            2,
           );
         }
       } else if (response.status === 'skipped') {
-        console.log(`    ⏭️  Skipped: ${response.id}`);
+        this.logger.indent(`⏭️  Skipped: ${response.id}`, 2);
       }
     }
 
-    console.log(`  ✓ Applied ${migrationsApplied} migration(s)`);
+    this.logger.syncSuccess(`Applied ${migrationsApplied} migration(s)`);
 
     return {
       migrationsApplied,

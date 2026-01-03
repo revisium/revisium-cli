@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RevisiumApiClient } from './api-client';
+import { LoggerService } from './logger.service';
 import { RevisiumUrlComplete, UrlBuilderService } from './url-builder.service';
 
 export interface ConnectionInfo {
@@ -16,7 +17,10 @@ export interface ConnectOptions {
 
 @Injectable()
 export class ConnectionFactoryService {
-  constructor(private readonly urlBuilder: UrlBuilderService) {}
+  constructor(
+    private readonly urlBuilder: UrlBuilderService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async createConnection(
     url: RevisiumUrlComplete,
@@ -25,7 +29,7 @@ export class ConnectionFactoryService {
     const label = options.label ?? 'API';
     const formattedUrl = this.urlBuilder.formatAsRevisiumUrl(url);
 
-    console.log(`\nConnecting to ${label}: ${formattedUrl}`);
+    this.logger.connecting(label, formattedUrl);
 
     const client = await this.createAuthenticatedClient(url);
     await this.validateProject(client, url);
@@ -34,8 +38,8 @@ export class ConnectionFactoryService {
     const revisionId = this.resolveRevisionId(url.revision, revisions);
     const revisionLabel = this.formatRevisionLabel(url.revision, revisions);
 
-    console.log(
-      `  \u2713 Project: ${url.organization}/${url.project}, Branch: ${url.branch || 'master'}, Revision: ${revisionLabel}`,
+    this.logger.connected(
+      `Project: ${url.organization}/${url.project}, Branch: ${url.branch || 'master'}, Revision: ${revisionLabel}`,
     );
 
     return {
@@ -53,7 +57,7 @@ export class ConnectionFactoryService {
     const client = new RevisiumApiClient(url.baseUrl);
     const username = await client.authenticate(url.auth);
 
-    console.log(`  \u2713 Authenticated as ${username}`);
+    this.logger.authenticated(username);
 
     return client;
   }

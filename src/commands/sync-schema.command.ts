@@ -8,6 +8,7 @@ import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { LoggerService } from 'src/services/logger.service';
 
 @SubCommand({
   name: 'schema',
@@ -20,38 +21,39 @@ export class SyncSchemaCommand extends BaseSyncCommand {
     syncApi: SyncApiService,
     commitRevision: CommitRevisionService,
     private readonly syncSchema: SyncSchemaService,
+    private readonly logger: LoggerService,
   ) {
     super(configService, urlBuilder, syncApi, commitRevision);
   }
 
   async run(_inputs: string[], options: BaseSyncOptions): Promise<void> {
-    console.log('\n🔄 Starting schema synchronization...\n');
+    this.logger.section('🔄 Starting schema synchronization...\n');
 
     await this.connectSourceAndTarget(options);
 
     const result = await this.syncSchema.sync(options.dryRun);
 
     if (options.dryRun) {
-      console.log('\n📋 Dry run complete - no changes were made');
+      this.logger.section('📋 Dry run complete - no changes were made');
       return;
     }
 
     if (result.migrationsApplied === 0) {
-      console.log('\n✅ Schema is already in sync - no changes needed');
+      this.logger.section('✅ Schema is already in sync - no changes needed');
       return;
     }
 
-    console.log(`\n✅ Schema sync complete`);
-    console.log(`   Migrations applied: ${result.migrationsApplied}`);
+    this.logger.section('✅ Schema sync complete');
+    this.logger.info(`   Migrations applied: ${result.migrationsApplied}`);
 
     if (result.tablesCreated.length > 0) {
-      console.log(`   Tables created: ${result.tablesCreated.join(', ')}`);
+      this.logger.info(`   Tables created: ${result.tablesCreated.join(', ')}`);
     }
     if (result.tablesUpdated.length > 0) {
-      console.log(`   Tables updated: ${result.tablesUpdated.join(', ')}`);
+      this.logger.info(`   Tables updated: ${result.tablesUpdated.join(', ')}`);
     }
     if (result.tablesRemoved.length > 0) {
-      console.log(`   Tables removed: ${result.tablesRemoved.join(', ')}`);
+      this.logger.info(`   Tables removed: ${result.tablesRemoved.join(', ')}`);
     }
 
     await this.commitIfNeeded(

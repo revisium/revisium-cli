@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection.service';
+import { LoggerService } from 'src/services/logger.service';
 
 type Options = BaseOptions & {
   file: string;
@@ -12,7 +13,10 @@ type Options = BaseOptions & {
   description: 'Save migrations to file',
 })
 export class SaveMigrationsCommand extends BaseCommand {
-  constructor(private readonly connectionService: ConnectionService) {
+  constructor(
+    private readonly connectionService: ConnectionService,
+    private readonly logger: LoggerService,
+  ) {
     super();
   }
 
@@ -31,11 +35,10 @@ export class SaveMigrationsCommand extends BaseCommand {
 
       await writeFile(filePath, JSON.stringify(result.data, null, 2), 'utf-8');
 
-      console.log(`✅ Save migrations to: ${filePath}`);
+      this.logger.success(`Save migrations to: ${filePath}`);
     } catch (error) {
-      console.error(
-        'Error reading or parsing file:',
-        error instanceof Error ? error.message : String(error),
+      this.logger.error(
+        `Error reading or parsing file: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw error;
     }

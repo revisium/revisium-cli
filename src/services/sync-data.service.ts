@@ -7,6 +7,7 @@ import {
   ApiClient,
   RowSyncError,
 } from './row-sync.service';
+import { LoggerService } from './logger.service';
 import {
   DataSyncResult,
   SyncOptions,
@@ -14,6 +15,7 @@ import {
 } from '../types/sync.types';
 import { JsonValue } from '../types/json.types';
 import { JsonSchema } from '../types/schema.types';
+import { formatBatchError } from '../utils/error-formatter.utils';
 import { printProgress, clearProgressLine } from '../utils/progress';
 
 const DEFAULT_BATCH_SIZE = 100;
@@ -24,6 +26,7 @@ export class SyncDataService {
     private readonly syncApi: SyncApiService,
     private readonly tableDependency: TableDependencyService,
     private readonly rowSync: RowSyncService,
+    private readonly logger: LoggerService,
   ) {}
 
   async sync(options: SyncOptions = {}): Promise<DataSyncResult> {
@@ -31,16 +34,16 @@ export class SyncDataService {
     const target = this.syncApi.target;
     const batchSize = options.batchSize || DEFAULT_BATCH_SIZE;
 
-    console.log('\n📋 Syncing data...');
+    this.logger.syncSection('Syncing data...');
 
     const tables = await this.getTablesToSync(source, options.tables);
 
     if (tables.length === 0) {
-      console.log('  ✓ No tables to sync');
+      this.logger.syncSuccess('No tables to sync');
       return this.createEmptyResult();
     }
 
-    console.log(`  Found ${tables.length} table(s) to sync`);
+    this.logger.indent(`Found ${tables.length} table(s) to sync`);
 
     const tableSchemas = await this.getTableSchemas(source, tables);
     const sortedTables = this.sortTablesByDependencies(tables, tableSchemas);
@@ -69,9 +72,8 @@ export class SyncDataService {
           schemas[tableId] = result.data as JsonSchema;
         }
       } catch (error) {
-        console.warn(
-          `  ⚠️ Could not fetch schema for table ${tableId}:`,
-          error instanceof Error ? error.message : String(error),
+        this.logger.indentWarn(
+          `Could not fetch schema for table ${tableId}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }
@@ -85,12 +87,12 @@ export class SyncDataService {
   ): string[] {
     const dependencyResult = this.tableDependency.analyzeDependencies(schemas);
 
-    console.log(
+    this.logger.info(
       this.tableDependency.formatDependencyInfo(dependencyResult, tables),
     );
 
     for (const warning of dependencyResult.warnings) {
-      console.warn(warning);
+      this.logger.warn(warning.replace(/^⚠️\s*/, ''));
     }
 
     return dependencyResult.sortedTables.filter((tableId) =>
@@ -186,7 +188,7 @@ export class SyncDataService {
     let totalRowsUpdated = 0;
     let totalRowsSkipped = 0;
 
-    console.log('\n  📊 Dry run analysis:');
+    this.logger.dryRunSection();
 
     for (const tableId of tables) {
       const sourceRows = await this.getSourceRows(source, tableId);
@@ -199,8 +201,8 @@ export class SyncDataService {
           tableId,
         );
       } catch {
-        console.warn(
-          `    ⚠️ Could not read existing rows for table "${tableId}" in target (table may not exist yet)`,
+        this.logger.dryRunResult(
+          `⚠️ Could not read existing rows for table "${tableId}" in target (table may not exist yet)`,
         );
         existingRows = new Map<string, JsonValue>();
       }
@@ -213,8 +215,8 @@ export class SyncDataService {
       const toSkip = skippedCount;
 
       if (toCreate > 0 || toUpdate > 0) {
-        console.log(
-          `    ${tableId}: ${toCreate} to create, ${toUpdate} to update, ${toSkip} unchanged`,
+        this.logger.dryRunResult(
+          `${tableId}: ${toCreate} to create, ${toUpdate} to update, ${toSkip} unchanged`,
         );
       }
 
@@ -263,16 +265,17 @@ export class SyncDataService {
         if (error instanceof RowSyncError) {
           this.printRowSyncError(error, batchSize);
         } else {
-          console.error(
-            `\n❌ Sync stopped due to error in table "${tableId}":`,
-            error instanceof Error ? error.message : String(error),
+          this.logger.section(
+            `❌ Sync stopped due to error in table "${tableId}": ${error instanceof Error ? error.message : String(error)}`,
           );
         }
         throw error;
       }
     }
 
-    console.log(`  ✓ Synced ${totalRowsCreated + totalRowsUpdated} row(s)`);
+    this.logger.syncSuccess(
+      `Synced ${totalRowsCreated + totalRowsUpdated} row(s)`,
+    );
 
     return {
       tables: tableResults,
@@ -284,19 +287,16 @@ export class SyncDataService {
   }
 
   private printRowSyncError(error: RowSyncError, batchSize: number): void {
-    console.error(`\n❌ Sync stopped due to error in table "${error.tableId}"`);
-    console.error(`   Error: ${error.message}`);
-
-    if (error.statusCode === 413) {
-      console.error(`\n💡 The request payload is too large (HTTP 413).`);
-      console.error(
-        `   Current batch size: ${error.batchSize ?? batchSize} rows`,
-      );
-      console.error(`   Try reducing the batch size with --batch-size option.`);
-      console.error(`   Example: --batch-size 50 or --batch-size 10`);
-    } else if (error.statusCode) {
-      console.error(`   HTTP status code: ${error.statusCode}`);
-    }
+    const lines = formatBatchError(
+      {
+        tableId: error.tableId,
+        message: error.message,
+        statusCode: error.statusCode,
+        batchSize: error.batchSize,
+      },
+      batchSize,
+    );
+    this.logger.errorLines(lines);
   }
 
   private async syncTable(
@@ -305,10 +305,10 @@ export class SyncDataService {
     tableId: string,
     batchSize: number,
   ): Promise<TableSyncResult> {
-    console.log(`  📋 Processing table: ${tableId}`);
+    this.logger.syncTable(tableId);
 
     const sourceRows = await this.getSourceRows(source, tableId);
-    console.log(`    📊 Found ${sourceRows.length} rows in source`);
+    this.logger.syncFound(sourceRows.length, 'rows in source');
 
     const stats = await this.rowSync.syncTableRows(
       target.client.api as unknown as ApiClient,
@@ -320,8 +320,9 @@ export class SyncDataService {
     );
 
     clearProgressLine();
-    console.log(
-      `  ✅ ${tableId}: ${stats.created} created, ${stats.updated} updated, ${stats.skipped} skipped`,
+    this.logger.syncResult(
+      tableId,
+      `${stats.created} created, ${stats.updated} updated, ${stats.skipped} skipped`,
     );
 
     return {

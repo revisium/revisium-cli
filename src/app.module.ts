@@ -16,8 +16,10 @@ import { UploadRowsCommand } from 'src/commands/upload-rows.command';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { ConnectionFactoryService } from 'src/services/connection-factory.service';
 import { ConnectionService } from 'src/services/connection.service';
+import { FileRowLoaderService } from 'src/services/file-row-loader.service';
 import { InteractiveService } from 'src/services/interactive.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
+import { LoggerService } from 'src/services/logger.service';
 import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { SyncDataService } from 'src/services/sync-data.service';
@@ -56,7 +58,9 @@ import {
     ConnectionFactoryService,
     ConnectionService,
     CommitRevisionService,
+    FileRowLoaderService,
     InteractiveService,
+    LoggerService,
     SyncApiService,
     SyncSchemaService,
     SyncDataService,

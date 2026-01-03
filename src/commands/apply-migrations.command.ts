@@ -4,6 +4,7 @@ import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { LoggerService } from 'src/services/logger.service';
 import { Migration } from 'src/types/migration.types';
 import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
@@ -21,6 +22,7 @@ export class ApplyMigrationsCommand extends BaseCommand {
     private readonly connectionService: ConnectionService,
     private readonly jsonValidatorService: JsonValidatorService,
     private readonly commitRevisionService: CommitRevisionService,
+    private readonly logger: LoggerService,
   ) {
     super();
   }
@@ -30,9 +32,9 @@ export class ApplyMigrationsCommand extends BaseCommand {
       throw new Error('Error: --file option is required');
     }
 
-    console.log(`📋 Validating migration file: ${options.file}`);
+    this.logger.info(`📋 Validating migration file: ${options.file}`);
     const jsonData = await this.validateJsonFile(options.file);
-    console.log('✅ Migration file validation passed');
+    this.logger.success('Migration file validation passed');
 
     await this.connectionService.connect(options);
 
@@ -52,9 +54,8 @@ export class ApplyMigrationsCommand extends BaseCommand {
 
       return this.jsonValidatorService.validateMigration(data);
     } catch (error) {
-      console.error(
-        'Error reading or parsing file:',
-        error instanceof Error ? error.message : String(error),
+      this.logger.error(
+        `Error reading or parsing file: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw error;
     }
@@ -64,11 +65,13 @@ export class ApplyMigrationsCommand extends BaseCommand {
     const revisionId = this.connectionService.draftRevisionId;
 
     if (migrations.length === 0) {
-      console.log('✅ No migrations to apply - all migrations are up to date');
+      this.logger.success(
+        'No migrations to apply - all migrations are up to date',
+      );
       return;
     }
 
-    console.log(`🚀 Applying ${migrations.length} migrations...`);
+    this.logger.info(`🚀 Applying ${migrations.length} migrations...`);
 
     let countAppliedMigrations = 0;
 
@@ -81,29 +84,31 @@ export class ApplyMigrationsCommand extends BaseCommand {
         const response = result.data[0];
 
         if (response.status === 'failed') {
-          console.error('❌ Migration failed:', response);
+          this.logger.migrationFailed(response);
           throw new Error(
             `Migration ${response.id} failed: ${response.error || 'Unknown error'}`,
           );
         } else if (response.status === 'skipped') {
-          console.log(`⏭️  Migration already applied: ${response.id}`);
+          this.logger.migrationSkipped(response.id);
         } else if (response.status === 'applied') {
-          console.log(`✅ Migration applied: ${response.id}`);
+          this.logger.migrationApplied(response.id);
           countAppliedMigrations++;
         }
       }
 
       if (countAppliedMigrations > 0) {
-        console.log(
-          `✅ Successfully applied ${countAppliedMigrations} migrations`,
+        this.logger.success(
+          `Successfully applied ${countAppliedMigrations} migrations`,
         );
       } else {
-        console.log('✅ All migrations processed (no new migrations applied)');
+        this.logger.success(
+          'All migrations processed (no new migrations applied)',
+        );
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      console.error(`❌ Migration process failed: ${errorMessage}`);
+      this.logger.error(`Migration process failed: ${errorMessage}`);
       throw error;
     }
 

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection.service';
+import { LoggerService } from 'src/services/logger.service';
 import {
   fetchAllPages,
   fetchAndProcessPages,
@@ -18,7 +19,10 @@ type Options = BaseOptions & {
   description: 'Save all rows from tables to JSON files',
 })
 export class SaveRowsCommand extends BaseCommand {
-  constructor(private readonly connectionService: ConnectionService) {
+  constructor(
+    private readonly connectionService: ConnectionService,
+    private readonly logger: LoggerService,
+  ) {
     super();
   }
 
@@ -48,19 +52,18 @@ export class SaveRowsCommand extends BaseCommand {
         tableFilter,
       );
 
-      console.log(`📊 Found ${tablesToProcess.length} tables to process`);
+      this.logger.foundItems(tablesToProcess.length, 'tables to process');
 
       for (const tableId of tablesToProcess) {
         await this.saveRowsFromTable(revisionId, tableId, folderPath);
       }
 
-      console.log(
-        `🎉 Successfully processed ${tablesToProcess.length} tables in: ${folderPath}`,
+      this.logger.summary(
+        `Successfully processed ${tablesToProcess.length} tables in: ${folderPath}`,
       );
     } catch (error) {
-      console.error(
-        'Error saving table rows:',
-        error instanceof Error ? error.message : String(error),
+      this.logger.error(
+        `Error saving table rows: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw error;
     }
@@ -87,7 +90,7 @@ export class SaveRowsCommand extends BaseCommand {
     folderPath: string,
   ) {
     try {
-      console.log(`📋 Processing table: ${tableId}`);
+      this.logger.processingTable(tableId);
 
       const tableFolderPath = join(folderPath, tableId);
       await mkdir(tableFolderPath, { recursive: true });
@@ -100,15 +103,18 @@ export class SaveRowsCommand extends BaseCommand {
         },
         {
           onFirstPage: (totalCount) =>
-            console.log(`  📊 Found ${totalCount} rows in table ${tableId}`),
+            this.logger.indent(
+              `📊 Found ${totalCount} rows in table ${tableId}`,
+            ),
         },
       );
 
-      console.log(`✅ Saved ${processed}/${total} rows from table: ${tableId}`);
+      this.logger.success(
+        `Saved ${processed}/${total} rows from table: ${tableId}`,
+      );
     } catch (error) {
-      console.error(
-        `❌ Failed to process table ${tableId}:`,
-        error instanceof Error ? error.message : String(error),
+      this.logger.error(
+        `Failed to process table ${tableId}: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

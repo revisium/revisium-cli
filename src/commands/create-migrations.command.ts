@@ -2,6 +2,7 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { JsonValidatorService } from 'src/services/json-validator.service';
+import { LoggerService } from 'src/services/logger.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 import { JsonSchema } from 'src/types/schema.types';
 import { InitMigrationDto } from 'src/__generated__/api';
@@ -20,6 +21,7 @@ export class CreateMigrationsCommand extends CommandRunner {
   constructor(
     private readonly jsonValidatorService: JsonValidatorService,
     private readonly tableDependencyService: TableDependencyService,
+    private readonly logger: LoggerService,
   ) {
     super();
   }
@@ -40,8 +42,8 @@ export class CreateMigrationsCommand extends CommandRunner {
 
     await writeFile(options.file, JSON.stringify(migrations, null, 2), 'utf-8');
 
-    console.log(
-      `✅ Successfully created ${migrations.length} migrations in: ${options.file}`,
+    this.logger.success(
+      `Successfully created ${migrations.length} migrations in: ${options.file}`,
     );
   }
 
@@ -54,7 +56,7 @@ export class CreateMigrationsCommand extends CommandRunner {
       const files = await readdir(folderPath);
       const jsonFiles = files.filter((file) => extname(file) === '.json');
 
-      console.log(
+      this.logger.info(
         `📋 Loading ${jsonFiles.length} schema files from: ${folderPath}`,
       );
 
@@ -63,11 +65,10 @@ export class CreateMigrationsCommand extends CommandRunner {
         const content = await readFile(filePath, 'utf-8');
         const schema: JsonSchema = JSON.parse(content) as JsonSchema;
 
-        // Use filename without extension as table ID
         const tableId = file.replace('.json', '');
         schemas[tableId] = schema;
 
-        console.log(`✅ Loaded schema for table: ${tableId}`);
+        this.logger.success(`Loaded schema for table: ${tableId}`);
       }
 
       return schemas;
@@ -83,27 +84,23 @@ export class CreateMigrationsCommand extends CommandRunner {
   private createMigrations(
     schemas: Record<string, JsonSchema>,
   ): InitMigrationDto[] {
-    // Analyze dependencies and get sorted tables
     const dependencyResult =
       this.tableDependencyService.analyzeDependencies(schemas);
 
-    // Log dependency analysis
-    console.log(
+    this.logger.info(
       this.tableDependencyService.formatDependencyInfo(
         dependencyResult,
         Object.keys(schemas),
       ),
     );
 
-    // Show warnings if there are circular dependencies
     if (dependencyResult.warnings.length > 0) {
-      console.log('\n⚠️  Warnings:');
+      this.logger.section('⚠️  Warnings:');
       for (const warning of dependencyResult.warnings) {
-        console.log(warning);
+        this.logger.info(warning);
       }
     }
 
-    // Create migrations in dependency order
     const migrations: InitMigrationDto[] = [];
     const baseTime = Date.now();
 
@@ -112,16 +109,13 @@ export class CreateMigrationsCommand extends CommandRunner {
       const schema = schemas[tableId];
 
       if (!schema) {
-        console.warn(`⚠️  Schema not found for table: ${tableId}`);
+        this.logger.warn(`Schema not found for table: ${tableId}`);
         continue;
       }
 
-      // Generate unique ISO date string for each migration
-      // Add milliseconds to ensure unique timestamps even when generated rapidly
-      const migrationDate = new Date(baseTime + i * 10); // 10ms apart to ensure uniqueness
+      const migrationDate = new Date(baseTime + i * 10);
       const id = migrationDate.toISOString();
 
-      // Generate hash for the schema
       const hash = this.generateSchemaHash(schema);
 
       const migration: InitMigrationDto = {
@@ -133,10 +127,10 @@ export class CreateMigrationsCommand extends CommandRunner {
       };
 
       migrations.push(migration);
-      console.log(`📦 Created migration for table: ${tableId} (${id})`);
+      this.logger.migrationCreated(tableId, id);
     }
 
-    console.log(`\n🎉 Generated ${migrations.length} migrations`);
+    this.logger.summary(`Generated ${migrations.length} migrations`);
 
     return migrations;
   }

@@ -9,6 +9,7 @@ import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { SyncDataService } from 'src/services/sync-data.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { LoggerService } from 'src/services/logger.service';
 
 type SchemaResult = {
   migrationsApplied: number;
@@ -36,12 +37,13 @@ export class SyncAllCommand extends BaseSyncCommand {
     commitRevision: CommitRevisionService,
     private readonly syncSchema: SyncSchemaService,
     private readonly syncData: SyncDataService,
+    private readonly logger: LoggerService,
   ) {
     super(configService, urlBuilder, syncApi, commitRevision);
   }
 
   async run(_inputs: string[], options: DataSyncOptions): Promise<void> {
-    console.log('\n🔄 Starting full synchronization...\n');
+    this.logger.section('🔄 Starting full synchronization...\n');
 
     await this.connectSourceAndTarget(options);
 
@@ -56,7 +58,7 @@ export class SyncAllCommand extends BaseSyncCommand {
     });
 
     if (options.dryRun) {
-      console.log('\n📋 Dry run complete - no changes were made');
+      this.logger.section('📋 Dry run complete - no changes were made');
       this.printSummary(schemaResult, dataResult);
       return;
     }
@@ -67,11 +69,13 @@ export class SyncAllCommand extends BaseSyncCommand {
       dataResult.totalRowsUpdated;
 
     if (totalChanges === 0) {
-      console.log('\n✅ Everything is already in sync - no changes needed');
+      this.logger.section(
+        '✅ Everything is already in sync - no changes needed',
+      );
       return;
     }
 
-    console.log('\n✅ Full sync complete');
+    this.logger.section('✅ Full sync complete');
     this.printSummary(schemaResult, dataResult);
 
     await this.commitIfNeeded(options.commit, 'Synced', totalChanges);
@@ -81,31 +85,33 @@ export class SyncAllCommand extends BaseSyncCommand {
     schemaResult: SchemaResult,
     dataResult: DataResult,
   ): void {
-    console.log('\n📊 Summary:');
-    console.log('   Schema:');
-    console.log(`     Migrations applied: ${schemaResult.migrationsApplied}`);
+    this.logger.section('📊 Summary:');
+    this.logger.info('   Schema:');
+    this.logger.info(
+      `     Migrations applied: ${schemaResult.migrationsApplied}`,
+    );
     if (schemaResult.tablesCreated.length > 0) {
-      console.log(
+      this.logger.info(
         `     Tables created: ${schemaResult.tablesCreated.join(', ')}`,
       );
     }
     if (schemaResult.tablesUpdated.length > 0) {
-      console.log(
+      this.logger.info(
         `     Tables updated: ${schemaResult.tablesUpdated.join(', ')}`,
       );
     }
     if (schemaResult.tablesRemoved.length > 0) {
-      console.log(
+      this.logger.info(
         `     Tables removed: ${schemaResult.tablesRemoved.join(', ')}`,
       );
     }
 
-    console.log('   Data:');
-    console.log(`     Rows created: ${dataResult.totalRowsCreated}`);
-    console.log(`     Rows updated: ${dataResult.totalRowsUpdated}`);
-    console.log(`     Rows skipped: ${dataResult.totalRowsSkipped}`);
+    this.logger.info('   Data:');
+    this.logger.info(`     Rows created: ${dataResult.totalRowsCreated}`);
+    this.logger.info(`     Rows updated: ${dataResult.totalRowsUpdated}`);
+    this.logger.info(`     Rows skipped: ${dataResult.totalRowsSkipped}`);
     if (dataResult.totalErrors > 0) {
-      console.log(`     Errors: ${dataResult.totalErrors}`);
+      this.logger.info(`     Errors: ${dataResult.totalErrors}`);
     }
   }
 }
