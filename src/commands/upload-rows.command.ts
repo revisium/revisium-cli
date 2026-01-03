@@ -9,15 +9,17 @@ import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { JsonValue } from 'src/types/json.types';
 import { JsonSchema } from 'src/types/schema.types';
 import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
+import { clearProgressLine } from 'src/utils/progress';
+import { UploadError } from 'src/types/errors';
 
-const DEFAULT_BATCH_SIZE = 100;
-
-interface ProgressState {
+interface UploadProgressState {
   tableId: string;
   operation: 'create' | 'update' | 'fetch';
   current: number;
   total: number;
 }
+
+const DEFAULT_BATCH_SIZE = 100;
 
 type Options = BaseOptions & {
   folder: string;
@@ -41,18 +43,6 @@ interface RowData {
   id: string;
   data: JsonValue;
   [key: string]: any;
-}
-
-class UploadError extends Error {
-  constructor(
-    message: string,
-    public readonly tableId: string,
-    public readonly statusCode?: number,
-    public readonly batchSize?: number,
-  ) {
-    super(message);
-    this.name = 'UploadError';
-  }
 }
 
 @SubCommand({
@@ -420,7 +410,7 @@ export class UploadRowsCommand extends BaseCommand {
       pageCount++;
 
       if (result.error) {
-        this.clearProgressLine();
+        clearProgressLine();
         console.warn(
           `  ⚠️ Error fetching rows (page ${pageCount}):`,
           result.error,
@@ -429,7 +419,7 @@ export class UploadRowsCommand extends BaseCommand {
       }
 
       if (!result.data) {
-        this.clearProgressLine();
+        clearProgressLine();
         console.warn(`  ⚠️ No data in response (page ${pageCount})`);
         break;
       }
@@ -451,7 +441,7 @@ export class UploadRowsCommand extends BaseCommand {
       after = pageInfo.endCursor;
     }
 
-    this.clearProgressLine();
+    clearProgressLine();
     return existingRows;
   }
 
@@ -566,7 +556,7 @@ export class UploadRowsCommand extends BaseCommand {
         const result = await config.executeBatch(batch);
 
         if (result.error) {
-          this.clearProgressLine();
+          clearProgressLine();
           const statusCode = this.getErrorStatusCode(result.error);
           throw new UploadError(
             `Batch ${config.operationName.replace('Rows', '')} failed: ${JSON.stringify(result.error)}`,
@@ -583,7 +573,7 @@ export class UploadRowsCommand extends BaseCommand {
           throw error;
         }
 
-        this.clearProgressLine();
+        clearProgressLine();
         const statusCode = this.getErrorStatusCode(error);
         throw new UploadError(
           `Batch ${config.operationName.replace('Rows', '')} exception: ${error instanceof Error ? error.message : String(error)}`,
@@ -594,7 +584,7 @@ export class UploadRowsCommand extends BaseCommand {
       }
     }
 
-    this.clearProgressLine();
+    clearProgressLine();
   }
 
   private getErrorStatusCode(error: unknown): number | undefined {
@@ -662,7 +652,7 @@ export class UploadRowsCommand extends BaseCommand {
     return this.connectionService.api;
   }
 
-  private printProgress(state: ProgressState): void {
+  private printProgress(state: UploadProgressState): void {
     let operationLabel: string;
     let progress: string;
 
@@ -675,10 +665,6 @@ export class UploadRowsCommand extends BaseCommand {
     }
 
     process.stdout.write(`\r${progress}`);
-  }
-
-  private clearProgressLine(): void {
-    process.stdout.write('\r\x1b[K');
   }
 
   @Option({

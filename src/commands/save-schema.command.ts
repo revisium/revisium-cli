@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection.service';
+import { fetchAndProcessPages } from 'src/utils/paginated-fetcher';
 
 type Options = BaseOptions & {
   folder: string;
@@ -33,63 +34,39 @@ export class SaveSchemaCommand extends BaseCommand {
     try {
       await mkdir(folderPath, { recursive: true });
 
-      let hasMore = true;
-      let after: string | undefined;
-      let totalTables = 0;
-      let processedTables = 0;
-
       console.log('🔍 Fetching tables...');
 
-      while (hasMore) {
-        const result = await this.api.tables({
-          revisionId,
-          first: 100,
-          after,
-        });
+      let totalTables = 0;
 
-        const { edges, pageInfo } = result.data;
+      const { processed } = await fetchAndProcessPages(
+        (params) => this.api.tables({ revisionId, ...params }),
+        async (table, index) => {
+          console.log(`📋 Processing table: ${table.id}`);
 
-        if (totalTables === 0) {
-          totalTables = result.data.totalCount;
-          console.log(`📊 Found ${totalTables} tables to process`);
-        }
+          const schemaResult = await this.api.tableSchema(revisionId, table.id);
+          const fileName = `${table.id}.json`;
+          const filePath = join(folderPath, fileName);
 
-        for (const edge of edges) {
-          const table = edge.node;
-          try {
-            console.log(`📋 Processing table: ${table.id}`);
+          await writeFile(
+            filePath,
+            JSON.stringify(schemaResult.data, null, 2),
+            'utf-8',
+          );
 
-            const schemaResult = await this.api.tableSchema(
-              revisionId,
-              table.id,
-            );
-            const fileName = `${table.id}.json`;
-            const filePath = join(folderPath, fileName);
-
-            await writeFile(
-              filePath,
-              JSON.stringify(schemaResult.data, null, 2),
-              'utf-8',
-            );
-
-            processedTables++;
-            console.log(
-              `✅ Saved schema: ${fileName} (${processedTables}/${totalTables})`,
-            );
-          } catch (error) {
-            console.error(
-              `❌ Failed to save schema for table ${table.id}:`,
-              error,
-            );
-          }
-        }
-
-        hasMore = pageInfo.hasNextPage;
-        after = pageInfo.endCursor;
-      }
+          console.log(
+            `✅ Saved schema: ${fileName} (${index + 1}/${totalTables})`,
+          );
+        },
+        {
+          onFirstPage: (count) => {
+            totalTables = count;
+            console.log(`📊 Found ${count} tables to process`);
+          },
+        },
+      );
 
       console.log(
-        `🎉 Successfully saved ${processedTables}/${totalTables} table schemas to: ${folderPath}`,
+        `🎉 Successfully saved ${processed}/${totalTables} table schemas to: ${folderPath}`,
       );
     } catch (error) {
       console.error(

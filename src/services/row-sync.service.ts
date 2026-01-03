@@ -16,17 +16,8 @@ export interface RowSyncStats {
   updateErrors: number;
 }
 
-export class RowSyncError extends Error {
-  constructor(
-    message: string,
-    public readonly tableId: string,
-    public readonly statusCode?: number,
-    public readonly batchSize?: number,
-  ) {
-    super(message);
-    this.name = 'RowSyncError';
-  }
-}
+import { RowSyncError } from 'src/types/errors';
+export { RowSyncError } from 'src/types/errors';
 
 export interface ApiClient {
   rows(
@@ -54,13 +45,9 @@ export interface ApiClient {
   ): Promise<{ data?: unknown; error?: unknown }>;
 }
 
-export type ProgressOperation = 'fetch' | 'create' | 'update';
+import type { ProgressState, ProgressOperation } from 'src/utils/progress';
 
-export interface ProgressState {
-  operation: ProgressOperation;
-  current: number;
-  total?: number;
-}
+export type { ProgressState, ProgressOperation } from 'src/utils/progress';
 
 export type ProgressCallback = (state: ProgressState) => void;
 

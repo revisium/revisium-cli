@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ConnectionService } from '../connection.service';
+import { ConnectionFactoryService } from '../connection-factory.service';
 import { UrlBuilderService, RevisiumUrlComplete } from '../url-builder.service';
 
 describe('ConnectionService', () => {
@@ -8,6 +9,9 @@ describe('ConnectionService', () => {
   let urlBuilderServiceFake: {
     parseAndComplete: jest.Mock;
     formatAsRevisiumUrl: jest.Mock;
+  };
+  let connectionFactoryFake: {
+    createConnection: jest.Mock;
   };
   let configServiceFake: { get: jest.Mock };
 
@@ -26,6 +30,10 @@ describe('ConnectionService', () => {
       formatAsRevisiumUrl: jest.fn(),
     };
 
+    connectionFactoryFake = {
+      createConnection: jest.fn(),
+    };
+
     configServiceFake = {
       get: jest.fn(),
     };
@@ -34,6 +42,7 @@ describe('ConnectionService', () => {
       providers: [
         ConnectionService,
         { provide: UrlBuilderService, useValue: urlBuilderServiceFake },
+        { provide: ConnectionFactoryService, useValue: connectionFactoryFake },
         { provide: ConfigService, useValue: configServiceFake },
       ],
     }).compile();
@@ -155,6 +164,19 @@ describe('ConnectionService', () => {
         },
       );
     });
+
+    it('calls connectionFactory.createConnection with parsed url', async () => {
+      urlBuilderServiceFake.parseAndComplete.mockResolvedValue(mockUrl);
+      connectionFactoryFake.createConnection.mockResolvedValue(
+        createMockConnectionInfo(mockUrl),
+      );
+
+      await service.connect();
+
+      expect(connectionFactoryFake.createConnection).toHaveBeenCalledWith(
+        mockUrl,
+      );
+    });
   });
 
   describe('revision resolution', () => {
@@ -224,11 +246,6 @@ describe('ConnectionService', () => {
     revisions: { headId: string; draftId: string },
   ) {
     urlBuilderServiceFake.parseAndComplete.mockResolvedValue(url);
-    urlBuilderServiceFake.formatAsRevisiumUrl.mockReturnValue(
-      `revisium://host/${url.organization}/${url.project}`,
-    );
-
-    const mockApiClient = createMockApiClient(revisions);
 
     const resolveRevisionId = (): string => {
       if (url.revision === 'head') {
@@ -240,26 +257,34 @@ describe('ConnectionService', () => {
       return url.revision;
     };
 
-    jest.spyOn(service as any, 'establishConnection').mockResolvedValue({
+    connectionFactoryFake.createConnection.mockResolvedValue({
       url,
-      client: mockApiClient,
+      client: createMockApiClient(),
       revisionId: resolveRevisionId(),
       headRevisionId: revisions.headId,
       draftRevisionId: revisions.draftId,
     });
   }
 
-  function createMockApiClient(revisions: { headId: string; draftId: string }) {
+  function createMockConnectionInfo(url: RevisiumUrlComplete) {
+    return {
+      url,
+      client: createMockApiClient(),
+      revisionId: 'draft-id',
+      headRevisionId: 'head-id',
+      draftRevisionId: 'draft-id',
+    };
+  }
+
+  function createMockApiClient() {
     return {
       api: {
         me: jest.fn().mockResolvedValue({ data: { username: 'test-user' } }),
         project: jest.fn().mockResolvedValue({ data: { id: 'project-id' } }),
-        headRevision: jest
-          .fn()
-          .mockResolvedValue({ data: { id: revisions.headId } }),
+        headRevision: jest.fn().mockResolvedValue({ data: { id: 'head-id' } }),
         draftRevision: jest
           .fn()
-          .mockResolvedValue({ data: { id: revisions.draftId } }),
+          .mockResolvedValue({ data: { id: 'draft-id' } }),
       },
       authenticate: jest.fn().mockResolvedValue('test-user'),
     };
