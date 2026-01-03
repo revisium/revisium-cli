@@ -204,8 +204,10 @@ describe('UrlBuilderService', () => {
       expect(result.project).toBe('myproject');
       expect(result.branch).toBe('main');
       expect(result.auth.method).toBe('password');
-      expect(result.auth.username).toBe('admin');
-      expect(result.auth.password).toBe('secret');
+      if (result.auth.method === 'password') {
+        expect(result.auth.username).toBe('admin');
+        expect(result.auth.password).toBe('secret');
+      }
     });
 
     it('uses env.url when input is undefined', async () => {
@@ -226,8 +228,10 @@ describe('UrlBuilderService', () => {
 
       expect(result.baseUrl).toBe('https://cloud.revisium.io');
       expect(result.auth.method).toBe('password');
-      expect(result.auth.username).toBe('envuser');
-      expect(result.auth.password).toBe('envpass');
+      if (result.auth.method === 'password') {
+        expect(result.auth.username).toBe('envuser');
+        expect(result.auth.password).toBe('envpass');
+      }
     });
 
     it('uses env credentials when not in URL', async () => {
@@ -245,8 +249,10 @@ describe('UrlBuilderService', () => {
       );
 
       expect(result.auth.method).toBe('password');
-      expect(result.auth.username).toBe('envuser');
-      expect(result.auth.password).toBe('envpass');
+      if (result.auth.method === 'password') {
+        expect(result.auth.username).toBe('envuser');
+        expect(result.auth.password).toBe('envpass');
+      }
 
       const promptTextCalls = interactiveService.promptText.mock.calls;
       const usernameCall = promptTextCalls.find((call) =>
@@ -264,8 +270,10 @@ describe('UrlBuilderService', () => {
       );
 
       expect(result.auth.method).toBe('password');
-      expect(result.auth.username).toBe('urluser');
-      expect(result.auth.password).toBe('urlpass');
+      if (result.auth.method === 'password') {
+        expect(result.auth.username).toBe('urluser');
+        expect(result.auth.password).toBe('urlpass');
+      }
     });
 
     it('prompts for host when no input and no env', async () => {

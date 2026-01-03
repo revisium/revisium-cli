@@ -19,11 +19,19 @@ export interface RowSyncStats {
 import { RowSyncError } from 'src/types/errors';
 export { RowSyncError } from 'src/types/errors';
 
+export interface OrderBy {
+  field: 'createdAt' | 'updatedAt' | 'publishedAt' | 'id' | 'data';
+  direction: 'asc' | 'desc';
+  path?: string;
+  type?: 'text' | 'int' | 'float' | 'boolean' | 'timestamp';
+  aggregation?: 'min' | 'max' | 'avg' | 'first' | 'last';
+}
+
 export interface ApiClient {
   rows(
     revisionId: string,
     tableId: string,
-    options: { first: number; after?: string; orderBy?: unknown[] },
+    options: { first: number; after?: string; orderBy?: OrderBy[] },
   ): Promise<{
     data?: {
       edges: { node: { id: string; data: unknown } }[];

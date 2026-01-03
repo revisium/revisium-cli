@@ -1,4 +1,4 @@
-import { Api, OrderByDto } from 'src/__generated__/api';
+import { Api } from 'src/__generated__/api';
 import { ApiClient } from '../sync/row-sync.service';
 
 type GeneratedApi = Api<unknown>['api'];
@@ -9,7 +9,7 @@ export function createApiClientAdapter(api: GeneratedApi): ApiClient {
       const result = await api.rows(revisionId, tableId, {
         first: options.first,
         after: options.after,
-        orderBy: options.orderBy as OrderByDto[],
+        orderBy: options.orderBy,
       });
 
       if (result.error) {

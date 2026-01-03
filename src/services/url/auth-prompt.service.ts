@@ -3,13 +3,10 @@ import { InteractiveService } from '../common';
 
 export type AuthMethod = 'token' | 'apikey' | 'password';
 
-export interface AuthCredentials {
-  method: AuthMethod;
-  token?: string;
-  apikey?: string;
-  username?: string;
-  password?: string;
-}
+export type AuthCredentials =
+  | { method: 'token'; token: string }
+  | { method: 'apikey'; apikey: string }
+  | { method: 'password'; username: string; password: string };
 
 @Injectable()
 export class AuthPromptService {
@@ -24,15 +21,9 @@ export class AuthPromptService {
     const authMethod = await this.interactive.promptSelect<AuthMethod>(
       `[${label}] Choose authentication method:`,
       [
-        {
-          name: `Token (copy from ${tokenPageUrl})`,
-          value: 'token' as AuthMethod,
-        },
-        {
-          name: 'API Key (for automated access)',
-          value: 'apikey' as AuthMethod,
-        },
-        { name: 'Username & Password', value: 'password' as AuthMethod },
+        { name: `Token (copy from ${tokenPageUrl})`, value: 'token' },
+        { name: 'API Key (for automated access)', value: 'apikey' },
+        { name: 'Username & Password', value: 'password' },
       ],
     );
 
@@ -66,7 +57,7 @@ export class AuthPromptService {
     const password = await this.interactive.promptPassword(
       `[${label}] Enter password:`,
     );
-    if (!password) {
+    if (!password?.trim()) {
       throw new Error('Password cannot be empty');
     }
 
@@ -74,6 +65,9 @@ export class AuthPromptService {
   }
 
   private getTokenPageUrl(baseUrl: string): string {
-    return `${baseUrl}/get-mcp-token`;
+    const normalizedUrl = baseUrl.endsWith('/')
+      ? baseUrl.slice(0, -1)
+      : baseUrl;
+    return `${normalizedUrl}/get-mcp-token`;
   }
 }

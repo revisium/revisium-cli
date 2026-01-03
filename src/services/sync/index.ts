@@ -7,6 +7,7 @@ export {
   RowData,
   RowSyncStats,
   ApiClient,
+  OrderBy,
   ProgressCallback,
   ProgressState,
   ProgressOperation,

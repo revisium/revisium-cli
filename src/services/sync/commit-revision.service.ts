@@ -89,27 +89,28 @@ export class CommitRevisionService {
 
     const comment = this.generateCommitComment(actionDescription, changeCount);
 
+    let result: { data?: { id: string }; error?: unknown };
     try {
-      const result = await params.api.createRevision(
+      result = await params.api.createRevision(
         params.organization,
         params.project,
         params.branch,
         { comment },
       );
-
-      if (result.data) {
-        this.logger.commitSuccess(result.data.id);
-        return { revisionId: result.data.id };
-      } else {
-        this.logger.commitError('No data returned');
-        throw new Error('Failed to create revision');
-      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       this.logger.commitError(errorMessage);
       throw error;
     }
+
+    if (result.data) {
+      this.logger.commitSuccess(result.data.id);
+      return { revisionId: result.data.id };
+    }
+
+    this.logger.commitError('No data returned');
+    throw new Error('Failed to create revision');
   }
 
   private generateCommitComment(
