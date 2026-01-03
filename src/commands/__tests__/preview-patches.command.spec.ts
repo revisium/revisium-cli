@@ -3,8 +3,7 @@ import { PreviewPatchesCommand } from '../preview-patches.command';
 import { PatchDiffService } from '../../services/patch-diff.service';
 import { PatchLoaderService } from '../../services/patch-loader.service';
 import { PatchValidationService } from '../../services/patch-validation.service';
-import { CoreApiService } from '../../services/core-api.service';
-import { DraftRevisionService } from '../../services/draft-revision.service';
+import { ConnectionService } from '../../services/connection.service';
 import { PatchFile } from '../../types/patch.types';
 
 describe('PreviewPatchesCommand', () => {
@@ -19,11 +18,9 @@ describe('PreviewPatchesCommand', () => {
     validateAll: jest.Mock;
     validateAllWithRevisionId: jest.Mock;
   };
-  let coreApiServiceFake: {
-    tryToLogin: jest.Mock;
-  };
-  let draftRevisionServiceFake: {
-    getDraftRevisionId: jest.Mock;
+  let connectionServiceFake: {
+    connect: jest.Mock;
+    draftRevisionId: string;
   };
 
   const mockPatches: PatchFile[] = [
@@ -50,12 +47,9 @@ describe('PreviewPatchesCommand', () => {
       validateAllWithRevisionId: jest.fn(),
     };
 
-    coreApiServiceFake = {
-      tryToLogin: jest.fn(),
-    };
-
-    draftRevisionServiceFake = {
-      getDraftRevisionId: jest.fn(),
+    connectionServiceFake = {
+      connect: jest.fn(),
+      draftRevisionId: 'revision-123',
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -64,8 +58,7 @@ describe('PreviewPatchesCommand', () => {
         { provide: PatchDiffService, useValue: diffServiceFake },
         { provide: PatchLoaderService, useValue: loaderServiceFake },
         { provide: PatchValidationService, useValue: validationServiceFake },
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 
@@ -89,7 +82,7 @@ describe('PreviewPatchesCommand', () => {
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalled();
+    expect(connectionServiceFake.connect).toHaveBeenCalled();
   });
 
   it('loads and validates patches', async () => {
@@ -110,10 +103,7 @@ describe('PreviewPatchesCommand', () => {
     }) as never);
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       {
         valid: false,
@@ -141,9 +131,7 @@ describe('PreviewPatchesCommand', () => {
 
     await command.run([], { input: './patches' });
 
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith({
-      input: './patches',
-    });
+    expect(connectionServiceFake.connect).toHaveBeenCalled();
     expect(diffServiceFake.compareWithApi).toHaveBeenCalledWith(
       mockPatches,
       'revision-123',
@@ -193,10 +181,7 @@ describe('PreviewPatchesCommand', () => {
 
   function setupSuccessfulFlow() {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);

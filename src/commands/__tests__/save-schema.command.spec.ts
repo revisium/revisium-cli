@@ -3,8 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SaveSchemaCommand } from '../save-schema.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 
 jest.mock('node:fs/promises');
 
@@ -18,30 +17,14 @@ describe('SaveSchemaCommand', () => {
     );
   });
 
-  it('authenticates before fetching schemas', async () => {
+  it('connects before fetching schemas', async () => {
     setupSuccessfulFlow();
 
     await command.run([], { folder: './schemas' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledWith({
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith({
       folder: './schemas',
     });
-  });
-
-  it('resolves revision ID from options', async () => {
-    setupSuccessfulFlow();
-    const options = {
-      folder: './schemas',
-      organization: 'test-org',
-      project: 'test-project',
-      branch: 'test-branch',
-    };
-
-    await command.run([], options);
-
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
-    );
   });
 
   it('creates output folder recursively', async () => {
@@ -58,7 +41,7 @@ describe('SaveSchemaCommand', () => {
 
     await command.run([], { folder: './schemas' });
 
-    expect(coreApiServiceFake.api.tables).toHaveBeenCalledWith({
+    expect(connectionServiceFake.api.tables).toHaveBeenCalledWith({
       revisionId: 'revision-123',
       first: 100,
       after: undefined,
@@ -71,13 +54,13 @@ describe('SaveSchemaCommand', () => {
 
     await command.run([], { folder: folderPath });
 
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenNthCalledWith(
       1,
       'revision-123',
       'users',
     );
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       'posts',
@@ -133,13 +116,10 @@ describe('SaveSchemaCommand', () => {
   });
 
   it('handles pagination with multiple pages', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
     // First page
-    coreApiServiceFake.api.tables
+    connectionServiceFake.api.tables
       .mockResolvedValueOnce({
         data: {
           totalCount: 3,
@@ -156,7 +136,7 @@ describe('SaveSchemaCommand', () => {
         },
       });
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
       .mockResolvedValueOnce({ data: mockCommentSchema });
@@ -166,30 +146,27 @@ describe('SaveSchemaCommand', () => {
 
     await command.run([], { folder: './schemas' });
 
-    expect(coreApiServiceFake.api.tables).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.tables).toHaveBeenNthCalledWith(1, {
+    expect(connectionServiceFake.api.tables).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.tables).toHaveBeenNthCalledWith(1, {
       revisionId: 'revision-123',
       first: 100,
       after: undefined,
     });
-    expect(coreApiServiceFake.api.tables).toHaveBeenNthCalledWith(2, {
+    expect(connectionServiceFake.api.tables).toHaveBeenNthCalledWith(2, {
       revisionId: 'revision-123',
       first: 100,
       after: 'cursor1',
     });
 
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledTimes(3);
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledTimes(3);
   });
 
   it('continues processing other tables when one fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockRejectedValueOnce(new Error('Schema not found'))
       .mockResolvedValueOnce({ data: mockPostSchema });
 
@@ -216,10 +193,7 @@ describe('SaveSchemaCommand', () => {
   it('handles API errors gracefully and throws', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockMkdir.mockRejectedValue(new Error('Permission denied'));
 
     await expect(
@@ -236,11 +210,8 @@ describe('SaveSchemaCommand', () => {
 
   it('handles empty tables response', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue({
       data: {
         totalCount: 0,
         edges: [],
@@ -256,7 +227,7 @@ describe('SaveSchemaCommand', () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       '🎉 Successfully saved 0/0 table schemas to: ./empty-schemas',
     );
-    expect(coreApiServiceFake.api.tableSchema).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.tableSchema).not.toHaveBeenCalled();
     expect(mockWriteFile).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
@@ -313,25 +284,19 @@ describe('SaveSchemaCommand', () => {
     },
   };
 
-  const coreApiServiceFake = {
-    tryToLogin: jest.fn(),
+  const connectionServiceFake = {
+    connect: jest.fn(),
+    revisionId: 'revision-123',
     api: {
       tables: jest.fn(),
       tableSchema: jest.fn(),
     },
   };
 
-  const draftRevisionServiceFake = {
-    getDraftRevisionId: jest.fn(),
-  };
-
   const setupSuccessfulFlow = () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema });
     mockMkdir.mockResolvedValue(undefined);
@@ -342,8 +307,7 @@ describe('SaveSchemaCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SaveSchemaCommand,
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 

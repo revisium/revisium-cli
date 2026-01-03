@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JsonSchemaStore } from '@revisium/schema-toolkit';
-import { CoreApiService } from './core-api.service';
-import { DraftRevisionService } from './draft-revision.service';
+import { ConnectionService } from './connection.service';
 import { JsonValidatorService } from './json-validator.service';
 import {
   PatchFile,
@@ -33,8 +32,7 @@ export class PatchValidationService {
   private readonly refs: Readonly<Record<string, JsonSchema>>;
 
   constructor(
-    private readonly coreApi: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
+    private readonly connectionService: ConnectionService,
     private readonly jsonValidator: JsonValidatorService,
   ) {
     this.refs = {
@@ -158,60 +156,6 @@ export class PatchValidationService {
     return [];
   }
 
-  public async validate(
-    patchFile: PatchFile,
-    options: { organization?: string; project?: string; branch?: string },
-  ): Promise<ValidationResult> {
-    const formatResult = this.validateFormat(patchFile);
-    if (!formatResult.valid) {
-      return formatResult;
-    }
-
-    try {
-      const revisionId =
-        await this.draftRevisionService.getDraftRevisionId(options);
-
-      const tableSchema = await this.getTableSchema(
-        patchFile.table,
-        revisionId,
-      );
-
-      return this.validateAgainstSchema(patchFile, tableSchema);
-    } catch (error) {
-      return {
-        valid: false,
-        errors: [
-          {
-            rowId: patchFile.rowId,
-            message: `Failed to fetch table schema: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-      };
-    }
-  }
-
-  public async validateAll(
-    patchFiles: PatchFile[],
-    options: { organization?: string; project?: string; branch?: string },
-  ): Promise<ValidationResult[]> {
-    let revisionId: string;
-    try {
-      revisionId = await this.draftRevisionService.getDraftRevisionId(options);
-    } catch (error) {
-      return patchFiles.map((patchFile) => ({
-        valid: false,
-        errors: [
-          {
-            rowId: patchFile.rowId,
-            message: `Failed to get revision ID: ${error instanceof Error ? error.message : String(error)}`,
-          },
-        ],
-      }));
-    }
-
-    return this.validateAllWithRevisionId(patchFiles, revisionId);
-  }
-
   public async validateAllWithRevisionId(
     patchFiles: PatchFile[],
     revisionId: string,
@@ -255,7 +199,10 @@ export class PatchValidationService {
     tableName: string,
     revisionId: string,
   ): Promise<JsonSchema> {
-    const response = await this.coreApi.api.tableSchema(revisionId, tableName);
+    const response = await this.connectionService.api.tableSchema(
+      revisionId,
+      tableName,
+    );
 
     if (response.error) {
       throw new Error(

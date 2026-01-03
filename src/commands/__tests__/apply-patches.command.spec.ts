@@ -3,8 +3,7 @@ import { ApplyPatchesCommand } from '../apply-patches.command';
 import { PatchLoaderService } from 'src/services/patch-loader.service';
 import { PatchValidationService } from 'src/services/patch-validation.service';
 import { PatchDiffService } from 'src/services/patch-diff.service';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { PatchFile } from 'src/types/patch.types';
 
@@ -19,16 +18,14 @@ describe('ApplyPatchesCommand', () => {
   let diffServiceFake: {
     compareWithApi: jest.Mock;
   };
-  let coreApiServiceFake: {
-    tryToLogin: jest.Mock;
+  let connectionServiceFake: {
+    connect: jest.Mock;
+    draftRevisionId: string;
     bulkPatchSupported: boolean | undefined;
     api: {
       patchRow: jest.Mock;
       patchRows: jest.Mock;
     };
-  };
-  let draftRevisionServiceFake: {
-    getDraftRevisionId: jest.Mock;
   };
   let commitRevisionServiceFake: {
     handleCommitFlow: jest.Mock;
@@ -64,17 +61,14 @@ describe('ApplyPatchesCommand', () => {
       compareWithApi: jest.fn(),
     };
 
-    coreApiServiceFake = {
-      tryToLogin: jest.fn(),
+    connectionServiceFake = {
+      connect: jest.fn(),
+      draftRevisionId: 'revision-123',
       bulkPatchSupported: undefined,
       api: {
         patchRow: jest.fn(),
         patchRows: jest.fn(),
       },
-    };
-
-    draftRevisionServiceFake = {
-      getDraftRevisionId: jest.fn(),
     };
 
     commitRevisionServiceFake = {
@@ -87,8 +81,7 @@ describe('ApplyPatchesCommand', () => {
         { provide: PatchLoaderService, useValue: loaderServiceFake },
         { provide: PatchValidationService, useValue: validationServiceFake },
         { provide: PatchDiffService, useValue: diffServiceFake },
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
         { provide: CommitRevisionService, useValue: commitRevisionServiceFake },
       ],
     }).compile();
@@ -113,7 +106,7 @@ describe('ApplyPatchesCommand', () => {
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalled();
+    expect(connectionServiceFake.connect).toHaveBeenCalled();
   });
 
   it('loads and validates patches before applying', async () => {
@@ -134,10 +127,7 @@ describe('ApplyPatchesCommand', () => {
     }) as never);
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       {
         valid: false,
@@ -166,8 +156,8 @@ describe('ApplyPatchesCommand', () => {
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledWith(
       'revision-123',
       'Article',
       {
@@ -187,10 +177,7 @@ describe('ApplyPatchesCommand', () => {
 
   it('falls back to single-row mode on 404', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -214,27 +201,24 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({
+    connectionServiceFake.api.patchRows.mockResolvedValue({
       error: { status: 404 },
     });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRow.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.bulkPatchSupported).toBe(false);
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.bulkPatchSupported).toBe(false);
   });
 
   it('exits early when no changes detected', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -255,18 +239,15 @@ describe('ApplyPatchesCommand', () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       '✅ No changes detected. All values are identical to current data.',
     );
-    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRow).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
 
   it('skips rows without changes', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -290,13 +271,13 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRows.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledWith(
       'revision-123',
       'Article',
       {
@@ -317,10 +298,7 @@ describe('ApplyPatchesCommand', () => {
     }) as never);
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -344,7 +322,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({
+    connectionServiceFake.api.patchRows.mockResolvedValue({
       error: { message: 'API error' },
     });
 
@@ -366,7 +344,7 @@ describe('ApplyPatchesCommand', () => {
     await command.run([], { input: './patches', commit: true });
 
     expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-      { input: './patches', commit: true },
+      true,
       'Applied patches',
       2,
     );
@@ -392,10 +370,7 @@ describe('ApplyPatchesCommand', () => {
 
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     loaderServiceFake.loadPatches.mockResolvedValue(multiTablePatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -419,7 +394,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRows.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
@@ -472,10 +447,7 @@ describe('ApplyPatchesCommand', () => {
     }));
 
     loaderServiceFake.loadPatches.mockResolvedValue(manyPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue(
       manyPatches.map(() => ({ valid: true, errors: [] })),
     );
@@ -493,7 +465,7 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.api.patchRows
+    connectionServiceFake.api.patchRows
       .mockResolvedValueOnce({ data: {} })
       .mockResolvedValueOnce({ error: { message: 'Server error' } });
 
@@ -519,10 +491,7 @@ describe('ApplyPatchesCommand', () => {
 
   it('uses single-row mode when bulkPatchSupported is false', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -547,14 +516,14 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.bulkPatchSupported = false;
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    connectionServiceFake.bulkPatchSupported = false;
+    connectionServiceFake.api.patchRow.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
   });
 
   it('logs correct single-row count when some rows fail', async () => {
@@ -562,10 +531,7 @@ describe('ApplyPatchesCommand', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -590,8 +556,8 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.bulkPatchSupported = false;
-    coreApiServiceFake.api.patchRow
+    connectionServiceFake.bulkPatchSupported = false;
+    connectionServiceFake.api.patchRow
       .mockResolvedValueOnce({ data: {} })
       .mockResolvedValueOnce({ error: { message: 'Failed' } });
 
@@ -619,10 +585,7 @@ describe('ApplyPatchesCommand', () => {
 
   it('falls back to single-row mode on 404 exception', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -646,25 +609,22 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockRejectedValue({ status: 404 });
-    coreApiServiceFake.api.patchRow.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRows.mockRejectedValue({ status: 404 });
+    connectionServiceFake.api.patchRow.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.bulkPatchSupported).toBe(false);
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.patchRow).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.bulkPatchSupported).toBe(false);
   });
 
   it('handles batch patchRows with no data returned', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -688,7 +648,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({});
+    connectionServiceFake.api.patchRows.mockResolvedValue({});
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
       throw new Error('process.exit called');
@@ -712,10 +672,7 @@ describe('ApplyPatchesCommand', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -739,7 +696,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockRejectedValue(
+    connectionServiceFake.api.patchRows.mockRejectedValue(
       new Error('Network error'),
     );
 
@@ -781,10 +738,7 @@ describe('ApplyPatchesCommand', () => {
     ];
 
     loaderServiceFake.loadPatches.mockResolvedValue(patchesWithEmpty);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -808,12 +762,12 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRows.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.patchRows).toHaveBeenCalledWith(
       'revision-123',
       'Article',
       {
@@ -831,10 +785,7 @@ describe('ApplyPatchesCommand', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatches[0]]);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
@@ -854,8 +805,8 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.bulkPatchSupported = false;
-    coreApiServiceFake.api.patchRow.mockRejectedValue(
+    connectionServiceFake.bulkPatchSupported = false;
+    connectionServiceFake.api.patchRow.mockRejectedValue(
       new Error('Connection failed'),
     );
 
@@ -881,10 +832,7 @@ describe('ApplyPatchesCommand', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatches[0]]);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
@@ -904,8 +852,8 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.bulkPatchSupported = false;
-    coreApiServiceFake.api.patchRow.mockResolvedValue({});
+    connectionServiceFake.bulkPatchSupported = false;
+    connectionServiceFake.api.patchRow.mockResolvedValue({});
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
       throw new Error('process.exit called');
@@ -955,10 +903,7 @@ describe('ApplyPatchesCommand', () => {
 
   it('handles is404Error with non-object error', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -983,7 +928,7 @@ describe('ApplyPatchesCommand', () => {
       },
     });
 
-    coreApiServiceFake.api.patchRows.mockRejectedValue('string error');
+    connectionServiceFake.api.patchRows.mockRejectedValue('string error');
 
     const mockExit = jest.spyOn(process, 'exit').mockImplementation((() => {
       throw new Error('process.exit called');
@@ -1011,10 +956,7 @@ describe('ApplyPatchesCommand', () => {
     const emptyPatches: PatchFile[] = [];
 
     loaderServiceFake.loadPatches.mockResolvedValue(emptyPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([]);
     diffServiceFake.compareWithApi.mockResolvedValue({
       table: 'Article',
@@ -1029,8 +971,8 @@ describe('ApplyPatchesCommand', () => {
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRow).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
@@ -1050,10 +992,7 @@ describe('ApplyPatchesCommand', () => {
     ];
 
     loaderServiceFake.loadPatches.mockResolvedValue(patchesForDifferentTable);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
@@ -1085,18 +1024,15 @@ describe('ApplyPatchesCommand', () => {
       logCalls.some((call) => String(call).includes('No changes to apply')),
     ).toBe(true);
 
-    expect(coreApiServiceFake.api.patchRows).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.patchRow).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.patchRow).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
 
   function setupSuccessfulFlow() {
     loaderServiceFake.loadPatches.mockResolvedValue(mockPatches);
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
       { valid: true, errors: [] },
@@ -1120,7 +1056,7 @@ describe('ApplyPatchesCommand', () => {
         errors: 0,
       },
     });
-    coreApiServiceFake.api.patchRows.mockResolvedValue({ data: {} });
+    connectionServiceFake.api.patchRows.mockResolvedValue({ data: {} });
     commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
   }
 });

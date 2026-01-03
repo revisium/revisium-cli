@@ -12,16 +12,16 @@
 
 export interface AddUserToOrganizationDto {
   roleId:
-    | "organizationOwner"
-    | "organizationAdmin"
-    | "developer"
-    | "editor"
-    | "reader";
+    | 'organizationOwner'
+    | 'organizationAdmin'
+    | 'developer'
+    | 'editor'
+    | 'reader';
   userId: string;
 }
 
 export interface AddUserToProjectDto {
-  roleId: "developer" | "editor" | "reader";
+  roleId: 'developer' | 'editor' | 'reader';
   userId: string;
 }
 
@@ -31,7 +31,7 @@ export interface ApplyMigrationsResponseDto {
   /** The ID of the migration */
   id: string;
   /** The migration application status */
-  status: "applied" | "failed" | "skipped";
+  status: 'applied' | 'failed' | 'skipped';
 }
 
 export interface BoolFilterDto {
@@ -76,7 +76,7 @@ export interface CreateBranchByRevisionDto {
 }
 
 export interface CreateEndpointDto {
-  type: "GRAPHQL" | "REST_API";
+  type: 'GRAPHQL' | 'REST_API';
 }
 
 export interface CreateProjectDto {
@@ -132,7 +132,7 @@ export interface CreateTableResponse {
 export interface CreateUserDto {
   email?: string;
   password: string;
-  roleId: "systemAdmin" | "systemFullApiRead" | "systemUser";
+  roleId: 'systemAdmin' | 'systemFullApiRead' | 'systemUser';
   username: string;
 }
 
@@ -155,7 +155,7 @@ export interface EndpointModel {
   /** @format date-time */
   createdAt: string;
   id: string;
-  type: "GRAPHQL" | "REST_API";
+  type: 'GRAPHQL' | 'REST_API';
 }
 
 export interface ErrorModel {
@@ -204,7 +204,7 @@ export interface InitMigrationDto {
    * Indicates an initialization migration
    * @example "init"
    */
-  changeType: "init";
+  changeType: 'init';
   /** Checksum of the initial schema */
   hash: string;
   /**
@@ -236,46 +236,46 @@ export interface JsonFilterDto {
   /** Less-than-or-equal comparison. Must be a number or numeric JSON value */
   lte?: number;
   /** Case sensitivity mode for string filters within JSON ("insensitive" uses ILIKE on PostgreSQL) */
-  mode?: "default" | "insensitive";
+  mode?: 'default' | 'insensitive';
   /** Path in JSON (PostgreSQL: array of keys/indexes, e.g. ["pet1","petName"] or dot notation "pet1.petName") */
   path?: string | string[];
   /** Full-text search string for JSON content */
   search?: string;
   /** Scope of search within JSON structure */
-  searchIn?: "all" | "values" | "keys" | "strings" | "numbers" | "booleans";
+  searchIn?: 'all' | 'values' | 'keys' | 'strings' | 'numbers' | 'booleans';
   /** Language for full-text search. Default: simple */
   searchLanguage?:
-    | "simple"
-    | "arabic"
-    | "armenian"
-    | "basque"
-    | "catalan"
-    | "danish"
-    | "dutch"
-    | "english"
-    | "finnish"
-    | "french"
-    | "german"
-    | "greek"
-    | "hindi"
-    | "hungarian"
-    | "indonesian"
-    | "irish"
-    | "italian"
-    | "lithuanian"
-    | "nepali"
-    | "norwegian"
-    | "portuguese"
-    | "romanian"
-    | "russian"
-    | "serbian"
-    | "spanish"
-    | "swedish"
-    | "tamil"
-    | "turkish"
-    | "yiddish";
+    | 'simple'
+    | 'arabic'
+    | 'armenian'
+    | 'basque'
+    | 'catalan'
+    | 'danish'
+    | 'dutch'
+    | 'english'
+    | 'finnish'
+    | 'french'
+    | 'german'
+    | 'greek'
+    | 'hindi'
+    | 'hungarian'
+    | 'indonesian'
+    | 'irish'
+    | 'italian'
+    | 'lithuanian'
+    | 'nepali'
+    | 'norwegian'
+    | 'portuguese'
+    | 'romanian'
+    | 'russian'
+    | 'serbian'
+    | 'spanish'
+    | 'swedish'
+    | 'tamil'
+    | 'turkish'
+    | 'yiddish';
   /** Search type: plain (individual words), phrase (exact phrase), prefix (word beginnings with :*), tsquery (raw PostgreSQL tsquery syntax) */
-  searchType?: "plain" | "phrase" | "prefix" | "tsquery";
+  searchType?: 'plain' | 'phrase' | 'prefix' | 'tsquery';
   /** Substring match in JSON string value */
   string_contains?: string;
   /** Suffix match in JSON string value */
@@ -294,11 +294,11 @@ export interface LoginResponse {
 }
 
 export interface OrderByDto {
-  aggregation?: "min" | "max" | "avg" | "first" | "last";
-  direction: "asc" | "desc";
-  field: "createdAt" | "updatedAt" | "publishedAt" | "id" | "data";
+  aggregation?: 'min' | 'max' | 'avg' | 'first' | 'last';
+  direction: 'asc' | 'desc';
+  field: 'createdAt' | 'updatedAt' | 'publishedAt' | 'id' | 'data';
   path?: string;
-  type?: "text" | "int" | "float" | "boolean" | "timestamp";
+  type?: 'text' | 'int' | 'float' | 'boolean' | 'timestamp';
 }
 
 export interface PageInfo {
@@ -318,7 +318,7 @@ export interface PatchRow {
    * The operation to perform. Currently only "replace" is supported
    * @example "replace"
    */
-  op: "replace";
+  op: 'replace';
   /**
    * JSON path using dot notation for objects and [index] for arrays. Examples: "name", "user.email", "items[0]", "data.list[2].value"
    * @example "list[0].nestedList[2].name"
@@ -382,7 +382,7 @@ export interface RemoveMigrationDto {
    * Indicates a remove migration
    * @example "remove"
    */
-  changeType: "remove";
+  changeType: 'remove';
   /** Timestamp when the table was removed (ISO 8601) */
   id: string;
   /** Current table identifier */
@@ -415,7 +415,7 @@ export interface RenameMigrationDto {
    * Indicates a rename migration
    * @example "rename"
    */
-  changeType: "rename";
+  changeType: 'rename';
   /** Timestamp when the table was renamed (ISO 8601) */
   id: string;
   /** New table identifier after renaming */
@@ -524,7 +524,7 @@ export interface StringFilterDto {
   in?: string[];
   lt?: string;
   lte?: string;
-  mode?: "default" | "insensitive";
+  mode?: 'default' | 'insensitive';
   /** Negation filter (not): a simple string */
   not?: string;
   notIn?: string[];
@@ -568,7 +568,7 @@ export interface UpdateMigrationDto {
    * Indicates an update migration
    * @example "update"
    */
-  changeType: "update";
+  changeType: 'update';
   /** Checksum of the patch set */
   hash: string;
   /** Timestamp when the update was applied (ISO 8601) */
@@ -699,7 +699,7 @@ export interface RevisionsParams {
   before?: string;
   inclusive?: boolean;
   /** Sort order: asc (default) or desc */
-  sort?: "asc" | "desc";
+  sort?: 'asc' | 'desc';
   organizationId: string;
   projectName: string;
   branchName: string;
@@ -764,9 +764,9 @@ export interface RowForeignKeysToParams {
 }
 
 export type QueryParamsType = Record<string | number, any>;
-export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
+export type ResponseFormat = keyof Omit<Body, 'body' | 'bodyUsed'>;
 
-export interface FullRequestParams extends Omit<RequestInit, "body"> {
+export interface FullRequestParams extends Omit<RequestInit, 'body'> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -787,12 +787,12 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
 
 export type RequestParams = Omit<
   FullRequestParams,
-  "body" | "method" | "query" | "path"
+  'body' | 'method' | 'query' | 'path'
 >;
 
 export interface ApiConfig<SecurityDataType = unknown> {
   baseUrl?: string;
-  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
+  baseApiParams?: Omit<RequestParams, 'baseUrl' | 'cancelToken' | 'signal'>;
   securityWorker?: (
     securityData: SecurityDataType | null,
   ) => Promise<RequestParams | void> | RequestParams | void;
@@ -808,26 +808,26 @@ export interface HttpResponse<D extends unknown, E extends unknown = unknown>
 type CancelToken = Symbol | string | number;
 
 export enum ContentType {
-  Json = "application/json",
-  JsonApi = "application/vnd.api+json",
-  FormData = "multipart/form-data",
-  UrlEncoded = "application/x-www-form-urlencoded",
-  Text = "text/plain",
+  Json = 'application/json',
+  JsonApi = 'application/vnd.api+json',
+  FormData = 'multipart/form-data',
+  UrlEncoded = 'application/x-www-form-urlencoded',
+  Text = 'text/plain',
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "";
+  public baseUrl: string = '';
   private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
+  private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
   private abortControllers = new Map<CancelToken, AbortController>();
   private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
     fetch(...fetchParams);
 
   private baseApiParams: RequestParams = {
-    credentials: "same-origin",
+    credentials: 'same-origin',
     headers: {},
-    redirect: "follow",
-    referrerPolicy: "no-referrer",
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
   };
 
   constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
@@ -840,7 +840,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected encodeQueryParam(key: string, value: any) {
     const encodedKey = encodeURIComponent(key);
-    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
+    return `${encodedKey}=${encodeURIComponent(typeof value === 'number' ? value : `${value}`)}`;
   }
 
   protected addQueryParam(query: QueryParamsType, key: string) {
@@ -849,13 +849,13 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected addArrayQueryParam(query: QueryParamsType, key: string) {
     const value = query[key];
-    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join('&');
   }
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
     const query = rawQuery || {};
     const keys = Object.keys(query).filter(
-      (key) => "undefined" !== typeof query[key],
+      (key) => 'undefined' !== typeof query[key],
     );
     return keys
       .map((key) =>
@@ -863,25 +863,25 @@ export class HttpClient<SecurityDataType = unknown> {
           ? this.addArrayQueryParam(query, key)
           : this.addQueryParam(query, key),
       )
-      .join("&");
+      .join('&');
   }
 
   protected addQueryParams(rawQuery?: QueryParamsType): string {
     const queryString = this.toQueryString(rawQuery);
-    return queryString ? `?${queryString}` : "";
+    return queryString ? `?${queryString}` : '';
   }
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
+      input !== null && (typeof input === 'object' || typeof input === 'string')
         ? JSON.stringify(input)
         : input,
     [ContentType.JsonApi]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
+      input !== null && (typeof input === 'object' || typeof input === 'string')
         ? JSON.stringify(input)
         : input,
     [ContentType.Text]: (input: any) =>
-      input !== null && typeof input !== "string"
+      input !== null && typeof input !== 'string'
         ? JSON.stringify(input)
         : input,
     [ContentType.FormData]: (input: any) =>
@@ -891,7 +891,7 @@ export class HttpClient<SecurityDataType = unknown> {
           key,
           property instanceof Blob
             ? property
-            : typeof property === "object" && property !== null
+            : typeof property === 'object' && property !== null
               ? JSON.stringify(property)
               : `${property}`,
         );
@@ -953,7 +953,7 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<HttpResponse<T, E>> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+      ((typeof secure === 'boolean' ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
@@ -963,13 +963,13 @@ export class HttpClient<SecurityDataType = unknown> {
     const responseFormat = format || requestParams.format;
 
     return this.customFetch(
-      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
+      `${baseUrl || this.baseUrl || ''}${path}${queryString ? `?${queryString}` : ''}`,
       {
         ...requestParams,
         headers: {
           ...(requestParams.headers || {}),
           ...(type && type !== ContentType.FormData
-            ? { "Content-Type": type }
+            ? { 'Content-Type': type }
             : {}),
         },
         signal:
@@ -977,7 +977,7 @@ export class HttpClient<SecurityDataType = unknown> {
             ? this.createAbortSignal(cancelToken)
             : requestParams.signal) || null,
         body:
-          typeof body === "undefined" || body === null
+          typeof body === 'undefined' || body === null
             ? null
             : payloadFormatter(body),
       },
@@ -1031,11 +1031,11 @@ export class Api<
     login: (data: LoginDto, params: RequestParams = {}) =>
       this.request<LoginResponse, any>({
         path: `/api/auth/login`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1050,11 +1050,11 @@ export class Api<
     updatePassword: (data: UpdatePasswordDto, params: RequestParams = {}) =>
       this.request<boolean, any>({
         path: `/api/auth/password`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1069,11 +1069,11 @@ export class Api<
     createUser: (data: CreateUserDto, params: RequestParams = {}) =>
       this.request<boolean, any>({
         path: `/api/auth/user`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1087,8 +1087,8 @@ export class Api<
     getConfiguration: (params: RequestParams = {}) =>
       this.request<ConfigurationResponse, any>({
         path: `/api/configuration`,
-        method: "GET",
-        format: "json",
+        method: 'GET',
+        format: 'json',
         ...params,
       }),
 
@@ -1103,9 +1103,9 @@ export class Api<
     deleteEndpoint: (endpointId: string, params: RequestParams = {}) =>
       this.request<boolean, any>({
         path: `/api/endpoints/${endpointId}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1121,9 +1121,9 @@ export class Api<
     endpointRelatives: (endpointId: string, params: RequestParams = {}) =>
       this.request<GetEndpointResultDto, any>({
         path: `/api/endpoints/${endpointId}/relatives`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1141,10 +1141,10 @@ export class Api<
     ) =>
       this.request<ProjectsConnection, any>({
         path: `/api/organization/${organizationId}/projects`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1163,12 +1163,12 @@ export class Api<
     ) =>
       this.request<ProjectModel, any>({
         path: `/api/organization/${organizationId}/projects`,
-        method: "POST",
+        method: 'POST',
         query: query,
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1187,9 +1187,9 @@ export class Api<
     ) =>
       this.request<SuccessModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1208,9 +1208,9 @@ export class Api<
     ) =>
       this.request<ProjectModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1230,11 +1230,11 @@ export class Api<
     ) =>
       this.request<SuccessModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1252,10 +1252,10 @@ export class Api<
     ) =>
       this.request<BranchesConnection, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1275,9 +1275,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1298,11 +1298,11 @@ export class Api<
     ) =>
       this.request<RevisionModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/create-revision`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1322,9 +1322,9 @@ export class Api<
     ) =>
       this.request<RevisionModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/draft-revision`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1344,9 +1344,9 @@ export class Api<
     ) =>
       this.request<RevisionModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/head-revision`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1366,9 +1366,9 @@ export class Api<
     ) =>
       this.request<ParentBranchResponse, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/parent-branch`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1388,9 +1388,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/revert-changes`,
-        method: "POST",
+        method: 'POST',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1408,10 +1408,10 @@ export class Api<
     ) =>
       this.request<RevisionsConnection, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/revisions`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1431,9 +1431,9 @@ export class Api<
     ) =>
       this.request<RevisionModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/start-revision`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1453,9 +1453,9 @@ export class Api<
     ) =>
       this.request<TouchedModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/touched`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1474,9 +1474,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/root-branch`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1494,10 +1494,10 @@ export class Api<
     ) =>
       this.request<UsersProjectConnection, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/users`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1517,11 +1517,11 @@ export class Api<
     ) =>
       this.request<SuccessModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/users`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1541,9 +1541,9 @@ export class Api<
     ) =>
       this.request<SuccessModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/users/${userId}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1562,11 +1562,11 @@ export class Api<
     ) =>
       this.request<boolean, any>({
         path: `/api/organization/${organizationId}/users`,
-        method: "DELETE",
+        method: 'DELETE',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1584,10 +1584,10 @@ export class Api<
     ) =>
       this.request<UsersOrganizationConnection, any>({
         path: `/api/organization/${organizationId}/users`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1606,11 +1606,11 @@ export class Api<
     ) =>
       this.request<boolean, any>({
         path: `/api/organization/${organizationId}/users`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1625,9 +1625,9 @@ export class Api<
     revision: (revisionId: string, params: RequestParams = {}) =>
       this.request<RevisionModel, any>({
         path: `/api/revision/${revisionId}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1651,11 +1651,11 @@ export class Api<
     ) =>
       this.request<ApplyMigrationsResponseDto[], any>({
         path: `/api/revision/${revisionId}/apply-migrations`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1670,9 +1670,9 @@ export class Api<
     childBranches: (revisionId: string, params: RequestParams = {}) =>
       this.request<ChildBranchResponse[], any>({
         path: `/api/revision/${revisionId}/child-branches`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1691,11 +1691,11 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/revision/${revisionId}/child-branches`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1710,9 +1710,9 @@ export class Api<
     childRevision: (revisionId: string, params: RequestParams = {}) =>
       this.request<RevisionModel, any>({
         path: `/api/revision/${revisionId}/child-revision`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1727,9 +1727,9 @@ export class Api<
     endpoints: (revisionId: string, params: RequestParams = {}) =>
       this.request<EndpointModel[], any>({
         path: `/api/revision/${revisionId}/endpoints`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1748,11 +1748,11 @@ export class Api<
     ) =>
       this.request<EndpointModel, any>({
         path: `/api/revision/${revisionId}/endpoints`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1775,9 +1775,9 @@ export class Api<
         any
       >({
         path: `/api/revision/${revisionId}/migrations`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1792,9 +1792,9 @@ export class Api<
     parentRevision: (revisionId: string, params: RequestParams = {}) =>
       this.request<RevisionModel, any>({
         path: `/api/revision/${revisionId}/parent-revision`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1812,10 +1812,10 @@ export class Api<
     ) =>
       this.request<TablesConnection, any>({
         path: `/api/revision/${revisionId}/tables`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1834,11 +1834,11 @@ export class Api<
     ) =>
       this.request<CreateTableResponse, any>({
         path: `/api/revision/${revisionId}/tables`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1857,9 +1857,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1874,9 +1874,9 @@ export class Api<
     table: (revisionId: string, tableId: string, params: RequestParams = {}) =>
       this.request<TableModel, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1896,11 +1896,11 @@ export class Api<
     ) =>
       this.request<UpdateTableResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1919,9 +1919,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-by`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1940,9 +1940,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-to`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1961,9 +1961,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/count-rows`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -1983,11 +1983,11 @@ export class Api<
     ) =>
       this.request<CreateRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/create-row`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2007,11 +2007,11 @@ export class Api<
     ) =>
       this.request<CreateRowsResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/create-rows`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2029,10 +2029,10 @@ export class Api<
     ) =>
       this.request<TablesConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-by`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2050,10 +2050,10 @@ export class Api<
     ) =>
       this.request<TablesConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-to`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2073,11 +2073,11 @@ export class Api<
     ) =>
       this.request<PatchRowsResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/patch-rows`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2097,11 +2097,11 @@ export class Api<
     ) =>
       this.request<UpdateTableResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rename`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2121,11 +2121,11 @@ export class Api<
     ) =>
       this.request<RemoveRowsResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows`,
-        method: "DELETE",
+        method: 'DELETE',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2145,11 +2145,11 @@ export class Api<
     ) =>
       this.request<RowsConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2169,9 +2169,9 @@ export class Api<
     ) =>
       this.request<RemoveRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: "DELETE",
+        method: 'DELETE',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2191,9 +2191,9 @@ export class Api<
     ) =>
       this.request<RowModel, ErrorModel>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2214,11 +2214,11 @@ export class Api<
     ) =>
       this.request<PatchRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2239,11 +2239,11 @@ export class Api<
     ) =>
       this.request<UpdateRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2263,9 +2263,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/count-foreign-keys-by`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2285,9 +2285,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/count-foreign-keys-to`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2305,10 +2305,10 @@ export class Api<
     ) =>
       this.request<RowsConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/foreign-keys-by`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2326,10 +2326,10 @@ export class Api<
     ) =>
       this.request<RowsConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/foreign-keys-to`,
-        method: "GET",
+        method: 'GET',
         query: query,
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2350,11 +2350,11 @@ export class Api<
     ) =>
       this.request<RenameRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/rename`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2379,11 +2379,11 @@ export class Api<
     ) =>
       this.request<UploadFileResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/upload/${fileId}`,
-        method: "POST",
+        method: 'POST',
         body: data,
         secure: true,
         type: ContentType.FormData,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2402,9 +2402,9 @@ export class Api<
     ) =>
       this.request<object, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/schema`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2424,11 +2424,11 @@ export class Api<
     ) =>
       this.request<UpdateRowsResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/update-rows`,
-        method: "PATCH",
+        method: 'PATCH',
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: "json",
+        format: 'json',
         ...params,
       }),
 
@@ -2443,9 +2443,9 @@ export class Api<
     me: (params: RequestParams = {}) =>
       this.request<UserModel, any>({
         path: `/api/user/me`,
-        method: "GET",
+        method: 'GET',
         secure: true,
-        format: "json",
+        format: 'json',
         ...params,
       }),
   };
@@ -2517,8 +2517,8 @@ export class Api<
         }
       >({
         path: `/health/liveness`,
-        method: "GET",
-        format: "json",
+        method: 'GET',
+        format: 'json',
         ...params,
       }),
 
@@ -2589,8 +2589,8 @@ export class Api<
         }
       >({
         path: `/health/readiness`,
-        method: "GET",
-        format: "json",
+        method: 'GET',
+        format: 'json',
         ...params,
       }),
   };

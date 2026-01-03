@@ -2,7 +2,7 @@ import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from './base.command';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
-import { CoreApiService } from '../services/core-api.service';
+import { ConnectionService } from '../services/connection.service';
 
 type Options = BaseOptions & {
   input: string;
@@ -16,7 +16,7 @@ export class ValidatePatchesCommand extends BaseCommand {
   constructor(
     private readonly loaderService: PatchLoaderService,
     private readonly validationService: PatchValidationService,
-    private readonly coreApiService: CoreApiService,
+    private readonly connectionService: ConnectionService,
   ) {
     super();
   }
@@ -26,17 +26,20 @@ export class ValidatePatchesCommand extends BaseCommand {
       throw new Error('Error: --input option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-
     console.log(`🔍 Loading patches from ${options.input}...`);
     const patches = await this.loaderService.loadPatches(options.input);
     console.log(`✅ Loaded ${patches.length} patch file(s)\n`);
+
+    await this.connectionService.connect(options);
 
     console.log('🔍 Validating patch files...');
     let validCount = 0;
     let invalidCount = 0;
 
-    const results = await this.validationService.validateAll(patches, options);
+    const results = await this.validationService.validateAllWithRevisionId(
+      patches,
+      this.connectionService.draftRevisionId,
+    );
 
     for (let i = 0; i < patches.length; i++) {
       const patch = patches[i];

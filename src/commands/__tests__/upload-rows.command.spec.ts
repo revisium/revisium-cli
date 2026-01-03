@@ -4,8 +4,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { readdir, readFile } from 'node:fs/promises';
 import { UploadRowsCommand } from '../upload-rows.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
@@ -35,8 +34,9 @@ describe('UploadRowsCommand', () => {
 
   const mockValidation = jest.fn();
 
-  const coreApiServiceFake = {
-    tryToLogin: jest.fn(),
+  const connectionServiceFake = {
+    connect: jest.fn(),
+    draftRevisionId: 'revision-123',
     bulkCreateSupported: undefined as boolean | undefined,
     bulkUpdateSupported: undefined as boolean | undefined,
     api: {
@@ -48,10 +48,6 @@ describe('UploadRowsCommand', () => {
       updateRow: jest.fn(),
       updateRows: jest.fn(),
     },
-  };
-
-  const draftRevisionServiceFake = {
-    getDraftRevisionId: jest.fn(),
   };
 
   const jsonValidatorServiceFake = {
@@ -68,10 +64,7 @@ describe('UploadRowsCommand', () => {
   };
 
   const setupSuccessfulFlow = () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
     mockReaddir
       .mockResolvedValueOnce([
@@ -86,7 +79,7 @@ describe('UploadRowsCommand', () => {
         'readme.txt',
       ] as any);
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
       .mockResolvedValueOnce({ data: mockUserSchema })
@@ -110,16 +103,16 @@ describe('UploadRowsCommand', () => {
         '{"id": "post-1", "data": {"title": "Hello World"}}',
       );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'new-row' }] },
     });
-    coreApiServiceFake.api.updateRows.mockResolvedValue({
+    connectionServiceFake.api.updateRows.mockResolvedValue({
       data: { rows: [{ id: 'updated-row' }] },
     });
 
@@ -130,8 +123,7 @@ describe('UploadRowsCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UploadRowsCommand,
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
         { provide: JsonValidatorService, useValue: jsonValidatorServiceFake },
         {
           provide: TableDependencyService,
@@ -147,8 +139,8 @@ describe('UploadRowsCommand', () => {
     command = module.get<UploadRowsCommand>(UploadRowsCommand);
 
     jest.clearAllMocks();
-    coreApiServiceFake.bulkCreateSupported = undefined;
-    coreApiServiceFake.bulkUpdateSupported = undefined;
+    connectionServiceFake.bulkCreateSupported = undefined;
+    connectionServiceFake.bulkUpdateSupported = undefined;
     if (consoleSpy) {
       consoleSpy.mockRestore();
     }
@@ -172,7 +164,7 @@ describe('UploadRowsCommand', () => {
 
     await command.run([], { folder: './data' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledWith({
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith({
       folder: './data',
     });
   });
@@ -188,9 +180,7 @@ describe('UploadRowsCommand', () => {
 
     await command.run([], options);
 
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
-    );
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith(options);
   });
 
   it('scans folder for table directories when no filter specified', async () => {
@@ -204,12 +194,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('uses table filter instead of scanning when provided', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
       .mockResolvedValueOnce({ data: mockUserSchema })
@@ -236,13 +223,13 @@ describe('UploadRowsCommand', () => {
       )
       .mockResolvedValueOnce('{"id": "user-1", "data": {"name": "Alice"}}');
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'new-row' }] },
     });
 
@@ -255,23 +242,20 @@ describe('UploadRowsCommand', () => {
       withFileTypes: true,
     });
 
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledWith(
       'revision-123',
       'users',
     );
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledWith(
       'revision-123',
       'posts',
     );
   });
 
   it('fetches schemas for dependency analysis', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
       .mockResolvedValueOnce({ data: mockUserSchema })
@@ -298,19 +282,19 @@ describe('UploadRowsCommand', () => {
       )
       .mockResolvedValueOnce('{"id": "user-1", "data": {"name": "Alice"}}');
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'post-1' }] },
     });
 
     await command.run([], { folder: './data', tables: 'users,posts' });
 
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledTimes(4);
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledTimes(4);
     expect(tableDependencyServiceFake.analyzeDependencies).toHaveBeenCalledWith(
       {
         users: mockUserSchema,
@@ -322,12 +306,9 @@ describe('UploadRowsCommand', () => {
   it('displays dependency analysis information', async () => {
     const localConsoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockUserSchema,
     });
 
@@ -347,7 +328,7 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'post-1', data: { title: 'Hello World' } } }],
         pageInfo: { hasNextPage: false, endCursor: null },
@@ -396,12 +377,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('creates new rows when they do not exist using bulk API', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -420,19 +398,19 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'post-1' }] },
     });
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(coreApiServiceFake.api.createRows).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.createRows).toHaveBeenCalledWith(
       'revision-123',
       'posts',
       {
@@ -443,12 +421,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('updates existing rows when data is different using bulk API', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -467,19 +442,19 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'post-1', data: { title: 'Old Title' } } }],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.updateRows.mockResolvedValue({
+    connectionServiceFake.api.updateRows.mockResolvedValue({
       data: { rows: [{ id: 'post-1' }] },
     });
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(coreApiServiceFake.api.updateRows).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.updateRows).toHaveBeenCalledWith(
       'revision-123',
       'posts',
       {
@@ -489,12 +464,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('skips rows when data is identical', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -513,7 +485,7 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'post-1', data: { title: 'Hello World' } } }],
         pageInfo: { hasNextPage: false, endCursor: null },
@@ -522,17 +494,14 @@ describe('UploadRowsCommand', () => {
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(coreApiServiceFake.api.updateRows).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.createRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.updateRows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.createRows).not.toHaveBeenCalled();
   });
 
   it('falls back to single-row mode when bulk create returns 404', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -553,24 +522,24 @@ describe('UploadRowsCommand', () => {
       )
       .mockResolvedValueOnce('{"id": "post-2", "data": {"title": "Second"}}');
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
 
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       error: { status: 404 },
     });
-    coreApiServiceFake.api.createRow.mockResolvedValue({
+    connectionServiceFake.api.createRow.mockResolvedValue({
       data: { id: 'post-1' },
     });
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(coreApiServiceFake.api.createRow).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.createRow).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.createRow).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.createRow).toHaveBeenCalledWith(
       'revision-123',
       'posts',
       {
@@ -582,12 +551,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('falls back to single-row mode when bulk update returns 404', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -606,23 +572,23 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "New Title"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'post-1', data: { title: 'Old Title' } } }],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
 
-    coreApiServiceFake.api.updateRows.mockResolvedValue({
+    connectionServiceFake.api.updateRows.mockResolvedValue({
       error: { status: 404 },
     });
-    coreApiServiceFake.api.updateRow.mockResolvedValue({
+    connectionServiceFake.api.updateRow.mockResolvedValue({
       data: { id: 'post-1' },
     });
 
     await command.run([], { folder: './data', tables: 'posts' });
 
-    expect(coreApiServiceFake.api.updateRow).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.updateRow).toHaveBeenCalledWith(
       'revision-123',
       'posts',
       'post-1',
@@ -634,12 +600,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('caches bulk support status after first fallback', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -663,24 +626,24 @@ describe('UploadRowsCommand', () => {
       )
       .mockResolvedValueOnce('{"id": "user-1", "data": {"name": "Alice"}}');
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
 
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       error: { status: 404 },
     });
-    coreApiServiceFake.api.createRow.mockResolvedValue({
+    connectionServiceFake.api.createRow.mockResolvedValue({
       data: { id: 'created' },
     });
 
     await command.run([], { folder: './data', tables: 'posts,users' });
 
-    expect(coreApiServiceFake.api.createRows).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.api.createRow).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.createRows).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.createRow).toHaveBeenCalledTimes(2);
   });
 
   it('tracks upload statistics correctly', async () => {
@@ -710,12 +673,9 @@ describe('UploadRowsCommand', () => {
   it('handles batch create errors gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockPostSchema,
     });
     tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -734,14 +694,14 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
 
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       error: { message: 'Validation failed' },
     });
 
@@ -758,12 +718,9 @@ describe('UploadRowsCommand', () => {
   it('continues processing when table fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema
+    connectionServiceFake.api.tableSchema
       .mockResolvedValueOnce({ data: mockUserSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
       .mockResolvedValueOnce({ data: mockPostSchema })
@@ -786,13 +743,13 @@ describe('UploadRowsCommand', () => {
       '{"id": "post-1", "data": {"title": "Hello World"}}',
     );
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'post-1' }] },
     });
 
@@ -829,12 +786,9 @@ describe('UploadRowsCommand', () => {
   });
 
   it('handles table filter with whitespace correctly', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
-    coreApiServiceFake.api.tableSchema.mockResolvedValue({
+    connectionServiceFake.api.tableSchema.mockResolvedValue({
       data: mockUserSchema,
     });
 
@@ -852,13 +806,13 @@ describe('UploadRowsCommand', () => {
     mockReaddir.mockResolvedValue(['row-1.json'] as any);
     mockReadFile.mockResolvedValue('{"id": "row-1", "data": {"name": "Test"}}');
 
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.createRows.mockResolvedValue({
+    connectionServiceFake.api.createRows.mockResolvedValue({
       data: { rows: [{ id: 'new-row' }] },
     });
 
@@ -867,15 +821,15 @@ describe('UploadRowsCommand', () => {
       tables: ' users , posts , comments ',
     });
 
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledWith(
       'revision-123',
       'users',
     );
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledWith(
       'revision-123',
       'posts',
     );
-    expect(coreApiServiceFake.api.tableSchema).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.tableSchema).toHaveBeenCalledWith(
       'revision-123',
       'comments',
     );
@@ -905,7 +859,7 @@ describe('UploadRowsCommand', () => {
       await command.run([], { folder: './data', commit: true });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { folder: './data', commit: true },
+        true,
         'Uploaded',
         expect.any(Number),
       );
@@ -918,17 +872,14 @@ describe('UploadRowsCommand', () => {
       await command.run([], { folder: './data', commit: false });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { folder: './data', commit: false },
+        false,
         'Uploaded',
         expect.any(Number),
       );
     });
 
     it('calls commitRevisionService with zero changes when no data uploaded', async () => {
-      coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-      draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-        'revision-123',
-      );
+      connectionServiceFake.connect.mockResolvedValue(undefined);
       mockReaddir.mockResolvedValueOnce([] as any);
       tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
         sortedTables: [],
@@ -945,7 +896,7 @@ describe('UploadRowsCommand', () => {
       });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { folder: './empty-data', commit: true },
+        true,
         'Uploaded',
         0,
       );
@@ -954,12 +905,9 @@ describe('UploadRowsCommand', () => {
 
   describe('pagination', () => {
     it('fetches all existing rows using pagination', async () => {
-      coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-      draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-        'revision-123',
-      );
+      connectionServiceFake.connect.mockResolvedValue(undefined);
 
-      coreApiServiceFake.api.tableSchema.mockResolvedValue({
+      connectionServiceFake.api.tableSchema.mockResolvedValue({
         data: mockPostSchema,
       });
       tableDependencyServiceFake.analyzeDependencies.mockReturnValue({
@@ -978,7 +926,7 @@ describe('UploadRowsCommand', () => {
         '{"id": "post-1", "data": {"title": "Hello World"}}',
       );
 
-      coreApiServiceFake.api.rows
+      connectionServiceFake.api.rows
         .mockResolvedValueOnce({
           data: {
             edges: [
@@ -996,14 +944,14 @@ describe('UploadRowsCommand', () => {
           },
         });
 
-      coreApiServiceFake.api.createRows.mockResolvedValue({
+      connectionServiceFake.api.createRows.mockResolvedValue({
         data: { rows: [{ id: 'post-1' }] },
       });
 
       await command.run([], { folder: './data', tables: 'posts' });
 
-      expect(coreApiServiceFake.api.rows).toHaveBeenCalledTimes(2);
-      expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+      expect(connectionServiceFake.api.rows).toHaveBeenCalledTimes(2);
+      expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
         1,
         'revision-123',
         'posts',
@@ -1013,7 +961,7 @@ describe('UploadRowsCommand', () => {
           orderBy: [{ field: 'id', direction: 'asc' }],
         },
       );
-      expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+      expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
         2,
         'revision-123',
         'posts',

@@ -3,8 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SaveRowsCommand } from '../save-rows.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 
 jest.mock('node:fs/promises');
 
@@ -23,7 +22,7 @@ describe('SaveRowsCommand', () => {
 
     await command.run([], { folder: './data' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledWith({
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith({
       folder: './data',
     });
   });
@@ -39,9 +38,7 @@ describe('SaveRowsCommand', () => {
 
     await command.run([], options);
 
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
-    );
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith(options);
   });
 
   it('creates output folder recursively', async () => {
@@ -57,20 +54,20 @@ describe('SaveRowsCommand', () => {
 
     await command.run([], { folder: './data' });
 
-    expect(coreApiServiceFake.api.tables).toHaveBeenCalledWith({
+    expect(connectionServiceFake.api.tables).toHaveBeenCalledWith({
       revisionId: 'revision-123',
       first: 100,
       after: undefined,
     });
 
-    expect(coreApiServiceFake.api.rows).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       1,
       'revision-123',
       'users',
       { first: 100, after: undefined },
     );
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       'posts',
@@ -86,15 +83,15 @@ describe('SaveRowsCommand', () => {
       tables: 'users,posts',
     });
 
-    expect(coreApiServiceFake.api.tables).not.toHaveBeenCalled();
-    expect(coreApiServiceFake.api.rows).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.tables).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.rows).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       1,
       'revision-123',
       'users',
       { first: 100, after: undefined },
     );
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       'posts',
@@ -172,13 +169,10 @@ describe('SaveRowsCommand', () => {
   });
 
   it('handles pagination for tables', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
     // First page of tables
-    coreApiServiceFake.api.tables
+    connectionServiceFake.api.tables
       .mockResolvedValueOnce({
         data: {
           edges: [{ node: { id: 'users' } }],
@@ -193,7 +187,7 @@ describe('SaveRowsCommand', () => {
         },
       });
 
-    coreApiServiceFake.api.rows
+    connectionServiceFake.api.rows
       .mockResolvedValueOnce(mockUserRowsResponse)
       .mockResolvedValueOnce(mockPostRowsResponse);
 
@@ -202,8 +196,8 @@ describe('SaveRowsCommand', () => {
 
     await command.run([], { folder: './data' });
 
-    expect(coreApiServiceFake.api.tables).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.tables).toHaveBeenNthCalledWith(2, {
+    expect(connectionServiceFake.api.tables).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.tables).toHaveBeenNthCalledWith(2, {
       revisionId: 'revision-123',
       first: 100,
       after: 'cursor1',
@@ -211,11 +205,8 @@ describe('SaveRowsCommand', () => {
   });
 
   it('handles pagination for rows', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'users' } }],
         pageInfo: { hasNextPage: false, endCursor: null },
@@ -223,7 +214,7 @@ describe('SaveRowsCommand', () => {
     });
 
     // First page of rows
-    coreApiServiceFake.api.rows
+    connectionServiceFake.api.rows
       .mockResolvedValueOnce({
         data: {
           totalCount: 3,
@@ -248,8 +239,8 @@ describe('SaveRowsCommand', () => {
 
     await command.run([], { folder: './data' });
 
-    expect(coreApiServiceFake.api.rows).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       'users',
@@ -264,17 +255,14 @@ describe('SaveRowsCommand', () => {
 
   it('continues processing when individual row fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'users' } }],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
-    coreApiServiceFake.api.rows.mockResolvedValue(mockUserRowsResponse);
+    connectionServiceFake.api.rows.mockResolvedValue(mockUserRowsResponse);
 
     mockMkdir.mockResolvedValue(undefined);
     mockWriteFile
@@ -295,18 +283,15 @@ describe('SaveRowsCommand', () => {
 
   it('continues processing when table fails', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue({
       data: {
         edges: [{ node: { id: 'users' } }, { node: { id: 'posts' } }],
         pageInfo: { hasNextPage: false, endCursor: null },
       },
     });
 
-    coreApiServiceFake.api.rows
+    connectionServiceFake.api.rows
       .mockRejectedValueOnce(new Error('Table access denied'))
       .mockResolvedValueOnce(mockPostRowsResponse);
 
@@ -333,20 +318,20 @@ describe('SaveRowsCommand', () => {
       tables: ' users , posts , comments ',
     });
 
-    expect(coreApiServiceFake.api.rows).toHaveBeenCalledTimes(3);
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenCalledTimes(3);
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       1,
       'revision-123',
       'users',
       expect.any(Object),
     );
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       'posts',
       expect.any(Object),
     );
-    expect(coreApiServiceFake.api.rows).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.rows).toHaveBeenNthCalledWith(
       3,
       'revision-123',
       'comments',
@@ -356,11 +341,8 @@ describe('SaveRowsCommand', () => {
 
   it('handles empty tables response', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue({
       data: {
         edges: [],
         pageInfo: { hasNextPage: false, endCursor: null },
@@ -375,7 +357,7 @@ describe('SaveRowsCommand', () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       '🎉 Successfully processed 0 tables in: ./data',
     );
-    expect(coreApiServiceFake.api.rows).not.toHaveBeenCalled();
+    expect(connectionServiceFake.api.rows).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
@@ -383,10 +365,7 @@ describe('SaveRowsCommand', () => {
   it('handles API errors gracefully and throws', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockMkdir.mockRejectedValue(new Error('Permission denied'));
 
     await expect(
@@ -443,25 +422,19 @@ describe('SaveRowsCommand', () => {
     },
   };
 
-  const coreApiServiceFake = {
-    tryToLogin: jest.fn(),
+  const connectionServiceFake = {
+    connect: jest.fn(),
+    revisionId: 'revision-123',
     api: {
       tables: jest.fn(),
       rows: jest.fn(),
     },
   };
 
-  const draftRevisionServiceFake = {
-    getDraftRevisionId: jest.fn(),
-  };
-
   const setupSuccessfulFlow = () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
-    coreApiServiceFake.api.rows
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.tables.mockResolvedValue(mockTablesResponse);
+    connectionServiceFake.api.rows
       .mockResolvedValueOnce(mockUserRowsResponse)
       .mockResolvedValueOnce(mockPostRowsResponse);
     mockMkdir.mockResolvedValue(undefined);
@@ -472,8 +445,7 @@ describe('SaveRowsCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SaveRowsCommand,
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 

@@ -1,14 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PatchDiffService } from '../patch-diff.service';
-import { CoreApiService } from '../core-api.service';
+import { ConnectionService } from '../connection.service';
 import { PatchFile } from '../../types/patch.types';
 
 describe('PatchDiffService', () => {
   let service: PatchDiffService;
-  let coreApiService: jest.Mocked<CoreApiService>;
+  let connectionServiceFake: {
+    api: {
+      rows: jest.Mock;
+    };
+  };
 
   beforeEach(async () => {
-    const mockCoreApi = {
+    connectionServiceFake = {
       api: {
         rows: jest.fn(),
       },
@@ -18,14 +22,13 @@ describe('PatchDiffService', () => {
       providers: [
         PatchDiffService,
         {
-          provide: CoreApiService,
-          useValue: mockCoreApi,
+          provide: ConnectionService,
+          useValue: connectionServiceFake,
         },
       ],
     }).compile();
 
     service = module.get<PatchDiffService>(PatchDiffService);
-    coreApiService = module.get(CoreApiService);
   });
 
   afterEach(() => {
@@ -33,7 +36,7 @@ describe('PatchDiffService', () => {
   });
 
   function mockRowsResponse(rows: { id: string; data: unknown }[]) {
-    (coreApiService.api.rows as jest.Mock).mockResolvedValue({
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: rows.map((row) => ({ node: row })),
         pageInfo: { hasNextPage: false },
@@ -256,7 +259,7 @@ describe('PatchDiffService', () => {
         },
       ];
 
-      (coreApiService.api.rows as jest.Mock).mockResolvedValue({
+      connectionServiceFake.api.rows.mockResolvedValue({
         data: null,
         error: { message: 'Network error' },
       });
@@ -372,7 +375,7 @@ describe('PatchDiffService', () => {
 
       await service.compareWithApi(patches, 'revision-123');
 
-      expect(coreApiService.api.rows).toHaveBeenCalledWith(
+      expect(connectionServiceFake.api.rows).toHaveBeenCalledWith(
         'revision-123',
         'Article',
         {

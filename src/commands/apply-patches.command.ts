@@ -4,8 +4,7 @@ import { BasePatchCommand, PatchOptions } from './base-patch.command';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
 import { PatchDiffService } from '../services/patch-diff.service';
-import { CoreApiService } from '../services/core-api.service';
-import { DraftRevisionService } from '../services/draft-revision.service';
+import { ConnectionService } from '../services/connection.service';
 import { CommitRevisionService } from '../services/commit-revision.service';
 import { PatchFile, DiffResult } from '../types/patch.types';
 import { parseBooleanOption } from '../utils/parse-boolean.utils';
@@ -41,17 +40,10 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     loaderService: PatchLoaderService,
     validationService: PatchValidationService,
     diffService: PatchDiffService,
-    coreApiService: CoreApiService,
-    draftRevisionService: DraftRevisionService,
+    connectionService: ConnectionService,
     private readonly commitRevisionService: CommitRevisionService,
   ) {
-    super(
-      loaderService,
-      validationService,
-      diffService,
-      coreApiService,
-      draftRevisionService,
-    );
+    super(loaderService, validationService, diffService, connectionService);
   }
 
   async run(_inputs: string[], options: Options): Promise<void> {
@@ -84,7 +76,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
     const totalChanges = stats.applied;
     await this.commitRevisionService.handleCommitFlow(
-      options,
+      options.commit,
       'Applied patches',
       totalChanges,
     );
@@ -227,7 +219,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     stats: ApplyStats,
     batchSize: number,
   ): Promise<void> {
-    if (this.coreApiService.bulkPatchSupported === false) {
+    if (this.connectionService.bulkPatchSupported === false) {
       await this.patchRowsSingle(revisionId, tableId, patchFiles, stats);
       return;
     }
@@ -257,7 +249,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
             console.log(
               `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
             );
-            this.coreApiService.bulkPatchSupported = false;
+            this.connectionService.bulkPatchSupported = false;
             const remainingRows = patchFiles.slice(i);
             await this.patchRowsSingle(
               revisionId,
@@ -278,7 +270,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
           continue;
         }
 
-        this.coreApiService.bulkPatchSupported = true;
+        this.connectionService.bulkPatchSupported = true;
         stats.applied += batch.length;
         batchApplied += batch.length;
       } catch (error) {
@@ -287,7 +279,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
           console.log(
             `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
           );
-          this.coreApiService.bulkPatchSupported = false;
+          this.connectionService.bulkPatchSupported = false;
           const remainingRows = patchFiles.slice(i);
           await this.patchRowsSingle(revisionId, tableId, remainingRows, stats);
           return;
@@ -419,7 +411,7 @@ export class ApplyPatchesCommand extends BasePatchCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 
   @Option({

@@ -18,8 +18,8 @@ JWT token from Revisium UI. Best for interactive use.
 revisium://cloud.revisium.io/org/proj?token=<YOUR_TOKEN>
 
 # Via environment variable
-export REVISIUM_SOURCE_TOKEN=<YOUR_TOKEN>
-revisium sync all --source revisium://cloud.revisium.io/org/proj
+export REVISIUM_TOKEN=<YOUR_TOKEN>
+revisium schema save --folder ./schemas --url revisium://cloud.revisium.io/org/proj
 ```
 
 ## API Key Authentication
@@ -33,7 +33,7 @@ API key for automated access (future feature).
 revisium://cloud.revisium.io/org/proj?apikey=ak_xxx...
 
 # Via environment variable
-export REVISIUM_SOURCE_API_KEY=ak_xxx...
+export REVISIUM_API_KEY=ak_xxx...
 ```
 
 ## Password Authentication
@@ -47,8 +47,8 @@ Username and password credentials.
 revisium://admin:secret@cloud.revisium.io/org/proj
 
 # Via environment variables
-export REVISIUM_SOURCE_USERNAME=admin
-export REVISIUM_SOURCE_PASSWORD=secret
+export REVISIUM_USERNAME=admin
+export REVISIUM_PASSWORD=secret
 ```
 
 ## Interactive Mode
@@ -56,18 +56,28 @@ export REVISIUM_SOURCE_PASSWORD=secret
 If no credentials are provided, you'll be prompted:
 
 ```text
-[source] Choose authentication method:
-  ❯ Token (copy from https://cloud.revisium.io/get-mcp-token)
+Choose authentication method:
+  > Token (copy from https://cloud.revisium.io/get-mcp-token)
     API Key (for automated access)
     Username & Password
 
-[source] Paste token: ****
-  ✓ Authenticated as admin
+Paste token: ****
+  OK Authenticated as admin
 ```
 
 ## Environment Variables
 
-### For Sync Commands
+### For All Commands (Single Endpoint)
+
+| Variable | Description |
+|----------|-------------|
+| `REVISIUM_URL` | Default URL (e.g., `revisium://host/org/project/branch`) |
+| `REVISIUM_TOKEN` | JWT authentication token |
+| `REVISIUM_API_KEY` | API key (for automated access) |
+| `REVISIUM_USERNAME` | Username (for password auth) |
+| `REVISIUM_PASSWORD` | Password (for password auth) |
+
+### For Sync Commands (Source/Target)
 
 | Variable | Description |
 |----------|-------------|
@@ -80,13 +90,6 @@ If no credentials are provided, you'll be prompted:
 | `REVISIUM_TARGET_USERNAME` | Target username |
 | `REVISIUM_TARGET_PASSWORD` | Target password |
 
-### For Other Commands
-
-| Variable | Description |
-|----------|-------------|
-| `REVISIUM_USERNAME` | Username |
-| `REVISIUM_PASSWORD` | Password |
-
 ## Priority
 
 1. **URL auth** (`?token=...` or `user:pass@host`)
@@ -98,10 +101,10 @@ If no credentials are provided, you'll be prompted:
 You cannot mix authentication methods:
 
 ```bash
-# ❌ Cannot use both credentials and token
+# Cannot use both credentials and token
 revisium://admin:pass@host/org/proj?token=xxx
 
-# ❌ Cannot use both token and apikey
+# Cannot use both token and apikey
 revisium://host/org/proj?token=xxx&apikey=yyy
 ```
 
@@ -112,15 +115,41 @@ revisium://host/org/proj?token=xxx&apikey=yyy
 ```yaml
 # GitHub Actions
 env:
-  REVISIUM_SOURCE_TOKEN: ${{ secrets.REVISIUM_TOKEN }}
+  REVISIUM_TOKEN: ${{ secrets.REVISIUM_TOKEN }}
+  REVISIUM_URL: revisium://cloud.revisium.io/myorg/myproject/main
+```
+
+### Schema Export
+
+```bash
+export REVISIUM_TOKEN=$YOUR_TOKEN
+revisium schema save --folder ./schemas --url revisium://cloud.revisium.io/org/proj
+```
+
+### Apply Migrations
+
+```bash
+export REVISIUM_URL=revisium://cloud.revisium.io/org/proj/main
+export REVISIUM_TOKEN=$YOUR_TOKEN
+revisium migrate apply --file migrations.json --commit
 ```
 
 ### Automation with Password
 
 ```bash
-export REVISIUM_SOURCE_USERNAME=deploy-user
-export REVISIUM_SOURCE_PASSWORD=$DEPLOY_PASSWORD
-revisium sync all --source revisium://cloud.revisium.io/org/proj
+export REVISIUM_USERNAME=deploy-user
+export REVISIUM_PASSWORD=$DEPLOY_PASSWORD
+revisium rows upload --folder ./data --url revisium://cloud.revisium.io/org/proj
+```
+
+### Sync Between Projects
+
+```bash
+export REVISIUM_SOURCE_TOKEN=$SOURCE_TOKEN
+export REVISIUM_TARGET_TOKEN=$TARGET_TOKEN
+revisium sync all \
+  --source revisium://cloud.revisium.io/org1/proj1 \
+  --target revisium://cloud.revisium.io/org2/proj2
 ```
 
 ## See Also

@@ -1,19 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand } from 'src/commands/base.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { BaseCommand, BaseOptions } from 'src/commands/base.command';
+import { ConnectionService } from 'src/services/connection.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 import { Migration } from 'src/types/migration.types';
 import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
-type Options = {
+type Options = BaseOptions & {
   file: string;
   commit?: boolean;
-  organization?: string;
-  project?: string;
-  branch?: string;
 };
 
 @SubCommand({
@@ -22,9 +18,8 @@ type Options = {
 })
 export class ApplyMigrationsCommand extends BaseCommand {
   constructor(
-    private readonly coreApiService: CoreApiService,
+    private readonly connectionService: ConnectionService,
     private readonly jsonValidatorService: JsonValidatorService,
-    private readonly draftRevisionService: DraftRevisionService,
     private readonly commitRevisionService: CommitRevisionService,
   ) {
     super();
@@ -35,18 +30,16 @@ export class ApplyMigrationsCommand extends BaseCommand {
       throw new Error('Error: --file option is required');
     }
 
-    console.log('🔐 Authenticating with Revisium API...');
-    await this.coreApiService.tryToLogin(options);
-    console.log('✅ Authentication successful');
-
     console.log(`📋 Validating migration file: ${options.file}`);
     const jsonData = await this.validateJsonFile(options.file);
     console.log('✅ Migration file validation passed');
 
-    const countAppliedMigrations = await this.applyMigration(options, jsonData);
+    await this.connectionService.connect(options);
+
+    const countAppliedMigrations = await this.applyMigration(jsonData);
 
     await this.commitRevisionService.handleCommitFlow(
-      options,
+      options.commit,
       'Applied',
       countAppliedMigrations || 0,
     );
@@ -67,9 +60,8 @@ export class ApplyMigrationsCommand extends BaseCommand {
     }
   }
 
-  private async applyMigration(options: Options, migrations: Migration[]) {
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
+  private async applyMigration(migrations: Migration[]) {
+    const revisionId = this.connectionService.draftRevisionId;
 
     if (migrations.length === 0) {
       console.log('✅ No migrations to apply - all migrations are up to date');
@@ -119,7 +111,7 @@ export class ApplyMigrationsCommand extends BaseCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 
   @Option({

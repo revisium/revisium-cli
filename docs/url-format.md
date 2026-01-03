@@ -75,6 +75,37 @@ revisium://cloud.revisium.io/org/proj/master:abc123def?token=<YOUR_TOKEN>
 revisium://cloud.revisium.io/org/proj/master?token=<YOUR_TOKEN>
 ```
 
+## Using with Commands
+
+All commands support the `--url` option:
+
+```bash
+# Schema commands
+revisium schema save --folder ./schemas --url revisium://host/org/proj
+
+# Migration commands
+revisium migrate apply --file migrations.json --url revisium://host/org/proj
+
+# Rows commands
+revisium rows upload --folder ./data --url revisium://host/org/proj
+
+# Patches commands
+revisium patches apply --input ./patches --url revisium://host/org/proj
+```
+
+### Default URL via Environment
+
+Set `REVISIUM_URL` to avoid repeating the URL:
+
+```bash
+export REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/main
+export REVISIUM_TOKEN=your_token
+
+# Now you can omit --url
+revisium schema save --folder ./schemas
+revisium migrate apply --file migrations.json
+```
+
 ## See Also
 
 - [Authentication](./authentication.md) - Authentication methods

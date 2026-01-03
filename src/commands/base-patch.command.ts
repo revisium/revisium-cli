@@ -2,8 +2,7 @@ import { BaseCommand, BaseOptions } from './base.command';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
 import { PatchDiffService } from '../services/patch-diff.service';
-import { CoreApiService } from '../services/core-api.service';
-import { DraftRevisionService } from '../services/draft-revision.service';
+import { ConnectionService } from '../services/connection.service';
 import { PatchFile, DiffResult } from '../types/patch.types';
 
 export type PatchOptions = BaseOptions & {
@@ -21,8 +20,7 @@ export abstract class BasePatchCommand extends BaseCommand {
     protected readonly loaderService: PatchLoaderService,
     protected readonly validationService: PatchValidationService,
     protected readonly diffService: PatchDiffService,
-    protected readonly coreApiService: CoreApiService,
-    protected readonly draftRevisionService: DraftRevisionService,
+    protected readonly connectionService: ConnectionService,
   ) {
     super();
   }
@@ -34,14 +32,12 @@ export abstract class BasePatchCommand extends BaseCommand {
       throw new Error('Error: --input option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-
     console.log(`🔍 Loading patches from ${options.input}...`);
     const patches = await this.loaderService.loadPatches(options.input);
     console.log(`✅ Loaded ${patches.length} patch file(s)\n`);
 
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.connectionService.connect(options);
+    const revisionId = this.connectionService.draftRevisionId;
 
     console.log('🔍 Validating patches...');
     const results = await this.validationService.validateAllWithRevisionId(

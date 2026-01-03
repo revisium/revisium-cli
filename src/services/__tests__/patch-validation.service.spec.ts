@@ -1,14 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PatchValidationService } from '../patch-validation.service';
-import { CoreApiService } from '../core-api.service';
-import { DraftRevisionService } from '../draft-revision.service';
+import { ConnectionService } from '../connection.service';
 import { JsonValidatorService } from '../json-validator.service';
 import { PatchFile } from '../../types/patch.types';
 import { JsonSchema, JsonSchemaTypeName } from '@revisium/schema-toolkit/types';
 
 describe('PatchValidationService', () => {
   let service: PatchValidationService;
-  let coreApiService: jest.Mocked<CoreApiService>;
+  let connectionService: jest.Mocked<ConnectionService>;
 
   const mockTableSchema: JsonSchema = {
     type: JsonSchemaTypeName.Object,
@@ -38,14 +37,10 @@ describe('PatchValidationService', () => {
   };
 
   beforeEach(async () => {
-    const mockCoreApi = {
+    const mockConnection = {
       api: {
         tableSchema: jest.fn(),
       },
-    };
-
-    const mockDraftRevision = {
-      getDraftRevisionId: jest.fn().mockResolvedValue('test-revision-id'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -53,18 +48,14 @@ describe('PatchValidationService', () => {
         PatchValidationService,
         JsonValidatorService,
         {
-          provide: CoreApiService,
-          useValue: mockCoreApi,
-        },
-        {
-          provide: DraftRevisionService,
-          useValue: mockDraftRevision,
+          provide: ConnectionService,
+          useValue: mockConnection,
         },
       ],
     }).compile();
 
     service = module.get<PatchValidationService>(PatchValidationService);
-    coreApiService = module.get(CoreApiService);
+    connectionService = module.get(ConnectionService);
   });
 
   afterEach(() => {
@@ -317,142 +308,7 @@ describe('PatchValidationService', () => {
     });
   });
 
-  describe('validate', () => {
-    it('performs full validation successfully', async () => {
-      const patchFile: PatchFile = {
-        version: '1.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-14T12:00:00Z',
-        patches: [{ op: 'replace', path: 'title', value: 'New Title' }],
-      };
-
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
-        data: mockTableSchema,
-        error: null,
-        ok: true,
-        status: 200,
-      });
-
-      const result = await service.validate(patchFile, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
-
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-      expect(coreApiService.api.tableSchema).toHaveBeenCalledWith(
-        'test-revision-id',
-        'Article',
-      );
-    });
-
-    it('returns format errors before fetching schema', async () => {
-      const patchFile = {
-        version: '2.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-14T12:00:00Z',
-        patches: [{ op: 'replace', path: 'title', value: 'Title' }],
-      } as unknown as PatchFile;
-
-      const result = await service.validate(patchFile, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(coreApiService.api.tableSchema).not.toHaveBeenCalled();
-    });
-
-    it('handles API errors when fetching schema', async () => {
-      const patchFile: PatchFile = {
-        version: '1.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-14T12:00:00Z',
-        patches: [{ op: 'replace', path: 'title', value: 'Title' }],
-      };
-
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
-        data: null,
-        error: { message: 'Table not found' },
-        ok: false,
-        status: 404,
-      });
-
-      const result = await service.validate(patchFile, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].message).toContain(
-        'Failed to fetch table schema',
-      );
-    });
-
-    it('handles missing schema data', async () => {
-      const patchFile: PatchFile = {
-        version: '1.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-14T12:00:00Z',
-        patches: [{ op: 'replace', path: 'title', value: 'Title' }],
-      };
-
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
-        data: null,
-        error: null,
-        ok: true,
-        status: 200,
-      });
-
-      const result = await service.validate(patchFile, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].message).toContain('Table schema not found');
-    });
-
-    it('validates schema constraints after format check', async () => {
-      const patchFile: PatchFile = {
-        version: '1.0',
-        table: 'Article',
-        rowId: 'row-1',
-        createdAt: '2025-10-14T12:00:00Z',
-        patches: [{ op: 'replace', path: 'nonexistent', value: 'Some Value' }],
-      };
-
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
-        data: mockTableSchema,
-        error: null,
-        ok: true,
-        status: 200,
-      });
-
-      const result = await service.validate(patchFile, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
-
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0].message).toContain('Invalid path');
-    });
-  });
-
-  describe('validateAll', () => {
+  describe('validateAllWithRevisionId', () => {
     it('validates multiple patch files', async () => {
       const patchFiles: PatchFile[] = [
         {
@@ -471,22 +327,138 @@ describe('PatchValidationService', () => {
         },
       ];
 
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
         data: mockTableSchema,
         error: null,
         ok: true,
         status: 200,
       });
 
-      const results = await service.validateAll(patchFiles, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
 
       expect(results).toHaveLength(2);
       expect(results[0].valid).toBe(true);
       expect(results[1].valid).toBe(true);
+      expect(connectionService.api.tableSchema).toHaveBeenCalledWith(
+        'test-revision-id',
+        'Article',
+      );
+    });
+
+    it('returns format errors before fetching schema', async () => {
+      const patchFiles = [
+        {
+          version: '2.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title' }],
+        } as unknown as PatchFile,
+      ];
+
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].valid).toBe(false);
+      expect(results[0].errors.length).toBeGreaterThan(0);
+      expect(connectionService.api.tableSchema).not.toHaveBeenCalled();
+    });
+
+    it('handles API errors when fetching schema', async () => {
+      const patchFiles: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title' }],
+        },
+      ];
+
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
+        data: null,
+        error: { message: 'Table not found' },
+        ok: false,
+        status: 404,
+      });
+
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].valid).toBe(false);
+      expect(results[0].errors.length).toBeGreaterThan(0);
+      expect(results[0].errors[0].message).toContain(
+        'Failed to fetch table schema',
+      );
+    });
+
+    it('handles missing schema data', async () => {
+      const patchFiles: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title' }],
+        },
+      ];
+
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
+        data: null,
+        error: null,
+        ok: true,
+        status: 200,
+      });
+
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].valid).toBe(false);
+      expect(results[0].errors.length).toBeGreaterThan(0);
+      expect(results[0].errors[0].message).toContain('Table schema not found');
+    });
+
+    it('validates schema constraints after format check', async () => {
+      const patchFiles: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [
+            { op: 'replace', path: 'nonexistent', value: 'Some Value' },
+          ],
+        },
+      ];
+
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
+        data: mockTableSchema,
+        error: null,
+        ok: true,
+        status: 200,
+      });
+
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].valid).toBe(false);
+      expect(results[0].errors.length).toBeGreaterThan(0);
+      expect(results[0].errors[0].message).toContain('Invalid path');
     });
 
     it('returns mixed results for valid and invalid files', async () => {
@@ -507,18 +479,17 @@ describe('PatchValidationService', () => {
         },
       ];
 
-      (coreApiService.api.tableSchema as jest.Mock).mockResolvedValue({
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
         data: mockTableSchema,
         error: null,
         ok: true,
         status: 200,
       });
 
-      const results = await service.validateAll(patchFiles, {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
+      const results = await service.validateAllWithRevisionId(
+        patchFiles,
+        'test-revision-id',
+      );
 
       expect(results).toHaveLength(2);
       expect(results[0].valid).toBe(true);
@@ -527,13 +498,87 @@ describe('PatchValidationService', () => {
     });
 
     it('handles empty array', async () => {
-      const results = await service.validateAll([], {
-        organization: 'org',
-        project: 'project',
-        branch: 'branch',
-      });
+      const results = await service.validateAllWithRevisionId(
+        [],
+        'test-revision-id',
+      );
 
       expect(results).toHaveLength(0);
+    });
+
+    it('caches table schemas for same table', async () => {
+      const patchFiles: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 1' }],
+        },
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-2',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 2' }],
+        },
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-3',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 3' }],
+        },
+      ];
+
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
+        data: mockTableSchema,
+        error: null,
+        ok: true,
+        status: 200,
+      });
+
+      await service.validateAllWithRevisionId(patchFiles, 'test-revision-id');
+
+      expect(connectionService.api.tableSchema).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetches schema for each unique table', async () => {
+      const patchFiles: PatchFile[] = [
+        {
+          version: '1.0',
+          table: 'Article',
+          rowId: 'row-1',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 1' }],
+        },
+        {
+          version: '1.0',
+          table: 'Product',
+          rowId: 'row-2',
+          createdAt: '2025-10-14T12:00:00Z',
+          patches: [{ op: 'replace', path: 'title', value: 'Title 2' }],
+        },
+      ];
+
+      (connectionService.api.tableSchema as jest.Mock).mockResolvedValue({
+        data: mockTableSchema,
+        error: null,
+        ok: true,
+        status: 200,
+      });
+
+      await service.validateAllWithRevisionId(patchFiles, 'test-revision-id');
+
+      expect(connectionService.api.tableSchema).toHaveBeenCalledTimes(2);
+      expect(connectionService.api.tableSchema).toHaveBeenCalledWith(
+        'test-revision-id',
+        'Article',
+      );
+      expect(connectionService.api.tableSchema).toHaveBeenCalledWith(
+        'test-revision-id',
+        'Product',
+      );
     });
   });
 });
