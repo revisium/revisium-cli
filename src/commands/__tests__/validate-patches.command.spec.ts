@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ValidatePatchesCommand } from '../validate-patches.command';
 import { PatchLoaderService } from '../../services/patch-loader.service';
 import { PatchValidationService } from '../../services/patch-validation.service';
-import { CoreApiService } from '../../services/core-api.service';
+import { ConnectionService } from '../../services/connection.service';
 import { PatchFile, ValidationResult } from '../../types/patch.types';
 
 describe('ValidatePatchesCommand', () => {
@@ -11,16 +11,14 @@ describe('ValidatePatchesCommand', () => {
     loadPatches: jest.Mock<Promise<PatchFile[]>, [string]>;
   };
   let validationServiceFake: {
-    validateAll: jest.Mock<
+    validateAllWithRevisionId: jest.Mock<
       Promise<ValidationResult[]>,
-      [
-        PatchFile[],
-        { organization?: string; project?: string; branch?: string },
-      ]
+      [PatchFile[], string]
     >;
   };
-  let coreApiServiceFake: {
-    tryToLogin: jest.Mock<Promise<void>, [unknown]>;
+  let connectionServiceFake: {
+    connect: jest.Mock<Promise<void>, [unknown]>;
+    draftRevisionId: string;
   };
 
   const mockPatchFile: PatchFile = {
@@ -37,17 +35,15 @@ describe('ValidatePatchesCommand', () => {
     };
 
     validationServiceFake = {
-      validateAll: jest.fn<
+      validateAllWithRevisionId: jest.fn<
         Promise<ValidationResult[]>,
-        [
-          PatchFile[],
-          { organization?: string; project?: string; branch?: string },
-        ]
+        [PatchFile[], string]
       >(),
     };
 
-    coreApiServiceFake = {
-      tryToLogin: jest.fn<Promise<void>, [unknown]>(),
+    connectionServiceFake = {
+      connect: jest.fn<Promise<void>, [unknown]>(),
+      draftRevisionId: 'revision-123',
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -55,7 +51,7 @@ describe('ValidatePatchesCommand', () => {
         ValidatePatchesCommand,
         { provide: PatchLoaderService, useValue: loaderServiceFake },
         { provide: PatchValidationService, useValue: validationServiceFake },
-        { provide: CoreApiService, useValue: coreApiServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 
@@ -76,20 +72,18 @@ describe('ValidatePatchesCommand', () => {
 
   it('authenticates before loading patches', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatchFile]);
-    validationServiceFake.validateAll.mockResolvedValue([
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
 
     await command.run([], { input: './patches' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledWith({
-      input: './patches',
-    });
+    expect(connectionServiceFake.connect).toHaveBeenCalled();
   });
 
   it('loads patches from specified input path', async () => {
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatchFile]);
-    validationServiceFake.validateAll.mockResolvedValue([
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
 
@@ -103,31 +97,21 @@ describe('ValidatePatchesCommand', () => {
   it('validates all loaded patches', async () => {
     const patches = [mockPatchFile];
     loaderServiceFake.loadPatches.mockResolvedValue(patches);
-    validationServiceFake.validateAll.mockResolvedValue([
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
 
-    const options = {
-      input: './patches',
-      organization: 'test-org',
-      project: 'test-project',
-      branch: 'main',
-    } as Parameters<typeof command.run>[1];
+    await command.run([], { input: './patches' });
 
-    await command.run([], options);
-
-    expect(validationServiceFake.validateAll).toHaveBeenCalledWith(patches, {
-      input: './patches',
-      organization: 'test-org',
-      project: 'test-project',
-      branch: 'main',
-    });
+    expect(
+      validationServiceFake.validateAllWithRevisionId,
+    ).toHaveBeenCalledWith(patches, 'revision-123');
   });
 
   it('logs success when all patches are valid', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatchFile]);
-    validationServiceFake.validateAll.mockResolvedValue([
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       { valid: true, errors: [] },
     ]);
 
@@ -147,7 +131,7 @@ describe('ValidatePatchesCommand', () => {
       .mockImplementation(() => undefined as never);
 
     loaderServiceFake.loadPatches.mockResolvedValue([mockPatchFile]);
-    validationServiceFake.validateAll.mockResolvedValue([
+    validationServiceFake.validateAllWithRevisionId.mockResolvedValue([
       {
         valid: false,
         errors: [

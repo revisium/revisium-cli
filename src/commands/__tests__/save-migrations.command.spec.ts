@@ -4,8 +4,7 @@ import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as os from 'os';
 import { SaveMigrationsCommand } from '../save-migrations.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 
 jest.mock('node:fs/promises');
 
@@ -15,7 +14,8 @@ const mockRm = rm as jest.MockedFunction<typeof rm>;
 
 describe('SaveMigrationsCommand', () => {
   it('throws error when file option is missing', async () => {
-    await expect(command.run([])).rejects.toThrow(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await expect(command.run([], {} as any)).rejects.toThrow(
       'Error: --file option is required',
     );
   });
@@ -28,8 +28,8 @@ describe('SaveMigrationsCommand', () => {
       url: 'http://localhost:8000',
     });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledTimes(1);
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenNthCalledWith(1, {
+    expect(connectionServiceFake.connect).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.connect).toHaveBeenNthCalledWith(1, {
       file: 'migrations.json',
       url: 'http://localhost:8000',
     });
@@ -47,9 +47,7 @@ describe('SaveMigrationsCommand', () => {
 
     await command.run([], options);
 
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
-    );
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith(options);
   });
 
   it('fetches migrations for resolved revision', async () => {
@@ -57,7 +55,7 @@ describe('SaveMigrationsCommand', () => {
 
     await command.run([], { file: 'migrations.json' });
 
-    expect(coreApiServiceFake.api.migrations).toHaveBeenCalledWith(
+    expect(connectionServiceFake.api.migrations).toHaveBeenCalledWith(
       'revision-789',
     );
   });
@@ -93,13 +91,10 @@ describe('SaveMigrationsCommand', () => {
 
   it('handles API fetch errors gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
+    connectionServiceFake.connect.mockResolvedValue(undefined);
 
     const apiError = new Error('Network timeout');
-    coreApiServiceFake.api.migrations.mockRejectedValue(apiError);
+    connectionServiceFake.api.migrations.mockRejectedValue(apiError);
 
     await expect(command.run([], { file: 'migrations.json' })).rejects.toThrow(
       'Network timeout',
@@ -134,11 +129,8 @@ describe('SaveMigrationsCommand', () => {
 
   it('handles non-Error exceptions', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.migrations.mockRejectedValue('String error');
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.migrations.mockRejectedValue('String error');
 
     await expect(command.run([], { file: 'migrations.json' })).rejects.toBe(
       'String error',
@@ -153,11 +145,8 @@ describe('SaveMigrationsCommand', () => {
   });
 
   it('processes empty migrations array', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.migrations.mockResolvedValue({ data: [] });
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.migrations.mockResolvedValue({ data: [] });
 
     await command.run([], { file: 'empty-migrations.json' });
 
@@ -169,11 +158,8 @@ describe('SaveMigrationsCommand', () => {
   });
 
   it('formats JSON with proper indentation', async () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.migrations.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.migrations.mockResolvedValue({
       data: [
         {
           id: '2024-01-01T00:00:00.000Z',
@@ -229,29 +215,27 @@ describe('SaveMigrationsCommand', () => {
     ],
   };
 
-  const coreApiServiceFake = {
-    tryToLogin: jest.fn(),
+  const connectionServiceFake = {
+    connect: jest.fn(),
+    revisionId: 'revision-123',
     api: {
       migrations: jest.fn(),
     },
   };
 
-  const draftRevisionServiceFake = {
-    getDraftRevisionId: jest.fn(),
-  };
-
   const setupSuccessfulApiCalls = (revisionId = 'revision-123') => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(revisionId);
-    coreApiServiceFake.api.migrations.mockResolvedValue(mockMigrationsResponse);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.revisionId = revisionId;
+    connectionServiceFake.api.migrations.mockResolvedValue(
+      mockMigrationsResponse,
+    );
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SaveMigrationsCommand,
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 

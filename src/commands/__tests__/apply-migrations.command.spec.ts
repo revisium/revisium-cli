@@ -2,9 +2,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { readFile } from 'node:fs/promises';
 import { ApplyMigrationsCommand } from '../apply-migrations.command';
-import { CoreApiService } from 'src/services/core-api.service';
+import { ConnectionService } from 'src/services/connection.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
 
 jest.mock('node:fs/promises');
@@ -18,21 +17,14 @@ describe('ApplyMigrationsCommand', () => {
     );
   });
 
-  it('authenticates before applying migrations', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+  it('connects before applying migrations', async () => {
     setupSuccessfulFlow();
 
     await command.run([], { file: 'migrations.json' });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalledWith({
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith({
       file: 'migrations.json',
     });
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '🔐 Authenticating with Revisium API...',
-    );
-    expect(consoleSpy).toHaveBeenCalledWith('✅ Authentication successful');
-
-    consoleSpy.mockRestore();
   });
 
   it('validates JSON file before processing', async () => {
@@ -66,9 +58,7 @@ describe('ApplyMigrationsCommand', () => {
 
     await command.run([], options);
 
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
-    );
+    expect(connectionServiceFake.connect).toHaveBeenCalledWith(options);
   });
 
   it('applies migrations one by one', async () => {
@@ -76,13 +66,13 @@ describe('ApplyMigrationsCommand', () => {
 
     await command.run([], { file: 'migrations.json' });
 
-    expect(coreApiServiceFake.api.applyMigrations).toHaveBeenCalledTimes(2);
-    expect(coreApiServiceFake.api.applyMigrations).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.applyMigrations).toHaveBeenCalledTimes(2);
+    expect(connectionServiceFake.api.applyMigrations).toHaveBeenNthCalledWith(
       1,
       'revision-123',
       [mockMigrations[0]],
     );
-    expect(coreApiServiceFake.api.applyMigrations).toHaveBeenNthCalledWith(
+    expect(connectionServiceFake.api.applyMigrations).toHaveBeenNthCalledWith(
       2,
       'revision-123',
       [mockMigrations[1]],
@@ -91,12 +81,9 @@ describe('ApplyMigrationsCommand', () => {
 
   it('logs success when no migrations to apply', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue('[]');
     jsonValidatorServiceFake.validateMigration.mockReturnValue([]);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
 
     await command.run([], { file: 'empty-migrations.json' });
 
@@ -139,13 +126,10 @@ describe('ApplyMigrationsCommand', () => {
 
   it('handles skipped migrations', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue(JSON.stringify(mockMigrations));
     jsonValidatorServiceFake.validateMigration.mockReturnValue(mockMigrations);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.applyMigrations.mockResolvedValue({
+    connectionServiceFake.api.applyMigrations.mockResolvedValue({
       data: [{ status: 'skipped', id: 'migration-1' }],
     });
 
@@ -160,13 +144,10 @@ describe('ApplyMigrationsCommand', () => {
 
   it('handles failed migrations and stops processing', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue(JSON.stringify(mockMigrations));
     jsonValidatorServiceFake.validateMigration.mockReturnValue(mockMigrations);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.applyMigrations.mockResolvedValueOnce({
+    connectionServiceFake.api.applyMigrations.mockResolvedValueOnce({
       data: [
         {
           status: 'failed',
@@ -185,7 +166,7 @@ describe('ApplyMigrationsCommand', () => {
       id: 'migration-1',
       error: 'Table already exists',
     });
-    expect(coreApiServiceFake.api.applyMigrations).toHaveBeenCalledTimes(1);
+    expect(connectionServiceFake.api.applyMigrations).toHaveBeenCalledTimes(1);
 
     consoleSpy.mockRestore();
   });
@@ -206,7 +187,7 @@ describe('ApplyMigrationsCommand', () => {
   it('handles file read errors gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockRejectedValue(new Error('File not found'));
 
     await expect(command.run([], { file: 'nonexistent.json' })).rejects.toThrow(
@@ -224,7 +205,7 @@ describe('ApplyMigrationsCommand', () => {
   it('handles invalid JSON gracefully', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue('invalid json content');
 
     await expect(command.run([], { file: 'invalid.json' })).rejects.toThrow();
@@ -239,15 +220,12 @@ describe('ApplyMigrationsCommand', () => {
 
   it('handles API errors during migration application', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue(JSON.stringify(mockMigrations));
     jsonValidatorServiceFake.validateMigration.mockReturnValue(mockMigrations);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
 
     const apiError = new Error('Network timeout');
-    coreApiServiceFake.api.applyMigrations.mockRejectedValue(apiError);
+    connectionServiceFake.api.applyMigrations.mockRejectedValue(apiError);
 
     await expect(command.run([], { file: 'migrations.json' })).rejects.toThrow(
       'Network timeout',
@@ -279,7 +257,7 @@ describe('ApplyMigrationsCommand', () => {
       await command.run([], { file: 'migrations.json', commit: true });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { file: 'migrations.json', commit: true },
+        true,
         'Applied',
         2,
       );
@@ -292,25 +270,22 @@ describe('ApplyMigrationsCommand', () => {
       await command.run([], { file: 'migrations.json', commit: false });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { file: 'migrations.json', commit: false },
+        false,
         'Applied',
         2,
       );
     });
 
     it('calls commitRevisionService with zero changes when no migrations', async () => {
-      coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+      connectionServiceFake.connect.mockResolvedValue(undefined);
       mockReadFile.mockResolvedValue('[]');
       jsonValidatorServiceFake.validateMigration.mockReturnValue([]);
-      draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-        'revision-123',
-      );
       commitRevisionServiceFake.handleCommitFlow.mockResolvedValue(undefined);
 
       await command.run([], { file: 'empty-migrations.json', commit: true });
 
       expect(commitRevisionServiceFake.handleCommitFlow).toHaveBeenCalledWith(
-        { file: 'empty-migrations.json', commit: true },
+        true,
         'Applied',
         0,
       );
@@ -338,8 +313,9 @@ describe('ApplyMigrationsCommand', () => {
     },
   ];
 
-  const coreApiServiceFake = {
-    tryToLogin: jest.fn(),
+  const connectionServiceFake = {
+    connect: jest.fn(),
+    draftRevisionId: 'revision-123',
     api: {
       applyMigrations: jest.fn(),
     },
@@ -349,22 +325,15 @@ describe('ApplyMigrationsCommand', () => {
     validateMigration: jest.fn(),
   };
 
-  const draftRevisionServiceFake = {
-    getDraftRevisionId: jest.fn(),
-  };
-
   const commitRevisionServiceFake = {
     handleCommitFlow: jest.fn(),
   };
 
   const setupSuccessfulFlow = () => {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
+    connectionServiceFake.connect.mockResolvedValue(undefined);
     mockReadFile.mockResolvedValue(JSON.stringify(mockMigrations));
     jsonValidatorServiceFake.validateMigration.mockReturnValue(mockMigrations);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.applyMigrations
+    connectionServiceFake.api.applyMigrations
       .mockResolvedValueOnce({
         data: [{ status: 'applied', id: 'migration-1' }],
       })
@@ -377,9 +346,8 @@ describe('ApplyMigrationsCommand', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApplyMigrationsCommand,
-        { provide: CoreApiService, useValue: coreApiServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
         { provide: JsonValidatorService, useValue: jsonValidatorServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
         {
           provide: CommitRevisionService,
           useValue: commitRevisionServiceFake,

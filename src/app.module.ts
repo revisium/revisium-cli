@@ -19,15 +19,13 @@ import { ValidatePatchesCommand } from 'src/commands/validate-patches.command';
 import { PreviewPatchesCommand } from 'src/commands/preview-patches.command';
 import { ApplyPatchesCommand } from 'src/commands/apply-patches.command';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 import { InteractiveService } from 'src/services/interactive.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { PatchDiffService } from 'src/services/patch-diff.service';
 import { PatchGeneratorService } from 'src/services/patch-generator.service';
 import { PatchLoaderService } from 'src/services/patch-loader.service';
 import { PatchValidationService } from 'src/services/patch-validation.service';
-import { ResolveOptionsService } from 'src/services/resolve-options.service';
 import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { SyncDataService } from 'src/services/sync-data.service';
@@ -68,11 +66,9 @@ import {
     SyncAllCommand,
     TableDependencyService,
     JsonValidatorService,
-    CoreApiService,
+    ConnectionService,
     CommitRevisionService,
-    DraftRevisionService,
     InteractiveService,
-    ResolveOptionsService,
     SyncApiService,
     SyncSchemaService,
     SyncDataService,

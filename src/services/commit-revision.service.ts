@@ -1,13 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CoreApiService } from './core-api.service';
-import { ResolveOptionsService } from './resolve-options.service';
-import { ConnectionInfo } from './sync-api.service';
-
-interface CommitOptions {
-  organization?: string;
-  project?: string;
-  branch?: string;
-}
+import { ConnectionInfo as SyncConnectionInfo } from './sync-api.service';
+import { ConnectionService } from './connection.service';
 
 export interface CommitResult {
   revisionId: string;
@@ -15,31 +8,23 @@ export interface CommitResult {
 
 @Injectable()
 export class CommitRevisionService {
-  constructor(
-    private readonly coreApiService: CoreApiService,
-    private readonly resolveOptionsService: ResolveOptionsService,
-  ) {}
+  constructor(private readonly connectionService: ConnectionService) {}
 
   async commitChanges(
-    options: CommitOptions,
     actionDescription: string,
     changeCount: number,
   ): Promise<CommitResult> {
     console.log('💾 Creating revision...');
 
-    const { organization, project, branch } =
-      this.resolveOptionsService.resolve(options);
-
+    const connection = this.connectionService.connection;
     const comment = this.generateCommitComment(actionDescription, changeCount);
 
     try {
-      const result = await this.coreApiService.api.createRevision(
-        organization,
-        project,
-        branch,
-        {
-          comment,
-        },
+      const result = await connection.client.api.createRevision(
+        connection.url.organization,
+        connection.url.project,
+        connection.url.branch,
+        { comment },
       );
 
       if (result.data) {
@@ -58,13 +43,13 @@ export class CommitRevisionService {
   }
 
   async handleCommitFlow(
-    options: CommitOptions & { commit?: boolean },
+    commit: boolean | undefined,
     actionDescription: string,
     changeCount: number,
   ): Promise<void> {
-    if (changeCount && options.commit) {
-      await this.commitChanges(options, actionDescription, changeCount);
-    } else if (changeCount && !options.commit) {
+    if (changeCount && commit) {
+      await this.commitChanges(actionDescription, changeCount);
+    } else if (changeCount && !commit) {
       console.log(
         '⚠️  Changes applied to draft. Use --commit to create a revision.',
       );
@@ -72,7 +57,7 @@ export class CommitRevisionService {
   }
 
   async handleCommitFlowForSync(
-    connection: ConnectionInfo,
+    connection: SyncConnectionInfo,
     actionDescription: string,
     changeCount: number,
   ): Promise<void> {

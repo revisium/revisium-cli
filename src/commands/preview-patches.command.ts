@@ -3,8 +3,7 @@ import { BasePatchCommand, PatchOptions } from './base-patch.command';
 import { PatchDiffService } from '../services/patch-diff.service';
 import { PatchLoaderService } from '../services/patch-loader.service';
 import { PatchValidationService } from '../services/patch-validation.service';
-import { CoreApiService } from '../services/core-api.service';
-import { DraftRevisionService } from '../services/draft-revision.service';
+import { ConnectionService } from '../services/connection.service';
 import { formatDiffAsTable } from '../utils/diff-formatter.utils';
 
 @SubCommand({
@@ -16,16 +15,9 @@ export class PreviewPatchesCommand extends BasePatchCommand {
     loaderService: PatchLoaderService,
     validationService: PatchValidationService,
     diffService: PatchDiffService,
-    coreApiService: CoreApiService,
-    draftRevisionService: DraftRevisionService,
+    connectionService: ConnectionService,
   ) {
-    super(
-      loaderService,
-      validationService,
-      diffService,
-      coreApiService,
-      draftRevisionService,
-    );
+    super(loaderService, validationService, diffService, connectionService);
   }
 
   async run(_inputs: string[], options: PatchOptions): Promise<void> {

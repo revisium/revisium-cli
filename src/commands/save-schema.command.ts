@@ -1,15 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand } from 'src/commands/base.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { BaseCommand, BaseOptions } from 'src/commands/base.command';
+import { ConnectionService } from 'src/services/connection.service';
 
-type Options = {
+type Options = BaseOptions & {
   folder: string;
-  organization?: string;
-  project?: string;
-  branch?: string;
 };
 
 @SubCommand({
@@ -17,10 +13,7 @@ type Options = {
   description: 'Save all table schemas to JSON files',
 })
 export class SaveSchemaCommand extends BaseCommand {
-  constructor(
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
-  ) {
+  constructor(private readonly connectionService: ConnectionService) {
     super();
   }
 
@@ -29,10 +22,11 @@ export class SaveSchemaCommand extends BaseCommand {
       throw new Error('Error: --folder option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
-    await this.saveAllTableSchemas(revisionId, options.folder);
+    await this.connectionService.connect(options);
+    await this.saveAllTableSchemas(
+      this.connectionService.revisionId,
+      options.folder,
+    );
   }
 
   private async saveAllTableSchemas(revisionId: string, folderPath: string) {
@@ -107,7 +101,7 @@ export class SaveSchemaCommand extends BaseCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 
   @Option({

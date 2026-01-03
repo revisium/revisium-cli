@@ -1,66 +1,17 @@
 import { CommandRunner, Option } from 'nest-commander';
 
 export type BaseOptions = {
-  organization?: string;
-  project?: string;
-  branch?: string;
   url?: string;
-  username?: string;
-  password?: string;
 };
 
 export abstract class BaseCommand extends CommandRunner {
   @Option({
-    flags: '-o, --organization <organization>',
-    description: 'organization name',
-    required: false,
-  })
-  public parseOrganization(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '-p, --project <project>',
-    description: 'project name',
-    required: false,
-  })
-  public parseProject(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '-b, --branch <branch>',
-    description: 'branch name',
-    required: false,
-  })
-  public parseBranch(value: string) {
-    return value;
-  }
-
-  @Option({
     flags: '--url <url>',
-    description: 'api url',
+    description:
+      'Revisium URL. Format: revisium://host/org/project/branch[:revision]?token=... See https://github.com/revisium/revisium-cli/blob/master/docs/url-format.md',
     required: false,
   })
-  public parseApiUrl(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '--username <username>',
-    description: 'username',
-    required: false,
-  })
-  public parseUsername(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '--password <password>',
-    description: 'password',
-    required: false,
-  })
-  public parsePassword(value: string) {
+  public parseUrl(value: string) {
     return value;
   }
 }

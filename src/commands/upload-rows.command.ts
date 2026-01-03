@@ -1,9 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand } from 'src/commands/base.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { BaseCommand, BaseOptions } from 'src/commands/base.command';
+import { ConnectionService } from 'src/services/connection.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
@@ -20,14 +19,11 @@ interface ProgressState {
   total: number;
 }
 
-type Options = {
+type Options = BaseOptions & {
   folder: string;
   tables?: string;
   commit?: boolean;
   batchSize?: number;
-  organization?: string;
-  project?: string;
-  branch?: string;
 };
 
 interface UploadStats {
@@ -65,8 +61,7 @@ class UploadError extends Error {
 })
 export class UploadRowsCommand extends BaseCommand {
   constructor(
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
+    private readonly connectionService: ConnectionService,
     private readonly jsonValidatorService: JsonValidatorService,
     private readonly tableDependencyService: TableDependencyService,
     private readonly commitRevisionService: CommitRevisionService,
@@ -79,9 +74,8 @@ export class UploadRowsCommand extends BaseCommand {
       throw new Error('Error: --folder option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.connectionService.connect(options);
+    const revisionId = this.connectionService.draftRevisionId;
     const batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
     const totalStats = await this.uploadAllTableRows(
       revisionId,
@@ -92,7 +86,7 @@ export class UploadRowsCommand extends BaseCommand {
 
     const totalChanges = totalStats.uploaded + totalStats.updated;
     await this.commitRevisionService.handleCommitFlow(
-      options,
+      options.commit,
       'Uploaded',
       totalChanges,
     );
@@ -499,7 +493,7 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
-    if (this.coreApiService.bulkCreateSupported === false) {
+    if (this.connectionService.bulkCreateSupported === false) {
       await this.createRowsSingle(revisionId, tableId, rows, stats);
       return;
     }
@@ -516,9 +510,9 @@ export class UploadRowsCommand extends BaseCommand {
         }),
       fallbackSingle: (remaining) =>
         this.createRowsSingle(revisionId, tableId, remaining, stats),
-      getBulkSupported: () => this.coreApiService.bulkCreateSupported,
+      getBulkSupported: () => this.connectionService.bulkCreateSupported,
       setBulkSupported: (value) => {
-        this.coreApiService.bulkCreateSupported = value;
+        this.connectionService.bulkCreateSupported = value;
       },
       updateStats: (count) => {
         stats.uploaded += count;
@@ -538,7 +532,7 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
-    if (this.coreApiService.bulkUpdateSupported === false) {
+    if (this.connectionService.bulkUpdateSupported === false) {
       await this.updateRowsSingle(revisionId, tableId, rows, stats);
       return;
     }
@@ -554,9 +548,9 @@ export class UploadRowsCommand extends BaseCommand {
         }),
       fallbackSingle: (remaining) =>
         this.updateRowsSingle(revisionId, tableId, remaining, stats),
-      getBulkSupported: () => this.coreApiService.bulkUpdateSupported,
+      getBulkSupported: () => this.connectionService.bulkUpdateSupported,
       setBulkSupported: (value) => {
-        this.coreApiService.bulkUpdateSupported = value;
+        this.connectionService.bulkUpdateSupported = value;
       },
       updateStats: (count) => {
         stats.updated += count;
@@ -904,7 +898,7 @@ export class UploadRowsCommand extends BaseCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 
   private printProgress(state: ProgressState): void {

@@ -1,19 +1,15 @@
 import { Option, SubCommand } from 'nest-commander';
-import { BaseCommand } from './base.command';
+import { BaseCommand, BaseOptions } from './base.command';
 import { PatchGeneratorService } from '../services/patch-generator.service';
 import { PatchLoaderService } from '../services/patch-loader.service';
-import { CoreApiService } from '../services/core-api.service';
-import { DraftRevisionService } from '../services/draft-revision.service';
+import { ConnectionService } from '../services/connection.service';
 import { PatchFile } from '../types/patch.types';
 
-type Options = {
+type Options = BaseOptions & {
   table: string;
   paths: string;
   output: string;
   merge?: boolean;
-  organization?: string;
-  project?: string;
-  branch?: string;
 };
 
 @SubCommand({
@@ -24,8 +20,7 @@ export class SavePatchesCommand extends BaseCommand {
   constructor(
     private readonly generatorService: PatchGeneratorService,
     private readonly loaderService: PatchLoaderService,
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
+    private readonly connectionService: ConnectionService,
   ) {
     super();
   }
@@ -43,9 +38,8 @@ export class SavePatchesCommand extends BaseCommand {
       throw new Error('Error: --paths option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
+    await this.connectionService.connect(options);
+    const revisionId = this.connectionService.revisionId;
 
     const paths = options.paths.split(',').map((p) => p.trim());
     console.log(`📋 Using paths: ${paths.join(', ')}`);
@@ -124,7 +118,7 @@ export class SavePatchesCommand extends BaseCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 
   @Option({

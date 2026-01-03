@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SavePatchesCommand } from '../save-patches.command';
 import { PatchGeneratorService } from '../../services/patch-generator.service';
 import { PatchLoaderService } from '../../services/patch-loader.service';
-import { CoreApiService } from '../../services/core-api.service';
-import { DraftRevisionService } from '../../services/draft-revision.service';
+import { ConnectionService } from '../../services/connection.service';
 import { JsonSchema, JsonValuePatch } from '@revisium/schema-toolkit/types';
 import { PatchFile } from '../../types/patch.types';
 
@@ -20,18 +19,13 @@ describe('SavePatchesCommand', () => {
     savePatchesAsSeparateFiles: jest.Mock<Promise<void>, [PatchFile[], string]>;
     savePatchesAsMergedFile: jest.Mock<Promise<void>, [PatchFile[], string]>;
   };
-  let coreApiServiceFake: {
-    tryToLogin: jest.Mock<Promise<void>, [unknown]>;
+  let connectionServiceFake: {
+    connect: jest.Mock<Promise<void>, [unknown]>;
+    revisionId: string;
     api: {
       tableSchema: jest.Mock;
       rows: jest.Mock;
     };
-  };
-  let draftRevisionServiceFake: {
-    getDraftRevisionId: jest.Mock<
-      Promise<string>,
-      [{ organization?: string; project?: string; branch?: string }]
-    >;
   };
 
   const mockRows = [
@@ -62,19 +56,13 @@ describe('SavePatchesCommand', () => {
       savePatchesAsMergedFile: jest.fn<Promise<void>, [PatchFile[], string]>(),
     };
 
-    coreApiServiceFake = {
-      tryToLogin: jest.fn<Promise<void>, [unknown]>(),
+    connectionServiceFake = {
+      connect: jest.fn<Promise<void>, [unknown]>(),
+      revisionId: 'revision-123',
       api: {
         tableSchema: jest.fn(),
         rows: jest.fn(),
       },
-    };
-
-    draftRevisionServiceFake = {
-      getDraftRevisionId: jest.fn<
-        Promise<string>,
-        [{ organization?: string; project?: string; branch?: string }]
-      >(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -82,8 +70,7 @@ describe('SavePatchesCommand', () => {
         SavePatchesCommand,
         { provide: PatchGeneratorService, useValue: generatorServiceFake },
         { provide: PatchLoaderService, useValue: loaderServiceFake },
-        { provide: CoreApiService, useValue: coreApiServiceFake },
-        { provide: DraftRevisionService, useValue: draftRevisionServiceFake },
+        { provide: ConnectionService, useValue: connectionServiceFake },
       ],
     }).compile();
 
@@ -130,24 +117,22 @@ describe('SavePatchesCommand', () => {
       output: './patches',
     });
 
-    expect(coreApiServiceFake.tryToLogin).toHaveBeenCalled();
+    expect(connectionServiceFake.connect).toHaveBeenCalled();
   });
 
-  it('resolves revision ID from options', async () => {
+  it('uses revisionId from connection service', async () => {
     setupSuccessfulFlow();
-    const options = {
+
+    await command.run([], {
       table: 'Article',
       paths: 'title',
       output: './patches',
-      organization: 'test-org',
-      project: 'test-project',
-      branch: 'main',
-    };
+    });
 
-    await command.run([], options);
-
-    expect(draftRevisionServiceFake.getDraftRevisionId).toHaveBeenCalledWith(
-      options,
+    expect(connectionServiceFake.api.rows).toHaveBeenCalledWith(
+      'revision-123',
+      'Article',
+      expect.any(Object),
     );
   });
 
@@ -241,11 +226,8 @@ describe('SavePatchesCommand', () => {
 
   it('logs when no patches are generated', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: mockRows.map((row) => ({ node: row })),
         pageInfo: { hasNextPage: false },
@@ -267,11 +249,8 @@ describe('SavePatchesCommand', () => {
   });
 
   function setupSuccessfulFlow() {
-    coreApiServiceFake.tryToLogin.mockResolvedValue(undefined);
-    draftRevisionServiceFake.getDraftRevisionId.mockResolvedValue(
-      'revision-123',
-    );
-    coreApiServiceFake.api.rows.mockResolvedValue({
+    connectionServiceFake.connect.mockResolvedValue(undefined);
+    connectionServiceFake.api.rows.mockResolvedValue({
       data: {
         edges: mockRows.map((row) => ({ node: row })),
         pageInfo: { hasNextPage: false },

@@ -1,34 +1,28 @@
 import { writeFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
-import { CoreApiService } from 'src/services/core-api.service';
-import { DraftRevisionService } from 'src/services/draft-revision.service';
+import { ConnectionService } from 'src/services/connection.service';
 
-type Options = {
+type Options = BaseOptions & {
   file: string;
-} & BaseOptions;
+};
 
 @SubCommand({
   name: 'save',
   description: 'Save migrations to file',
 })
 export class SaveMigrationsCommand extends BaseCommand {
-  constructor(
-    private readonly coreApiService: CoreApiService,
-    private readonly draftRevisionService: DraftRevisionService,
-  ) {
+  constructor(private readonly connectionService: ConnectionService) {
     super();
   }
 
-  async run(_inputs: string[], options?: Options): Promise<void> {
-    if (!options?.file) {
+  async run(_inputs: string[], options: Options): Promise<void> {
+    if (!options.file) {
       throw new Error('Error: --file option is required');
     }
 
-    await this.coreApiService.tryToLogin(options);
-    const revisionId =
-      await this.draftRevisionService.getDraftRevisionId(options);
-    await this.saveFile(revisionId, options.file);
+    await this.connectionService.connect(options);
+    await this.saveFile(this.connectionService.revisionId, options.file);
   }
 
   private async saveFile(revisionId: string, filePath: string) {
@@ -57,6 +51,6 @@ export class SaveMigrationsCommand extends BaseCommand {
   }
 
   private get api() {
-    return this.coreApiService.api;
+    return this.connectionService.api;
   }
 }

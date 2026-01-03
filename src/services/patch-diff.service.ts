@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CoreApiService } from './core-api.service';
+import { ConnectionService } from './connection.service';
 import { getValueByPath, deepEqual } from '@revisium/schema-toolkit/lib';
 import { JsonValue, JsonValuePatch } from '@revisium/schema-toolkit/types';
 import {
@@ -26,7 +26,7 @@ interface CompareStats {
 
 @Injectable()
 export class PatchDiffService {
-  constructor(private readonly coreApi: CoreApiService) {}
+  constructor(private readonly connectionService: ConnectionService) {}
 
   public async compareWithApi(
     patches: PatchFile[],
@@ -176,14 +176,18 @@ export class PatchDiffService {
         onProgress(i, rowIds.length);
       }
 
-      const response = await this.coreApi.api.rows(revisionId, tableId, {
-        first: BATCH_SIZE,
-        where: {
-          id: {
-            in: batchIds,
+      const response = await this.connectionService.api.rows(
+        revisionId,
+        tableId,
+        {
+          first: BATCH_SIZE,
+          where: {
+            id: {
+              in: batchIds,
+            },
           },
         },
-      });
+      );
 
       if (response.error) {
         throw new Error(
