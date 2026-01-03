@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-export type LogLevel = 'info' | 'success' | 'warn' | 'error';
-
 @Injectable()
 export class LoggerService {
   info(message: string): void {
@@ -128,7 +126,9 @@ export class LoggerService {
   }
 
   migrationFailed(response: unknown): void {
-    console.error('❌ Migration failed:', response);
+    const message =
+      typeof response === 'string' ? response : JSON.stringify(response);
+    console.error(`❌ Migration failed: ${message}`);
   }
 
   migrationCreated(tableId: string, id: string): void {

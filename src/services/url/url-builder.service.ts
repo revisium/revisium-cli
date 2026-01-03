@@ -113,7 +113,7 @@ export class UrlBuilderService {
   private validateAuthMethods(parsed: RevisiumUrl, env?: UrlEnvConfig): void {
     const methods: string[] = [];
 
-    if (parsed.username || parsed.password) {
+    if (parsed.username && parsed.password) {
       methods.push('credentials (username/password in URL)');
     }
 

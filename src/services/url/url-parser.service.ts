@@ -163,13 +163,6 @@ export class UrlParserService {
       return { baseUrl: '' };
     }
 
-    return {
-      baseUrl: '',
-      username: undefined,
-      password: undefined,
-      organization: undefined,
-      project: undefined,
-      branch: undefined,
-    };
+    return { baseUrl: '' };
   }
 }

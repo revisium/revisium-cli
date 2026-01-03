@@ -37,26 +37,24 @@ export function aggregateUploadStats(
 }
 
 export function formatUploadSummary(stats: UploadStats): string[] {
-  const lines: string[] = [];
-
-  lines.push('\n🎉 Upload Summary:');
-  lines.push(`📊 Total rows processed: ${stats.totalRows}`);
-  lines.push(`⬆️  Uploaded (new): ${stats.uploaded}`);
-  lines.push(`🔄 Updated (changed): ${stats.updated}`);
-  lines.push(`⏭️  Skipped (identical): ${stats.skipped}`);
-  lines.push(`❌ Invalid schema: ${stats.invalidSchema}`);
-  lines.push(`🚫 Create errors: ${stats.createErrors}`);
-  lines.push(`⚠️  Update errors: ${stats.updateErrors}`);
-  lines.push(`💥 Other errors: ${stats.otherErrors}`);
-
   const successful = stats.uploaded + stats.updated;
   const total = stats.totalRows;
   const totalErrors =
     stats.createErrors + stats.updateErrors + stats.otherErrors;
   const successRate = total > 0 ? ((successful / total) * 100).toFixed(1) : '0';
-  lines.push(`✅ Success rate: ${successRate}% (${totalErrors} total errors)`);
 
-  return lines;
+  return [
+    '\n🎉 Upload Summary:',
+    `📊 Total rows processed: ${stats.totalRows}`,
+    `⬆️  Uploaded (new): ${stats.uploaded}`,
+    `🔄 Updated (changed): ${stats.updated}`,
+    `⏭️  Skipped (identical): ${stats.skipped}`,
+    `❌ Invalid schema: ${stats.invalidSchema}`,
+    `🚫 Create errors: ${stats.createErrors}`,
+    `⚠️  Update errors: ${stats.updateErrors}`,
+    `💥 Other errors: ${stats.otherErrors}`,
+    `✅ Success rate: ${successRate}% (${totalErrors} total errors)`,
+  ];
 }
 
 export function formatTableResult(tableId: string, stats: UploadStats): string {

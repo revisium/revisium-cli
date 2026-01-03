@@ -40,24 +40,37 @@ export class AuthPromptService {
       const token = await this.interactive.promptPassword(
         `[${label}] Paste token:`,
       );
-      return { method: 'token', token };
+      if (!token?.trim()) {
+        throw new Error('Token cannot be empty');
+      }
+      return { method: 'token', token: token.trim() };
     }
 
     if (authMethod === 'apikey') {
       const apikey = await this.interactive.promptPassword(
         `[${label}] Enter API key:`,
       );
-      return { method: 'apikey', apikey };
+      if (!apikey?.trim()) {
+        throw new Error('API key cannot be empty');
+      }
+      return { method: 'apikey', apikey: apikey.trim() };
     }
 
     const username = await this.interactive.promptText(
       `[${label}] Enter username:`,
     );
+    if (!username?.trim()) {
+      throw new Error('Username cannot be empty');
+    }
+
     const password = await this.interactive.promptPassword(
       `[${label}] Enter password:`,
     );
+    if (!password) {
+      throw new Error('Password cannot be empty');
+    }
 
-    return { method: 'password', username, password };
+    return { method: 'password', username: username.trim(), password };
   }
 
   private getTokenPageUrl(baseUrl: string): string {

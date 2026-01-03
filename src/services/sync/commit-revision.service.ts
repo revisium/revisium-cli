@@ -7,6 +7,20 @@ export interface CommitResult {
   revisionId: string;
 }
 
+interface CommitParams {
+  organization: string;
+  project: string;
+  branch: string;
+  api: {
+    createRevision: (
+      org: string,
+      proj: string,
+      branch: string,
+      data: { comment: string },
+    ) => Promise<{ data?: { id: string }; error?: unknown }>;
+  };
+}
+
 @Injectable()
 export class CommitRevisionService {
   constructor(
@@ -18,32 +32,17 @@ export class CommitRevisionService {
     actionDescription: string,
     changeCount: number,
   ): Promise<CommitResult> {
-    this.logger.commit();
-
     const connection = this.connectionService.connection;
-    const comment = this.generateCommitComment(actionDescription, changeCount);
-
-    try {
-      const result = await connection.client.api.createRevision(
-        connection.url.organization,
-        connection.url.project,
-        connection.url.branch,
-        { comment },
-      );
-
-      if (result.data) {
-        this.logger.commitSuccess(result.data.id);
-        return { revisionId: result.data.id };
-      } else {
-        this.logger.commitError('No data returned');
-        throw new Error('Failed to create revision');
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.logger.commitError(errorMessage);
-      throw error;
-    }
+    return this.doCommit(
+      {
+        organization: connection.url.organization,
+        project: connection.url.project,
+        branch: connection.url.branch,
+        api: connection.client.api,
+      },
+      actionDescription,
+      changeCount,
+    );
   }
 
   async handleCommitFlow(
@@ -69,20 +68,38 @@ export class CommitRevisionService {
       return;
     }
 
+    await this.doCommit(
+      {
+        organization: connection.url.organization,
+        project: connection.url.project,
+        branch: connection.url.branch,
+        api: connection.client.api,
+      },
+      actionDescription,
+      changeCount,
+    );
+  }
+
+  private async doCommit(
+    params: CommitParams,
+    actionDescription: string,
+    changeCount: number,
+  ): Promise<CommitResult> {
     this.logger.commit();
 
     const comment = this.generateCommitComment(actionDescription, changeCount);
 
     try {
-      const result = await connection.client.api.createRevision(
-        connection.url.organization,
-        connection.url.project,
-        connection.url.branch,
+      const result = await params.api.createRevision(
+        params.organization,
+        params.project,
+        params.branch,
         { comment },
       );
 
       if (result.data) {
         this.logger.commitSuccess(result.data.id);
+        return { revisionId: result.data.id };
       } else {
         this.logger.commitError('No data returned');
         throw new Error('Failed to create revision');

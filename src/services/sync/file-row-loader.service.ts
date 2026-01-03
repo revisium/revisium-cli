@@ -48,9 +48,19 @@ export class FileRowLoaderService {
       try {
         const fileContent = await readFile(filePath, 'utf-8');
         const rowData = JSON.parse(fileContent) as {
-          id: string;
-          data: Record<string, unknown>;
+          id?: unknown;
+          data?: unknown;
         };
+
+        if (
+          typeof rowData.id !== 'string' ||
+          !rowData.id ||
+          typeof rowData.data !== 'object' ||
+          rowData.data === null
+        ) {
+          result.parseErrors++;
+          continue;
+        }
 
         if (validator && !validator(rowData.data as JsonValue)) {
           result.invalidCount++;
@@ -59,7 +69,7 @@ export class FileRowLoaderService {
 
         result.rows.push({
           id: rowData.id,
-          data: rowData.data,
+          data: rowData.data as Record<string, unknown>,
         });
       } catch {
         result.parseErrors++;

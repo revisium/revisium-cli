@@ -1,11 +1,13 @@
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
-import { ConnectionService } from 'src/services/connection';
+import {
+  ConnectionService,
+  createApiClientAdapter,
+} from 'src/services/connection';
 import { JsonValidatorService, LoggerService } from 'src/services/common';
 import {
   CommitRevisionService,
   FileRowLoaderService,
-  ApiClient,
   RowSyncService,
   RowSyncError,
   TableDependencyService,
@@ -188,8 +190,9 @@ export class UploadRowsCommand extends BaseCommand {
       return stats;
     }
 
+    const apiClient = createApiClientAdapter(this.api);
     const syncStats = await this.rowSyncService.syncTableRows(
-      this.api as unknown as ApiClient,
+      apiClient,
       revisionId,
       tableId,
       loadResult.rows,
