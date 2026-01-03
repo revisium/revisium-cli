@@ -219,11 +219,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     stats: ApplyStats,
     batchSize: number,
   ): Promise<void> {
-    if (this.connectionService.bulkPatchSupported === false) {
-      await this.patchRowsSingle(revisionId, tableId, patchFiles, stats);
-      return;
-    }
-
     let batchApplied = 0;
 
     for (let i = 0; i < patchFiles.length; i += batchSize) {
@@ -244,21 +239,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
         const result = await this.api.patchRows(revisionId, tableId, { rows });
 
         if (result.error) {
-          if (this.is404Error(result.error)) {
-            this.clearProgressLine();
-            console.log(
-              `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
-            );
-            this.connectionService.bulkPatchSupported = false;
-            const remainingRows = patchFiles.slice(i);
-            await this.patchRowsSingle(
-              revisionId,
-              tableId,
-              remainingRows,
-              stats,
-            );
-            return;
-          }
           console.error(`\n❌ Batch patch failed:`, result.error);
           stats.applyErrors += batch.length;
           continue;
@@ -270,20 +250,9 @@ export class ApplyPatchesCommand extends BasePatchCommand {
           continue;
         }
 
-        this.connectionService.bulkPatchSupported = true;
         stats.applied += batch.length;
         batchApplied += batch.length;
       } catch (error) {
-        if (this.is404Error(error)) {
-          this.clearProgressLine();
-          console.log(
-            `  ⚠️ Bulk patchRows not supported, falling back to single-row mode`,
-          );
-          this.connectionService.bulkPatchSupported = false;
-          const remainingRows = patchFiles.slice(i);
-          await this.patchRowsSingle(revisionId, tableId, remainingRows, stats);
-          return;
-        }
         console.error(`\n❌ Batch patch exception:`, error);
         stats.applyErrors += batch.length;
       }
@@ -298,56 +267,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
     console.log(`  ✅ Applied ${batchApplied} rows`);
   }
 
-  private async patchRowsSingle(
-    revisionId: string,
-    tableId: string,
-    patchFiles: PatchFile[],
-    stats: ApplyStats,
-  ): Promise<void> {
-    let singleRowApplied = 0;
-
-    for (let i = 0; i < patchFiles.length; i++) {
-      const patchFile = patchFiles[i];
-
-      this.printProgress({
-        tableId,
-        current: i,
-        total: patchFiles.length,
-      });
-
-      const result = await this.applyPatchFile(patchFile, revisionId, tableId);
-
-      if (result === 'applied') {
-        stats.applied++;
-        singleRowApplied++;
-      } else {
-        stats.applyErrors++;
-      }
-    }
-
-    this.printProgress({
-      tableId,
-      current: patchFiles.length,
-      total: patchFiles.length,
-    });
-    this.clearProgressLine();
-    console.log(`  ✅ Applied ${singleRowApplied} rows (single-row mode)`);
-  }
-
-  private is404Error(error: unknown): boolean {
-    if (typeof error === 'object' && error !== null) {
-      const errorObj = error as Record<string, unknown>;
-      return (
-        errorObj['status'] === 404 ||
-        (errorObj['response'] as Record<string, unknown> | undefined)?.[
-          'status'
-        ] === 404 ||
-        errorObj['statusCode'] === 404
-      );
-    }
-    return false;
-  }
-
   private printProgress(state: ProgressState): void {
     const progress = `  Patching: ${state.current}/${state.total} rows`;
     process.stdout.write(`\r${progress}`);
@@ -355,42 +274,6 @@ export class ApplyPatchesCommand extends BasePatchCommand {
 
   private clearProgressLine(): void {
     process.stdout.write('\r\x1b[K');
-  }
-
-  private async applyPatchFile(
-    patchFile: PatchFile,
-    revisionId: string,
-    table: string,
-  ): Promise<'applied' | 'applyError'> {
-    try {
-      const result = await this.api.patchRow(
-        revisionId,
-        table,
-        patchFile.rowId,
-        {
-          patches: patchFile.patches as PatchRow[],
-        },
-      );
-
-      if (result.error) {
-        console.error(
-          `    Error details: ${JSON.stringify(result.error, null, 2)}`,
-        );
-        return 'applyError';
-      }
-
-      if (!result.data) {
-        console.error('    Error: No data returned from API');
-        return 'applyError';
-      }
-
-      return 'applied';
-    } catch (error) {
-      console.error(
-        `    Exception: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      return 'applyError';
-    }
   }
 
   private printStats(stats: ApplyStats): void {

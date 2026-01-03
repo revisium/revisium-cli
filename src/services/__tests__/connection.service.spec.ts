@@ -75,42 +75,6 @@ describe('ConnectionService', () => {
         'Connection not established. Call connect() first.',
       );
     });
-
-    it('throws error when accessing bulkCreateSupported before connect', () => {
-      expect(() => service.bulkCreateSupported).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when accessing bulkUpdateSupported before connect', () => {
-      expect(() => service.bulkUpdateSupported).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when accessing bulkPatchSupported before connect', () => {
-      expect(() => service.bulkPatchSupported).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when setting bulkCreateSupported before connect', () => {
-      expect(() => {
-        service.bulkCreateSupported = true;
-      }).toThrow('Connection not established. Call connect() first.');
-    });
-
-    it('throws error when setting bulkUpdateSupported before connect', () => {
-      expect(() => {
-        service.bulkUpdateSupported = true;
-      }).toThrow('Connection not established. Call connect() first.');
-    });
-
-    it('throws error when setting bulkPatchSupported before connect', () => {
-      expect(() => {
-        service.bulkPatchSupported = true;
-      }).toThrow('Connection not established. Call connect() first.');
-    });
   });
 
   describe('connect', () => {
@@ -255,50 +219,6 @@ describe('ConnectionService', () => {
     });
   });
 
-  describe('bulk operation flags', () => {
-    it('allows setting and getting bulkCreateSupported', async () => {
-      setupSuccessfulConnection(mockUrl, {
-        headId: 'head-id',
-        draftId: 'draft-id',
-      });
-      await service.connect();
-
-      expect(service.bulkCreateSupported).toBeUndefined();
-
-      service.bulkCreateSupported = true;
-      expect(service.bulkCreateSupported).toBe(true);
-
-      service.bulkCreateSupported = false;
-      expect(service.bulkCreateSupported).toBe(false);
-    });
-
-    it('allows setting and getting bulkUpdateSupported', async () => {
-      setupSuccessfulConnection(mockUrl, {
-        headId: 'head-id',
-        draftId: 'draft-id',
-      });
-      await service.connect();
-
-      expect(service.bulkUpdateSupported).toBeUndefined();
-
-      service.bulkUpdateSupported = true;
-      expect(service.bulkUpdateSupported).toBe(true);
-    });
-
-    it('allows setting and getting bulkPatchSupported', async () => {
-      setupSuccessfulConnection(mockUrl, {
-        headId: 'head-id',
-        draftId: 'draft-id',
-      });
-      await service.connect();
-
-      expect(service.bulkPatchSupported).toBeUndefined();
-
-      service.bulkPatchSupported = true;
-      expect(service.bulkPatchSupported).toBe(true);
-    });
-  });
-
   function setupSuccessfulConnection(
     url: RevisiumUrlComplete,
     revisions: { headId: string; draftId: string },
@@ -342,9 +262,6 @@ describe('ConnectionService', () => {
           .mockResolvedValue({ data: { id: revisions.draftId } }),
       },
       authenticate: jest.fn().mockResolvedValue('test-user'),
-      bulkCreateSupported: undefined as boolean | undefined,
-      bulkUpdateSupported: undefined as boolean | undefined,
-      bulkPatchSupported: undefined as boolean | undefined,
     };
   }
 });

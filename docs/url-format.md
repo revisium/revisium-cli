@@ -5,7 +5,7 @@ Revisium CLI uses a special URL format to specify project connections.
 ## Syntax
 
 ```text
-revisium://[auth@]host[:port]/organization/project/branch[:revision][?params]
+revisium://[user:password@]host[:port]/organization/project/branch[:revision][?params]
 ```
 
 ## URL Parts
@@ -18,6 +18,13 @@ revisium://[auth@]host[:port]/organization/project/branch[:revision][?params]
 | `project` | Project name | No | Prompted |
 | `branch` | Branch name | No | `master` |
 | `revision` | Revision target | No | `draft` |
+
+## Query Parameters (Authentication)
+
+| Parameter | Description |
+|-----------|-------------|
+| `token` | JWT authentication token |
+| `apikey` | API key (for automated access) |
 
 ## Revision Values
 
@@ -35,17 +42,84 @@ revisium://[auth@]host[:port]/organization/project/branch[:revision][?params]
 |------|----------|--------------|
 | `localhost` | http | 8080 |
 | `127.0.0.1` | http | 8080 |
-| Other hosts | https (prompted) | 443 |
+| Other hosts | https | 443 |
 
-## Examples
+## Authentication Examples
 
-### Full URL
+### Token Authentication (Recommended)
+
+Token in URL query parameter:
+
+```bash
+revisium://cloud.revisium.io/myorg/myproject/master?token=eyJhbGciOiJIUzI1NiIs...
+```
+
+Token via environment variable:
+
+```bash
+export REVISIUM_TOKEN=eyJhbGciOiJIUzI1NiIs...
+revisium migrate apply --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
+```
+
+Get your token:
+- **Cloud:** https://cloud.revisium.io/get-mcp-token
+- **Self-hosted:** https://your-host/get-mcp-token
+
+### API Key Authentication
+
+API key in URL query parameter:
+
+```bash
+revisium://cloud.revisium.io/myorg/myproject/master?apikey=ak_xxxxxxxxxxxxx
+```
+
+API key via environment variable:
+
+```bash
+export REVISIUM_API_KEY=ak_xxxxxxxxxxxxx
+revisium migrate apply --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
+```
+
+### Password Authentication
+
+Credentials in URL:
+
+```bash
+revisium://admin:secret@cloud.revisium.io/myorg/myproject/master
+```
+
+Credentials via environment variables:
+
+```bash
+export REVISIUM_USERNAME=admin
+export REVISIUM_PASSWORD=secret
+revisium migrate apply --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
+```
+
+### CI/CD (Username/Password via Environment)
+
+```bash
+# Set credentials in CI environment
+export REVISIUM_USERNAME=$REVISIUM_USERNAME
+export REVISIUM_PASSWORD=$REVISIUM_PASSWORD
+
+# URL without credentials
+revisium migrate apply --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master --commit
+```
+
+## URL Examples
+
+### Full URL with Token
 
 ```bash
 # Cloud with token auth
 revisium://cloud.revisium.io/myorg/myproject/master:head?token=<YOUR_TOKEN>
 
-# Local with password auth (not recommended, use token instead)
+# Local development
 revisium://localhost:8080/admin/demo/master?token=<YOUR_TOKEN>
 ```
 
@@ -56,7 +130,7 @@ revisium://localhost:8080/admin/demo/master?token=<YOUR_TOKEN>
 revisium://cloud.revisium.io/org/proj
 
 # No branch - defaults to master
-revisium://admin@cloud.revisium.io/org/proj
+revisium://cloud.revisium.io/org/proj
 
 # Just host - will prompt for everything else
 revisium://cloud.revisium.io
@@ -81,16 +155,16 @@ All commands support the `--url` option:
 
 ```bash
 # Schema commands
-revisium schema save --folder ./schemas --url revisium://host/org/proj
+revisium schema save --folder ./schemas --url revisium://host/org/proj?token=xxx
 
 # Migration commands
-revisium migrate apply --file migrations.json --url revisium://host/org/proj
+revisium migrate apply --file migrations.json --url revisium://host/org/proj?token=xxx
 
 # Rows commands
-revisium rows upload --folder ./data --url revisium://host/org/proj
+revisium rows upload --folder ./data --url revisium://host/org/proj?token=xxx
 
 # Patches commands
-revisium patches apply --input ./patches --url revisium://host/org/proj
+revisium patches apply --input ./patches --url revisium://host/org/proj?token=xxx
 ```
 
 ### Default URL via Environment
@@ -106,7 +180,29 @@ revisium schema save --folder ./schemas
 revisium migrate apply --file migrations.json
 ```
 
+## Sync Commands (Source/Target)
+
+Sync commands use separate URLs for source and target:
+
+```bash
+revisium sync all \
+  --source revisium://source.example.com/org/proj/master:head?token=xxx \
+  --target revisium://target.example.com/org/proj/master?token=yyy
+```
+
+With environment variables:
+
+```bash
+export REVISIUM_SOURCE_TOKEN=source_token
+export REVISIUM_TARGET_TOKEN=target_token
+
+revisium sync all \
+  --source revisium://source.example.com/org/proj/master:head \
+  --target revisium://target.example.com/org/proj/master
+```
+
 ## See Also
 
-- [Authentication](./authentication.md) - Authentication methods
+- [Authentication](./authentication.md) - Authentication methods in detail
+- [Configuration](./configuration.md) - Environment variables
 - [Sync Commands](./sync-commands.md) - Using URLs with sync commands
