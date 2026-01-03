@@ -54,7 +54,7 @@ Like Prisma, save schema migrations locally and apply them in CI/CD:
 ```bash
 # 1. Save migrations locally (during development)
 revisium migrate save --file ./revisium/migrations.json \
-  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+  --url revisium://admin:admin@localhost:8080/myorg/myproject/master
 
 # 2. Commit to git
 git add revisium/migrations.json
