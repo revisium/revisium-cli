@@ -162,9 +162,6 @@ revisium migrate apply --file migrations.json --url revisium://host/org/proj?tok
 
 # Rows commands
 revisium rows upload --folder ./data --url revisium://host/org/proj?token=xxx
-
-# Patches commands
-revisium patches apply --input ./patches --url revisium://host/org/proj?token=xxx
 ```
 
 ### Default URL via Environment

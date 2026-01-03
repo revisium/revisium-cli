@@ -21,7 +21,6 @@ A CLI tool for interacting with Revisium instances, providing migration manageme
 - **Migration Management** - Save and apply database migrations with auto-commit
 - **Schema Export/Import** - Export table schemas and convert to migrations
 - **Data Export/Upload** - Export and upload rows with smart dependency handling
-- **Patches** - Selective field updates with validation and preview
 - **Project Sync** - Synchronize schema and data between Revisium projects
 - **Bulk Operations** - Efficient batch operations with configurable batch size
 - **Docker Deployment** - Containerized automation for CI/CD
@@ -123,22 +122,6 @@ revisium sync all \
   --commit
 ```
 
-### Patches (Selective Updates)
-
-```
-┌────────┐      ┌────────┐      ┌──────────┐      ┌────────┐
-│  SAVE  │─────▶│  EDIT  │─────▶│ VALIDATE │─────▶│ APPLY  │
-└────────┘      └────────┘      └──────────┘      └────────┘
-```
-
-Update specific fields without affecting other data:
-
-```bash
-revisium patches save --table Article --paths title,status --output ./patches
-revisium patches preview --input ./patches
-revisium patches apply --input ./patches --commit
-```
-
 ## Commands
 
 | Command | Description | Documentation |
@@ -149,10 +132,6 @@ revisium patches apply --input ./patches --commit
 | `migrate apply` | Apply migrations from JSON file | [Migrate Commands](docs/migrate-commands.md) |
 | `rows save` | Export table data to JSON files | [Rows Commands](docs/rows-commands.md) |
 | `rows upload` | Upload table data from JSON files | [Rows Commands](docs/rows-commands.md) |
-| `patches save` | Export field values as patches | [Patches Commands](docs/patches-commands.md) |
-| `patches validate` | Validate patch files | [Patches Commands](docs/patches-commands.md) |
-| `patches preview` | Preview patch changes | [Patches Commands](docs/patches-commands.md) |
-| `patches apply` | Apply patches to rows | [Patches Commands](docs/patches-commands.md) |
 | `sync schema` | Sync schema between projects | [Sync Commands](docs/sync-commands.md) |
 | `sync data` | Sync data between projects | [Sync Commands](docs/sync-commands.md) |
 | `sync all` | Full sync (schema + data) | [Sync Commands](docs/sync-commands.md) |
@@ -184,7 +163,6 @@ See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) 
 - [Schema Commands](docs/schema-commands.md) - schema save, create-migrations
 - [Migrate Commands](docs/migrate-commands.md) - migrate save, apply
 - [Rows Commands](docs/rows-commands.md) - rows save, upload
-- [Patches Commands](docs/patches-commands.md) - patches save, validate, preview, apply
 - [Sync Commands](docs/sync-commands.md) - sync schema, data, all
 - [Docker Deployment](docs/docker-deployment.md) - Docker, Kubernetes, CI/CD
 
