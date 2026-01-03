@@ -9,7 +9,7 @@ The CLI is available as a Docker image for CI/CD pipelines and containerized env
 docker pull revisium/revisium-cli
 
 # Or specific version
-docker pull revisium/revisium-cli:1.1.1
+docker pull revisium/revisium-cli:2.0.0
 ```
 
 ## Environment Variables
@@ -97,7 +97,7 @@ Use migrations in Kubernetes with init container for schema deployment:
 ### Build Custom Image with Migrations
 
 ```dockerfile
-FROM revisium/revisium-cli:1.1.1
+FROM revisium/revisium-cli:2.0.0
 
 # Copy migrations
 COPY revisium/migrations.json /app/migrations.json
@@ -150,7 +150,7 @@ For initial data seeding, include data files in your Docker image:
 ### Dockerfile with Data
 
 ```dockerfile
-FROM revisium/revisium-cli:1.1.1
+FROM revisium/revisium-cli:2.0.0
 
 # Copy migrations
 COPY revisium/migrations.json /app/migrations.json
