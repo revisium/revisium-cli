@@ -1,0 +1,67 @@
+{
+  "createdId": "73Z1GKVAioZ1eT2AWxFd_",
+  "id": "frozen_lake",
+  "versionId": "MFjQvcT56vmbw8o4IWd8q",
+  "createdAt": "2025-08-19T18:22:10.102Z",
+  "updatedAt": "2025-08-19T18:22:10.102Z",
+  "publishedAt": "2025-08-19T18:22:10.102Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "",
+      "hash": "",
+      "size": 0,
+      "width": 0,
+      "fileId": "68uQ8KERveIJIJ_gJBsEy",
+      "height": 0,
+      "status": "ready",
+      "fileName": "",
+      "mimeType": "",
+      "extension": ""
+    },
+    "name": "Frozen Lake",
+    "region_id": "northern_mountains",
+    "coordinates": {
+      "x": 300,
+      "y": 500,
+      "z": 0,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "ozRoo8Xw9Y_qJwPWIaASt",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Ice Surface",
+          "item_id": "crystal_armor",
+          "description": "A place where ice hides powerful magical armor."
+        },
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "qE_tQt4QvLGWDA7fgqMIb",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Cave of Ice Spirits",
+          "item_id": "healing_potion",
+          "description": "A cave where you can find potions and encounter ice spirits."
+        }
+      ]
+    },
+    "description": "A lake covered with eternal ice, around which spirits dwell."
+  }
+}

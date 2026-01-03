@@ -41,6 +41,19 @@ export default tseslint.config(
       'sonarjs/no-nested-functions': 'off',
       'sonarjs/no-alphabetical-sort': 'off',
       'sonarjs/no-misleading-array-reverse': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
+    files: ['e2e/**/*.ts'],
+    rules: {
+      'sonarjs/no-hardcoded-passwords': 'off',
+      'sonarjs/no-os-command-from-path': 'off',
+      'sonarjs/os-command': 'off',
+      'sonarjs/pseudo-random': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
     },
   },
 );

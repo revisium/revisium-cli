@@ -6,3 +6,14 @@ coverage:
     patch:
       default:
         target: 90%
+
+ignore:
+  - "**/__tests__/**"
+  - "**/__mocks__/**"
+  - "**/*.spec.ts"
+  - "**/*.e2e-spec.ts"
+  - "src/__generated__/**"
+  - "src/main.ts"
+  - "e2e/**"
+  - "dist/**"
+  - "scripts/**"

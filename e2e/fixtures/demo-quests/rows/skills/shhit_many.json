@@ -1,0 +1,18 @@
+{
+  "createdId": "Z3xoLPjl9V1Ts3rW5WWNB",
+  "id": "shhit_many",
+  "versionId": "sPmCbdk42Vviwc26Tvfv7",
+  "createdAt": "2025-08-19T18:22:03.105Z",
+  "updatedAt": "2025-08-19T18:22:03.105Z",
+  "publishedAt": "2025-08-19T18:22:03.105Z",
+  "readonly": true,
+  "data": {
+    "name": "Mana Shield",
+    "skill_data": {
+      "bonus": -10,
+      "stat_id": "mana",
+      "cooldown_reduction": 4
+    },
+    "description": "Converts damage to mana cost, protecting health."
+  }
+}

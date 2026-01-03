@@ -1,0 +1,67 @@
+{
+  "createdId": "P8yeszRjQsMtr1KgTwKFx",
+  "id": "burning_pit",
+  "versionId": "dhXYsxbwkWJQmRkIk_gt4",
+  "createdAt": "2025-08-19T18:22:08.873Z",
+  "updatedAt": "2025-08-19T18:22:08.873Z",
+  "publishedAt": "2025-08-19T18:22:08.873Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "",
+      "hash": "",
+      "size": 0,
+      "width": 0,
+      "fileId": "9v_QZzAbg6Dn7R5lWEBDZ",
+      "height": 0,
+      "status": "ready",
+      "fileName": "",
+      "mimeType": "",
+      "extension": ""
+    },
+    "name": "Burning Pit",
+    "region_id": "desert_wastes",
+    "coordinates": {
+      "x": 700,
+      "y": 150,
+      "z": -5,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "9SVmkev1G0FeQDWfJK4g1",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Ash Well",
+          "item_id": "flaming_sword",
+          "description": "A well full of ash and debris from ancient artifacts."
+        },
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "H3Uv8MzFWaDxnz833WyrM",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Fire Trail",
+          "item_id": "shadow_dagger",
+          "description": "A trail leading to a forgotten place of rituals."
+        }
+      ]
+    },
+    "description": "A place where the earth burns and glows, leaving only ash behind."
+  }
+}

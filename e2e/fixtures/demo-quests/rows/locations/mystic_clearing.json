@@ -1,0 +1,67 @@
+{
+  "createdId": "QM8BdlBRa6mem3VEH1iwf",
+  "id": "mystic_clearing",
+  "versionId": "zlrnaD9D9rYBzw9aYijVM",
+  "createdAt": "2025-08-19T18:22:10.899Z",
+  "updatedAt": "2025-08-19T18:22:10.899Z",
+  "publishedAt": "2025-08-19T18:22:10.899Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "",
+      "hash": "",
+      "size": 0,
+      "width": 0,
+      "fileId": "cwkyWqF9miom6ni4YX_cz",
+      "height": 0,
+      "status": "ready",
+      "fileName": "",
+      "mimeType": "",
+      "extension": ""
+    },
+    "name": "Mystic Clearing",
+    "region_id": "enchanted_forest",
+    "coordinates": {
+      "x": 150,
+      "y": 220,
+      "z": 10,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "ohiOORF2EbG1mbd1UjrU9",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Druid Circle",
+          "item_id": "healing_potion",
+          "description": "A place of power where druids conduct their rituals."
+        },
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "QRCnp4-rdYix8JvfgJPYJ",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Nature's Altar",
+          "item_id": "crystal_armor",
+          "description": "An altar emanating magical energy that enhances armor."
+        }
+      ]
+    },
+    "description": "A clearing in the heart of the Enchanted Forest, surrounded by nature's magic."
+  }
+}

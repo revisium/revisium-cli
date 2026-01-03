@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:17.4-alpine
+    ports:
+      - '5439:5432'
+    environment:
+      POSTGRES_DB: revisium-e2e
+      POSTGRES_USER: revisium
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U revisium']
+      interval: 1s
+      timeout: 1s
+      retries: 30
+
+  revisium:
+    image: revisium/revisium:v2.5.0-alpha.3
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '8082:8080'
+    environment:
+      DATABASE_URL: postgresql://revisium:password@db:5432/revisium-e2e?schema=public
+      JWT_SECRET: e2e-test-secret
+      FILE_PLUGIN_PUBLIC_ENDPOINT: https://cdn.example.com
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 2s
+      timeout: 5s
+      retries: 30

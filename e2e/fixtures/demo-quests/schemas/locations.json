@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "required": [
+    "coordinates",
+    "description",
+    "icon",
+    "name",
+    "region_id"
+  ],
+  "properties": {
+    "icon": {
+      "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+    },
+    "name": {
+      "type": "string",
+      "default": ""
+    },
+    "region_id": {
+      "type": "string",
+      "default": "",
+      "foreignKey": "regions"
+    },
+    "coordinates": {
+      "type": "object",
+      "required": [
+        "points_of_interest",
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "default": 0
+        },
+        "y": {
+          "type": "number",
+          "default": 0
+        },
+        "z": {
+          "type": "number",
+          "default": 0
+        },
+        "points_of_interest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "icon",
+              "item_id",
+              "name"
+            ],
+            "properties": {
+              "icon": {
+                "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+              },
+              "name": {
+                "type": "string",
+                "default": ""
+              },
+              "item_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "items"
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "additionalProperties": false
+}

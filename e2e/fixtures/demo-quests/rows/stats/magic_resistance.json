@@ -1,0 +1,13 @@
+{
+  "createdId": "Hg-qRy-Bh0B-zHsTVHD8Y",
+  "id": "magic_resistance",
+  "versionId": "TNNNdBFo1P9q4q2Mkhxgk",
+  "createdAt": "2025-08-19T18:21:52.488Z",
+  "updatedAt": "2025-08-19T18:21:52.488Z",
+  "publishedAt": "2025-08-19T18:21:52.488Z",
+  "readonly": true,
+  "data": {
+    "name": "Magic Resistance",
+    "description": "Reduces damage taken by the character from magical attacks."
+  }
+}

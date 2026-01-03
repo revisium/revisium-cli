@@ -1,0 +1,41 @@
+{
+  "createdId": "LgLmmV_kjbqc1q8R9xSnm",
+  "id": "desert_raider",
+  "versionId": "Nuu3Vn67hjB33vIHjeMyu",
+  "createdAt": "2025-08-19T18:22:12.706Z",
+  "updatedAt": "2025-08-19T18:22:12.706Z",
+  "publishedAt": "2025-08-19T18:22:12.706Z",
+  "readonly": true,
+  "data": {
+    "name": "Desert Raider",
+    "avatar": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/7b9b9631472ac0c07b849277660d741a439a6bcc",
+      "hash": "7b9b9631472ac0c07b849277660d741a439a6bcc",
+      "size": 2476957,
+      "width": 1024,
+      "fileId": "8pVZ4LcyxMDCHLlnsDmGQ",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "desert_raider.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "attributes": {
+      "level": 12,
+      "stats": {
+        "agility": 18,
+        "strength": 15,
+        "intelligence": 6
+      },
+      "health": 140,
+      "equipment": [
+        {
+          "slot": "weapon",
+          "item_id": "shadow_dagger"
+        }
+      ],
+      "faction_id": "desert_nomads"
+    },
+    "location_id": "scorched_dunes"
+  }
+}

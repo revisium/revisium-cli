@@ -1,0 +1,13 @@
+{
+  "createdId": "ZlrJn_dibi_tCOZ0hYtjA",
+  "id": "spell_power",
+  "versionId": "d_RrVqU5eUvfWy0bvVKEl",
+  "createdAt": "2025-08-19T18:21:54.439Z",
+  "updatedAt": "2025-08-19T18:21:54.439Z",
+  "publishedAt": "2025-08-19T18:21:54.439Z",
+  "readonly": true,
+  "data": {
+    "name": "Spell Power",
+    "description": "Increases damage and effectiveness of magical spells."
+  }
+}

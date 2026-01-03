@@ -1,0 +1,13 @@
+{
+  "createdId": "987B0mmZm-R9kvZemxCXO",
+  "id": "weapon",
+  "versionId": "jUtpOscl3bU91l1OXTYBl",
+  "createdAt": "2025-08-19T18:21:43.778Z",
+  "updatedAt": "2025-08-19T18:21:43.778Z",
+  "publishedAt": "2025-08-19T18:21:43.778Z",
+  "readonly": true,
+  "data": {
+    "name": "Weapon",
+    "description": "Items used to deal damage to enemies."
+  }
+}

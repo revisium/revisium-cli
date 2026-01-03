@@ -545,6 +545,7 @@ export class UploadRowsCommand extends BaseCommand {
       executeBatch: (batch) =>
         this.api.updateRows(revisionId, tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+          isRestore: true,
         }),
       fallbackSingle: (remaining) =>
         this.updateRowsSingle(revisionId, tableId, remaining, stats),

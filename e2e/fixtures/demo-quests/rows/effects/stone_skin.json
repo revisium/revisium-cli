@@ -1,0 +1,27 @@
+{
+  "createdId": "3N2J9zN7F4Zg0tcB8np_h",
+  "id": "stone_skin",
+  "versionId": "9qrHHh-INTl6ZGVPhcuQV",
+  "createdAt": "2025-08-19T18:21:59.379Z",
+  "updatedAt": "2025-08-19T18:21:59.379Z",
+  "publishedAt": "2025-08-19T18:21:59.379Z",
+  "readonly": true,
+  "data": {
+    "name": "Stone Skin",
+    "description": "Increases defense for a short time, reducing incoming damage.",
+    "effect_data": {
+      "type": "buff",
+      "duration": 20,
+      "application": {
+        "chance": 100,
+        "target_type": "ally"
+      },
+      "stat_changes": [
+        {
+          "value": 20,
+          "stat_id": "defense"
+        }
+      ]
+    }
+  }
+}

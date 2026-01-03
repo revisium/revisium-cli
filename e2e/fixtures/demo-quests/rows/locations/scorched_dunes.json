@@ -1,0 +1,84 @@
+{
+  "createdId": "6yYRSx7lmMdkfR4V_lTkr",
+  "id": "scorched_dunes",
+  "versionId": "GV62ElI2qMcXi-eNEmyqt",
+  "createdAt": "2025-08-19T18:22:11.292Z",
+  "updatedAt": "2025-08-19T18:22:11.292Z",
+  "publishedAt": "2025-08-19T18:22:11.292Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/8e682e1bf2a57397adf4a58b2ff523d6691e15c3",
+      "hash": "8e682e1bf2a57397adf4a58b2ff523d6691e15c3",
+      "size": 2561685,
+      "width": 1024,
+      "fileId": "2ft8Wfrw1Bjh5muLIWuGL",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "scorched_dunes.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "name": "Scorched Dunes",
+    "region_id": "desert_wastes",
+    "coordinates": {
+      "x": 512,
+      "y": 128,
+      "z": 0,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/9601fb1afe203ed63594fb98d11832c93c2ad8a8",
+            "hash": "9601fb1afe203ed63594fb98d11832c93c2ad8a8",
+            "size": 2843219,
+            "width": 1024,
+            "fileId": "m92evci8yhQ8LsauF2rys",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "scorched_dunes2.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Oasis of Hope",
+          "item_id": "healing_potion",
+          "description": "The only place where you can find water and healing in the desert."
+        },
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/7c5d84e9c2d5cb93a4422cf20df49633536800c6",
+            "hash": "7c5d84e9c2d5cb93a4422cf20df49633536800c6",
+            "size": 2698625,
+            "width": 1024,
+            "fileId": "fpyWArvOKdgj3TmajLHM2",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "scorched_dunes3.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Tomb of the Forgotten Warrior",
+          "item_id": "shadow_dagger",
+          "description": "Ancient tomb that holds a cursed dagger."
+        },
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/0918d751228eee4da5b0b6c7a201f4d3468df3b9",
+            "hash": "0918d751228eee4da5b0b6c7a201f4d3468df3b9",
+            "size": 2455500,
+            "width": 1024,
+            "fileId": "TVjohEjVEYzULhJdj3lO9",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "scorched_dunes4.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Sandstone Obelisk",
+          "item_id": "crystal_armor",
+          "description": "A towering obelisk carved from ancient sandstone that grants protection against raging sandstorms when activated."
+        }
+      ]
+    },
+    "description": "Dangerous sand dunes where every step could be your last."
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "createdId": "DAyXgDk4fEKyf0p4lNcDN",
+  "id": "zashita_labirint",
+  "versionId": "3w05IqWxEJdgqZNS4jRS2",
+  "createdAt": "2025-08-19T18:22:15.359Z",
+  "updatedAt": "2025-10-15T08:49:15.632Z",
+  "publishedAt": "2025-08-19T18:22:15.359Z",
+  "readonly": true,
+  "data": {
+    "name": "Defense of the Crystal Labyrinth",
+    "steps": [
+      {
+        "items": [],
+        "npc_id": "crystal_keeper",
+        "coordinates": {
+          "x": 640,
+          "y": 480
+        },
+        "description": "Help the Crystal Keeper defend the labyrinth from attackers.",
+        "location_id": "crystal_maze",
+        "step_number": 1,
+        "objective_type": "defend"
+      }
+    ],
+    "preview": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/4096ecadbfe7ef524b6949997e72027e175ad293",
+      "hash": "4096ecadbfe7ef524b6949997e72027e175ad293",
+      "size": 2045900,
+      "width": 1024,
+      "fileId": "iVdfUzO-YJj4yy8ukt4xP",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "ChatGPT Image 1 Ð¸ÑÐ½. 2025 Ð³., 17_34_45.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "rewards": {
+      "items": [
+        {
+          "item_id": "crystal_armor",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 200,
+        "silver": 100
+      },
+      "abilities": [
+        "crystal_shield"
+      ],
+      "experience": 800
+    },
+    "description": "Help defend the Crystal Labyrinth from enemies.",
+    "requirements": {
+      "required_items": [
+        {
+          "item_id": "healing_potion",
+          "quantity": 2
+        }
+      ],
+      "required_level": 12,
+      "required_skills": [
+        "blok_shhitom"
+      ],
+      "required_factions": [
+        {
+          "faction_id": "black_order",
+          "reputation": "ally"
+        }
+      ]
+    },
+    "is_repeatable": false,
+    "quest_type_id": "escort_quest"
+  }
+}

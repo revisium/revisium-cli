@@ -1,0 +1,13 @@
+{
+  "createdId": "mW8E-AL1sYAYUeZz-IPcb",
+  "id": "cooldown_reduction",
+  "versionId": "KDlD8t2oVPRnAoNDUlSwi",
+  "createdAt": "2025-08-19T18:21:49.387Z",
+  "updatedAt": "2025-08-19T18:21:49.387Z",
+  "publishedAt": "2025-08-19T18:21:49.387Z",
+  "readonly": true,
+  "data": {
+    "name": "Cooldown Reduction",
+    "description": "Reduces the recovery time of abilities and spells."
+  }
+}

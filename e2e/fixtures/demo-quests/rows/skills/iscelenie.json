@@ -1,0 +1,18 @@
+{
+  "createdId": "mNznDHBy6j-rfmew0GFMY",
+  "id": "iscelenie",
+  "versionId": "U2_RPghUXKSKMcQddAR5J",
+  "createdAt": "2025-08-19T18:22:01.943Z",
+  "updatedAt": "2025-08-19T18:22:01.943Z",
+  "publishedAt": "2025-08-19T18:22:01.943Z",
+  "readonly": true,
+  "data": {
+    "name": "Healing",
+    "skill_data": {
+      "bonus": 25,
+      "stat_id": "health",
+      "cooldown_reduction": 5
+    },
+    "description": "Restores ally's health."
+  }
+}

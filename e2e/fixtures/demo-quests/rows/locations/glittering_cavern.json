@@ -1,0 +1,67 @@
+{
+  "createdId": "uSsOl5uLWQLOweijuW3ui",
+  "id": "glittering_cavern",
+  "versionId": "Sqh1LSnu5qsBQIKHqZD5k",
+  "createdAt": "2025-08-19T18:22:10.504Z",
+  "updatedAt": "2025-08-19T18:22:10.504Z",
+  "publishedAt": "2025-08-19T18:22:10.504Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "",
+      "hash": "",
+      "size": 0,
+      "width": 0,
+      "fileId": "PsiGxNrdi4eIm3zchJEEN",
+      "height": 0,
+      "status": "ready",
+      "fileName": "",
+      "mimeType": "",
+      "extension": ""
+    },
+    "name": "Glittering Cavern",
+    "region_id": "crystal_caves",
+    "coordinates": {
+      "x": 410,
+      "y": 610,
+      "z": -15,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "1ONxZL7R2M3xx2uZbf9XT",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Crystal Waterfall",
+          "item_id": "healing_potion",
+          "description": "A waterfall whose waters have healing properties."
+        },
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "SjcBFIcMqIwL6X9wjnh4f",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Wisdom Stone",
+          "item_id": "enchanted_staff",
+          "description": "A stone that enhances magical abilities."
+        }
+      ]
+    },
+    "description": "A cave filled with sparkling crystals and magical waterfalls."
+  }
+}
