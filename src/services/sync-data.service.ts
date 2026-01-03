@@ -6,7 +6,6 @@ import {
   RowData,
   ApiClient,
   RowSyncError,
-  ProgressState,
 } from './row-sync.service';
 import {
   DataSyncResult,
@@ -15,6 +14,7 @@ import {
 } from '../types/sync.types';
 import { JsonValue } from '../types/json.types';
 import { JsonSchema } from '../types/schema.types';
+import { printProgress, clearProgressLine } from '../utils/progress';
 
 const DEFAULT_BATCH_SIZE = 100;
 
@@ -162,9 +162,9 @@ export class SyncDataService {
         });
       }
 
-      this.printProgress(
+      printProgress(
         { operation: 'fetch', current: rows.length },
-        'Loading from source',
+        { labels: { fetch: 'Loading from source' }, indent: '    ' },
       );
 
       cursor = result.data.pageInfo.hasNextPage
@@ -172,7 +172,7 @@ export class SyncDataService {
         : undefined;
     } while (cursor);
 
-    this.clearProgressLine();
+    clearProgressLine();
     return rows;
   }
 
@@ -316,10 +316,10 @@ export class SyncDataService {
       tableId,
       sourceRows,
       batchSize,
-      (state) => this.printProgress(state),
+      (state) => printProgress(state, { indent: '    ' }),
     );
 
-    this.clearProgressLine();
+    clearProgressLine();
     console.log(
       `  ✅ ${tableId}: ${stats.created} created, ${stats.updated} updated, ${stats.skipped} skipped`,
     );
@@ -331,25 +331,6 @@ export class SyncDataService {
       rowsSkipped: stats.skipped,
       errors: 0,
     };
-  }
-
-  private printProgress(state: ProgressState, label?: string): void {
-    let operationLabel: string;
-    let progress: string;
-
-    if (state.operation === 'fetch') {
-      operationLabel = label ?? 'Fetching';
-      progress = `    ${operationLabel}: ${state.current} rows`;
-    } else {
-      operationLabel = state.operation === 'create' ? 'Creating' : 'Updating';
-      progress = `    ${operationLabel}: ${state.current}/${state.total} rows`;
-    }
-
-    process.stdout.write(`\r${progress}`);
-  }
-
-  private clearProgressLine(): void {
-    process.stdout.write('\r\x1b[K');
   }
 
   private createEmptyResult(): DataSyncResult {

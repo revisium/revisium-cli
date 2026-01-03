@@ -19,6 +19,7 @@ import { ValidatePatchesCommand } from 'src/commands/validate-patches.command';
 import { PreviewPatchesCommand } from 'src/commands/preview-patches.command';
 import { ApplyPatchesCommand } from 'src/commands/apply-patches.command';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
+import { ConnectionFactoryService } from 'src/services/connection-factory.service';
 import { ConnectionService } from 'src/services/connection.service';
 import { InteractiveService } from 'src/services/interactive.service';
 import { JsonValidatorService } from 'src/services/json-validator.service';
@@ -66,6 +67,7 @@ import {
     SyncAllCommand,
     TableDependencyService,
     JsonValidatorService,
+    ConnectionFactoryService,
     ConnectionService,
     CommitRevisionService,
     InteractiveService,

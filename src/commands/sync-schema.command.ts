@@ -1,67 +1,33 @@
-import { Option, SubCommand } from 'nest-commander';
+import { SubCommand } from 'nest-commander';
 import { ConfigService } from '@nestjs/config';
-import { BaseCommand } from 'src/commands/base.command';
+import {
+  BaseSyncCommand,
+  BaseSyncOptions,
+} from 'src/commands/base-sync.command';
 import { SyncApiService } from 'src/services/sync-api.service';
 import { SyncSchemaService } from 'src/services/sync-schema.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
 import { CommitRevisionService } from 'src/services/commit-revision.service';
-import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
-
-type Options = {
-  source?: string;
-  target?: string;
-  commit?: boolean;
-  dryRun?: boolean;
-};
 
 @SubCommand({
   name: 'schema',
   description: 'Sync schema migrations from source to target project',
 })
-export class SyncSchemaCommand extends BaseCommand {
+export class SyncSchemaCommand extends BaseSyncCommand {
   constructor(
-    private readonly configService: ConfigService,
-    private readonly urlBuilder: UrlBuilderService,
-    private readonly syncApi: SyncApiService,
+    configService: ConfigService,
+    urlBuilder: UrlBuilderService,
+    syncApi: SyncApiService,
+    commitRevision: CommitRevisionService,
     private readonly syncSchema: SyncSchemaService,
-    private readonly commitRevision: CommitRevisionService,
   ) {
-    super();
+    super(configService, urlBuilder, syncApi, commitRevision);
   }
 
-  async run(_inputs: string[], options: Options): Promise<void> {
-    const sourceEnv = {
-      url: this.configService.get<string>('REVISIUM_SOURCE_URL'),
-      token: this.configService.get<string>('REVISIUM_SOURCE_TOKEN'),
-      apikey: this.configService.get<string>('REVISIUM_SOURCE_API_KEY'),
-      username: this.configService.get<string>('REVISIUM_SOURCE_USERNAME'),
-      password: this.configService.get<string>('REVISIUM_SOURCE_PASSWORD'),
-    };
-
-    const targetEnv = {
-      url: this.configService.get<string>('REVISIUM_TARGET_URL'),
-      token: this.configService.get<string>('REVISIUM_TARGET_TOKEN'),
-      apikey: this.configService.get<string>('REVISIUM_TARGET_API_KEY'),
-      username: this.configService.get<string>('REVISIUM_TARGET_USERNAME'),
-      password: this.configService.get<string>('REVISIUM_TARGET_PASSWORD'),
-    };
-
-    const sourceUrl = await this.urlBuilder.parseAndComplete(
-      options.source,
-      'source',
-      sourceEnv,
-    );
-
-    const targetUrl = await this.urlBuilder.parseAndComplete(
-      options.target,
-      'target',
-      targetEnv,
-    );
-
+  async run(_inputs: string[], options: BaseSyncOptions): Promise<void> {
     console.log('\n🔄 Starting schema synchronization...\n');
 
-    await this.syncApi.connectSource(sourceUrl);
-    await this.syncApi.connectTarget(targetUrl);
+    await this.connectSourceAndTarget(options);
 
     const result = await this.syncSchema.sync(options.dryRun);
 
@@ -88,44 +54,10 @@ export class SyncSchemaCommand extends BaseCommand {
       console.log(`   Tables removed: ${result.tablesRemoved.join(', ')}`);
     }
 
-    if (options.commit) {
-      await this.commitRevision.handleCommitFlowForSync(
-        this.syncApi.target,
-        'Applied',
-        result.migrationsApplied,
-      );
-    }
-  }
-
-  @Option({
-    flags: '-s, --source [string]',
-    description: 'Source URL (revisium://...)',
-  })
-  parseSource(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '-t, --target [string]',
-    description: 'Target URL (revisium://...)',
-  })
-  parseTarget(value: string) {
-    return value;
-  }
-
-  @Option({
-    flags: '-c, --commit [boolean]',
-    description: 'Commit changes after sync',
-  })
-  parseCommit(value?: string): boolean {
-    return parseBooleanOption(value);
-  }
-
-  @Option({
-    flags: '-d, --dry-run [boolean]',
-    description: 'Preview changes without applying',
-  })
-  parseDryRun(value?: string): boolean {
-    return parseBooleanOption(value);
+    await this.commitIfNeeded(
+      options.commit,
+      'Applied',
+      result.migrationsApplied,
+    );
   }
 }

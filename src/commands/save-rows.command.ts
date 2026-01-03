@@ -3,6 +3,10 @@ import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection.service';
+import {
+  fetchAllPages,
+  fetchAndProcessPages,
+} from 'src/utils/paginated-fetcher';
 
 type Options = BaseOptions & {
   folder: string;
@@ -67,33 +71,14 @@ export class SaveRowsCommand extends BaseCommand {
     tableFilter?: string,
   ): Promise<string[]> {
     if (tableFilter) {
-      // Parse comma-separated table IDs
       return tableFilter.split(',').map((id) => id.trim());
     }
 
-    // Fetch all tables if no filter specified
-    const allTables: string[] = [];
-    let hasMore = true;
-    let after: string | undefined;
+    const { items } = await fetchAllPages((params) =>
+      this.api.tables({ revisionId, ...params }),
+    );
 
-    while (hasMore) {
-      const result = await this.api.tables({
-        revisionId,
-        first: 100,
-        after,
-      });
-
-      const { edges, pageInfo } = result.data;
-
-      for (const edge of edges) {
-        allTables.push(edge.node.id);
-      }
-
-      hasMore = pageInfo.hasNextPage;
-      after = pageInfo.endCursor;
-    }
-
-    return allTables;
+    return items.map((table) => table.id);
   }
 
   private async saveRowsFromTable(
@@ -104,53 +89,22 @@ export class SaveRowsCommand extends BaseCommand {
     try {
       console.log(`📋 Processing table: ${tableId}`);
 
-      let hasMore = true;
-      let after: string | undefined;
-      let totalRows = 0;
-      let processedRows = 0;
-      let isFirstPage = true;
-
       const tableFolderPath = join(folderPath, tableId);
       await mkdir(tableFolderPath, { recursive: true });
 
-      while (hasMore) {
-        const result = await this.api.rows(revisionId, tableId, {
-          first: 100,
-          after,
-        });
-
-        const { edges, pageInfo } = result.data;
-
-        if (isFirstPage) {
-          totalRows = result.data.totalCount;
-          console.log(`  📊 Found ${totalRows} rows in table ${tableId}`);
-          isFirstPage = false;
-        }
-
-        for (const edge of edges) {
-          const row = edge.node;
-          try {
-            const fileName = `${row.id}.json`;
-            const filePath = join(tableFolderPath, fileName);
-
-            await writeFile(filePath, JSON.stringify(row, null, 2), 'utf-8');
-
-            processedRows++;
-          } catch (error) {
-            console.error(
-              `❌ Failed to save row ${row.id} from table ${tableId}:`,
-              error,
-            );
-          }
-        }
-
-        hasMore = pageInfo.hasNextPage;
-        after = pageInfo.endCursor;
-      }
-
-      console.log(
-        `✅ Saved ${processedRows}/${totalRows} rows from table: ${tableId}`,
+      const { processed, total } = await fetchAndProcessPages(
+        (params) => this.api.rows(revisionId, tableId, params),
+        async (row) => {
+          const filePath = join(tableFolderPath, `${row.id}.json`);
+          await writeFile(filePath, JSON.stringify(row, null, 2), 'utf-8');
+        },
+        {
+          onFirstPage: (totalCount) =>
+            console.log(`  📊 Found ${totalCount} rows in table ${tableId}`),
+        },
       );
+
+      console.log(`✅ Saved ${processed}/${total} rows from table: ${tableId}`);
     } catch (error) {
       console.error(
         `❌ Failed to process table ${tableId}:`,
