@@ -26,6 +26,8 @@ import { SyncDataService } from 'src/services/sync-data.service';
 import { RowSyncService } from 'src/services/row-sync.service';
 import { TableDependencyService } from 'src/services/table-dependency.service';
 import { UrlBuilderService } from 'src/services/url-builder.service';
+import { UrlParserService } from 'src/services/url-parser.service';
+import { AuthPromptService } from 'src/services/auth-prompt.service';
 import {
   getEnvFilePath,
   shouldIgnoreEnvFile,
@@ -66,6 +68,8 @@ import {
     SyncDataService,
     RowSyncService,
     UrlBuilderService,
+    UrlParserService,
+    AuthPromptService,
   ],
 })
 export class AppModule {}

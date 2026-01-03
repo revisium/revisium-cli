@@ -1,9 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UrlBuilderService } from '../url-builder.service';
+import { UrlParserService } from '../url-parser.service';
+import { AuthPromptService } from '../auth-prompt.service';
 import { InteractiveService } from '../interactive.service';
 
 describe('UrlBuilderService', () => {
   let service: UrlBuilderService;
+  let urlParser: UrlParserService;
   let interactiveService: jest.Mocked<InteractiveService>;
 
   beforeEach(async () => {
@@ -17,11 +20,14 @@ describe('UrlBuilderService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UrlBuilderService,
+        UrlParserService,
+        AuthPromptService,
         { provide: InteractiveService, useValue: mockInteractive },
       ],
     }).compile();
 
     service = module.get<UrlBuilderService>(UrlBuilderService);
+    urlParser = module.get<UrlParserService>(UrlParserService);
     interactiveService = module.get(InteractiveService);
     jest.clearAllMocks();
   });
@@ -385,15 +391,15 @@ describe('UrlBuilderService', () => {
     });
   });
 
-  describe('buildBaseUrl', () => {
+  describe('buildBaseUrl (via UrlParserService)', () => {
     it('builds URL with port', () => {
-      expect(service.buildBaseUrl('http', 'localhost', 8080)).toBe(
+      expect(urlParser.buildBaseUrl('http', 'localhost', 8080)).toBe(
         'http://localhost:8080',
       );
     });
 
     it('builds URL without port', () => {
-      expect(service.buildBaseUrl('https', 'cloud.revisium.io')).toBe(
+      expect(urlParser.buildBaseUrl('https', 'cloud.revisium.io')).toBe(
         'https://cloud.revisium.io',
       );
     });

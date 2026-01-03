@@ -10,14 +10,25 @@ export class RevisiumApiClient extends Api<unknown> {
 
   public async authenticate(auth: AuthCredentials): Promise<string> {
     if (auth.method === 'token') {
-      return this.authenticateWithToken(auth.token!);
+      if (!auth.token) {
+        throw new Error('Token is required for token authentication');
+      }
+      return this.authenticateWithToken(auth.token);
     }
 
     if (auth.method === 'apikey') {
-      return this.authenticateWithApiKey(auth.apikey!);
+      if (!auth.apikey) {
+        throw new Error('API key is required for apikey authentication');
+      }
+      return this.authenticateWithApiKey(auth.apikey);
     }
 
-    return this.authenticateWithPassword(auth.username!, auth.password!);
+    if (!auth.username || !auth.password) {
+      throw new Error(
+        'Username and password are required for password authentication',
+      );
+    }
+    return this.authenticateWithPassword(auth.username, auth.password);
   }
 
   private async authenticateWithToken(token: string): Promise<string> {
