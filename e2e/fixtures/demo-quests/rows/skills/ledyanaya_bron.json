@@ -1,0 +1,18 @@
+{
+  "createdId": "KifLsS61tIPWVt9JEiGYs",
+  "id": "ledyanaya_bron",
+  "versionId": "7Wf3igQbRlqpKti9xBBQT",
+  "createdAt": "2025-08-19T18:22:02.333Z",
+  "updatedAt": "2025-08-19T18:22:02.333Z",
+  "publishedAt": "2025-08-19T18:22:02.333Z",
+  "readonly": true,
+  "data": {
+    "name": "Ice Armor",
+    "skill_data": {
+      "bonus": 15,
+      "stat_id": "magic_resistance",
+      "cooldown_reduction": 3
+    },
+    "description": "Increases magic resistance for a certain time."
+  }
+}

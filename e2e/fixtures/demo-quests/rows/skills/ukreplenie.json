@@ -1,0 +1,18 @@
+{
+  "createdId": "XyWrR_2Cjh9heqsANywMP",
+  "id": "ukreplenie",
+  "versionId": "AYJaH1t-kW247a2S4g2aN",
+  "createdAt": "2025-08-19T18:22:03.911Z",
+  "updatedAt": "2025-08-19T18:22:03.911Z",
+  "publishedAt": "2025-08-19T18:22:03.911Z",
+  "readonly": true,
+  "data": {
+    "name": "Fortification",
+    "skill_data": {
+      "bonus": 25,
+      "stat_id": "defense",
+      "cooldown_reduction": 2
+    },
+    "description": "Increases defense for a short time."
+  }
+}

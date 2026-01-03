@@ -1,0 +1,39 @@
+{
+  "createdId": "XcYsQ6qSHoTkiLPfyiMyh",
+  "id": "flaming_sword",
+  "versionId": "5YfL3aYFQzDUJesGaOo6i",
+  "createdAt": "2025-08-19T18:22:06.085Z",
+  "updatedAt": "2025-08-19T18:22:06.085Z",
+  "publishedAt": "2025-08-19T18:22:06.085Z",
+  "readonly": true,
+  "data": {
+    "name": "Flaming Sword",
+    "properties": {
+      "damage": {
+        "max": 25,
+        "min": 15,
+        "type": "fire"
+      },
+      "defense": 5,
+      "effects": [
+        {
+          "chance": 30,
+          "effect_id": "fire_shield"
+        }
+      ],
+      "modifiers": [
+        {
+          "value": 10,
+          "stat_id": "strength"
+        }
+      ],
+      "requirements": {
+        "level": 5,
+        "class_ids": [
+          "warrior"
+        ]
+      }
+    },
+    "item_type_id": "weapon"
+  }
+}

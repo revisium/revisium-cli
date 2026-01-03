@@ -1,0 +1,13 @@
+{
+  "createdId": "d9Bs_JJ5sGyUXPPZwOtLR",
+  "id": "attack_speed",
+  "versionId": "ZEqjdVEbE0lvGg4LB8dtt",
+  "createdAt": "2025-08-19T18:21:48.615Z",
+  "updatedAt": "2025-08-19T18:21:48.615Z",
+  "publishedAt": "2025-08-19T18:21:48.615Z",
+  "readonly": true,
+  "data": {
+    "name": "Attack Speed",
+    "description": "Determines how fast the character can attack enemies."
+  }
+}

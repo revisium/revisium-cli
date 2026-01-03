@@ -1,0 +1,13 @@
+{
+  "createdId": "zO61gQhKYuJav3HDY3B7S",
+  "id": "desert_nomads",
+  "versionId": "FnmkCZ9h2bPS_9Ju7OPKy",
+  "createdAt": "2025-08-19T18:21:38.652Z",
+  "updatedAt": "2025-08-19T18:21:38.652Z",
+  "publishedAt": "2025-08-19T18:21:38.652Z",
+  "readonly": true,
+  "data": {
+    "name": "Desert Nomads",
+    "description": "Nomadic tribes living in harsh desert conditions."
+  }
+}

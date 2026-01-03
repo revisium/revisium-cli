@@ -1,0 +1,965 @@
+[
+  {
+    "id": "2025-08-18T17:22:32.797Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "classes",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.807Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "factions",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.817Z",
+    "hash": "417b6c9afc1bf89607b002b89b6ef1bfb70fdef3",
+    "schema": {
+      "type": "object",
+      "required": [
+        "file"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "files",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.827Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "item_types",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.837Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "quest_types",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.847Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "regions",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.857Z",
+    "hash": "5e11255db905cb03dd7d8ef329431e00d6a193ef",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "stats",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.867Z",
+    "hash": "81822636c4de4fd6302bfeb914d852b0dfe48695",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "effect_data",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "effect_data": {
+          "type": "object",
+          "required": [
+            "application",
+            "duration",
+            "stat_changes",
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "default": ""
+            },
+            "duration": {
+              "type": "number",
+              "default": 0
+            },
+            "application": {
+              "type": "object",
+              "required": [
+                "chance",
+                "target_type"
+              ],
+              "properties": {
+                "chance": {
+                  "type": "number",
+                  "default": 0
+                },
+                "target_type": {
+                  "type": "string",
+                  "default": ""
+                }
+              },
+              "additionalProperties": false
+            },
+            "stat_changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "stat_id",
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "stat_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "stats"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "effects",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.877Z",
+    "hash": "e9b59ea29f9d284c23bda6b9017ae7ee6cfa841a",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "name",
+        "skill_data"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "skill_data": {
+          "type": "object",
+          "required": [
+            "bonus",
+            "cooldown_reduction",
+            "stat_id"
+          ],
+          "properties": {
+            "bonus": {
+              "type": "number",
+              "default": 0
+            },
+            "stat_id": {
+              "type": "string",
+              "default": "",
+              "foreignKey": "stats"
+            },
+            "cooldown_reduction": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "skills",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.887Z",
+    "hash": "1679d0aea53468824fa5a309f05cb3f98157cfab",
+    "schema": {
+      "type": "object",
+      "required": [
+        "item_type_id",
+        "name",
+        "properties"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "properties": {
+          "type": "object",
+          "required": [
+            "damage",
+            "defense",
+            "effects",
+            "modifiers",
+            "requirements"
+          ],
+          "properties": {
+            "damage": {
+              "type": "object",
+              "required": [
+                "max",
+                "min",
+                "type"
+              ],
+              "properties": {
+                "max": {
+                  "type": "number",
+                  "default": 0
+                },
+                "min": {
+                  "type": "number",
+                  "default": 0
+                },
+                "type": {
+                  "type": "string",
+                  "default": ""
+                }
+              },
+              "additionalProperties": false
+            },
+            "defense": {
+              "type": "number",
+              "default": 0
+            },
+            "effects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "chance",
+                  "effect_id"
+                ],
+                "properties": {
+                  "chance": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "effect_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "effects"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "modifiers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "stat_id",
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "stat_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "stats"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "requirements": {
+              "type": "object",
+              "required": [
+                "class_ids",
+                "level"
+              ],
+              "properties": {
+                "level": {
+                  "type": "number",
+                  "default": 0
+                },
+                "class_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "classes"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "item_type_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "item_types"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "items",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.897Z",
+    "hash": "19b91ab57f89954645bc041337346f2d6aa413e3",
+    "schema": {
+      "type": "object",
+      "required": [
+        "ability_data",
+        "description",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "ability_data": {
+          "type": "object",
+          "required": [
+            "cooldown",
+            "effects",
+            "requirements",
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "default": ""
+            },
+            "effects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "chance",
+                  "effect_id"
+                ],
+                "properties": {
+                  "chance": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "effect_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "effects"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "cooldown": {
+              "type": "number",
+              "default": 0
+            },
+            "requirements": {
+              "type": "object",
+              "required": [
+                "level",
+                "skill_ids"
+              ],
+              "properties": {
+                "level": {
+                  "type": "number",
+                  "default": 0
+                },
+                "skill_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "skills"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "abilities",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.907Z",
+    "hash": "e1464319496304104ac4002637a1cac99e6aa136",
+    "schema": {
+      "type": "object",
+      "required": [
+        "coordinates",
+        "description",
+        "icon",
+        "name",
+        "region_id"
+      ],
+      "properties": {
+        "icon": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "region_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "regions"
+        },
+        "coordinates": {
+          "type": "object",
+          "required": [
+            "points_of_interest",
+            "x",
+            "y",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "default": 0
+            },
+            "y": {
+              "type": "number",
+              "default": 0
+            },
+            "z": {
+              "type": "number",
+              "default": 0
+            },
+            "points_of_interest": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "description",
+                  "icon",
+                  "item_id",
+                  "name"
+                ],
+                "properties": {
+                  "icon": {
+                    "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+                  },
+                  "name": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "items"
+                  },
+                  "description": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "locations",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.917Z",
+    "hash": "3e01890d8f6d031c7fc29ece16fd9774ad52ad19",
+    "schema": {
+      "type": "object",
+      "required": [
+        "attributes",
+        "avatar",
+        "location_id",
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "avatar": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "attributes": {
+          "type": "object",
+          "required": [
+            "equipment",
+            "faction_id",
+            "health",
+            "level",
+            "stats"
+          ],
+          "properties": {
+            "level": {
+              "type": "number",
+              "default": 0
+            },
+            "stats": {
+              "type": "object",
+              "required": [
+                "agility",
+                "intelligence",
+                "strength"
+              ],
+              "properties": {
+                "agility": {
+                  "type": "number",
+                  "default": 0
+                },
+                "strength": {
+                  "type": "number",
+                  "default": 0
+                },
+                "intelligence": {
+                  "type": "number",
+                  "default": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "health": {
+              "type": "number",
+              "default": 0
+            },
+            "equipment": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "item_id",
+                  "slot"
+                ],
+                "properties": {
+                  "slot": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "item_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "items"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "faction_id": {
+              "type": "string",
+              "default": "",
+              "foreignKey": "factions"
+            }
+          },
+          "additionalProperties": false
+        },
+        "location_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "locations"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "npcs",
+    "changeType": "init"
+  },
+  {
+    "id": "2025-08-18T17:22:32.927Z",
+    "hash": "6216061d6fc28d75b1aee2a2dba7a0ef68ef909a",
+    "schema": {
+      "type": "object",
+      "required": [
+        "description",
+        "is_repeatable",
+        "name",
+        "preview",
+        "quest_type_id",
+        "requirements",
+        "rewards",
+        "steps"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": ""
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "coordinates",
+              "description",
+              "items",
+              "location_id",
+              "npc_id",
+              "objective_type",
+              "step_number"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "item_id",
+                    "quantity"
+                  ],
+                  "properties": {
+                    "item_id": {
+                      "type": "string",
+                      "default": "",
+                      "foreignKey": "items"
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "default": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "npc_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "npcs"
+              },
+              "coordinates": {
+                "type": "object",
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "default": 0
+                  },
+                  "y": {
+                    "type": "number",
+                    "default": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "description": {
+                "type": "string",
+                "default": ""
+              },
+              "location_id": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "locations"
+              },
+              "step_number": {
+                "type": "number",
+                "default": 0
+              },
+              "objective_type": {
+                "type": "string",
+                "default": ""
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "preview": {
+          "$ref": "urn:jsonschema:io:revisium:file-schema:1.0.0"
+        },
+        "rewards": {
+          "type": "object",
+          "required": [
+            "abilities",
+            "currency",
+            "experience",
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "item_id",
+                  "quantity"
+                ],
+                "properties": {
+                  "item_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "items"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "default": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "currency": {
+              "type": "object",
+              "required": [
+                "gold",
+                "silver"
+              ],
+              "properties": {
+                "gold": {
+                  "type": "number",
+                  "default": 0
+                },
+                "silver": {
+                  "type": "number",
+                  "default": 0
+                }
+              },
+              "additionalProperties": false
+            },
+            "abilities": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "abilities"
+              }
+            },
+            "experience": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "description": {
+          "type": "string",
+          "default": ""
+        },
+        "requirements": {
+          "type": "object",
+          "required": [
+            "required_factions",
+            "required_items",
+            "required_level",
+            "required_skills"
+          ],
+          "properties": {
+            "required_items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "item_id",
+                  "quantity"
+                ],
+                "properties": {
+                  "item_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "items"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "default": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required_level": {
+              "type": "number",
+              "default": 0
+            },
+            "required_skills": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "",
+                "foreignKey": "skills"
+              }
+            },
+            "required_factions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "faction_id",
+                  "reputation"
+                ],
+                "properties": {
+                  "faction_id": {
+                    "type": "string",
+                    "default": "",
+                    "foreignKey": "factions"
+                  },
+                  "reputation": {
+                    "type": "string",
+                    "default": ""
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "is_repeatable": {
+          "type": "boolean",
+          "default": false
+        },
+        "quest_type_id": {
+          "type": "string",
+          "default": "",
+          "foreignKey": "quest_types"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tableId": "quests",
+    "changeType": "init"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "createdId": "WfmMvo38_QDKnjvgxtoLf",
+  "id": "warrior",
+  "versionId": "_4iI2Tk6TijwEb2QFIBF0",
+  "createdAt": "2025-08-19T18:21:37.660Z",
+  "updatedAt": "2025-08-19T18:21:37.660Z",
+  "publishedAt": "2025-08-19T18:21:37.660Z",
+  "readonly": true,
+  "data": {
+    "name": "Warrior",
+    "description": "A strong melee fighter with high defense."
+  }
+}

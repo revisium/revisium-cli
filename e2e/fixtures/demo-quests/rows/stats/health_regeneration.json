@@ -1,0 +1,13 @@
+{
+  "createdId": "P3Uji2f8JiMZrG-7cEh4W",
+  "id": "health_regeneration",
+  "versionId": "tqiCUCAVKb0DIR0ofwke7",
+  "createdAt": "2025-08-19T18:21:51.687Z",
+  "updatedAt": "2025-08-19T18:21:51.687Z",
+  "publishedAt": "2025-08-19T18:21:51.687Z",
+  "readonly": true,
+  "data": {
+    "name": "Health Regeneration",
+    "description": "The character's health regeneration rate."
+  }
+}

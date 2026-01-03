@@ -1,0 +1,13 @@
+{
+  "createdId": "arGoLVcoj0EfJBy9b12p5",
+  "id": "mana",
+  "versionId": "As0jTR9AfswsMR7Teq9uz",
+  "createdAt": "2025-08-19T18:21:52.886Z",
+  "updatedAt": "2025-08-19T18:21:52.886Z",
+  "publishedAt": "2025-08-19T18:21:52.886Z",
+  "readonly": true,
+  "data": {
+    "name": "Mana",
+    "description": "A resource used to cast spells and abilities."
+  }
+}

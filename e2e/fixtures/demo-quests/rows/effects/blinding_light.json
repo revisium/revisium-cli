@@ -1,0 +1,27 @@
+{
+  "createdId": "j328G0DoxzbCjLgVkfMES",
+  "id": "blinding_light",
+  "versionId": "fGeFrfzYbmJ0hu0xvVpWP",
+  "createdAt": "2025-08-19T18:21:55.779Z",
+  "updatedAt": "2025-08-19T18:21:55.779Z",
+  "publishedAt": "2025-08-19T18:21:55.779Z",
+  "readonly": true,
+  "data": {
+    "name": "Blinding Light",
+    "description": "Blinds enemies, reducing their hit chance.",
+    "effect_data": {
+      "type": "debuff",
+      "duration": 15,
+      "application": {
+        "chance": 80,
+        "target_type": "enemy"
+      },
+      "stat_changes": [
+        {
+          "value": -25,
+          "stat_id": "critical_chance"
+        }
+      ]
+    }
+  }
+}

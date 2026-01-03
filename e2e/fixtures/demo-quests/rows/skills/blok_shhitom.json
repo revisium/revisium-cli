@@ -1,0 +1,18 @@
+{
+  "createdId": "oy1wS_ZFMwTDZw7QInSBc",
+  "id": "blok_shhitom",
+  "versionId": "dtNhe72nG93s1hiC-yiR1",
+  "createdAt": "2025-08-19T18:22:00.371Z",
+  "updatedAt": "2025-08-19T18:22:00.371Z",
+  "publishedAt": "2025-08-19T18:22:00.371Z",
+  "readonly": true,
+  "data": {
+    "name": "Shield Block",
+    "skill_data": {
+      "bonus": 20,
+      "stat_id": "block_chance",
+      "cooldown_reduction": 3
+    },
+    "description": "Increases block chance for a short time."
+  }
+}

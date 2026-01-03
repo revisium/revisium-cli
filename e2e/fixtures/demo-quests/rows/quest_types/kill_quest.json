@@ -1,0 +1,13 @@
+{
+  "createdId": "8k_e22NB1Q6agbcUUm1tb",
+  "id": "kill_quest",
+  "versionId": "YFYSvXP8ckBezb37YXHbs",
+  "createdAt": "2025-08-19T18:21:45.514Z",
+  "updatedAt": "2025-08-19T18:21:45.514Z",
+  "publishedAt": "2025-08-19T18:21:45.514Z",
+  "readonly": true,
+  "data": {
+    "name": "Kill Enemy1",
+    "description": "A quest where the player must kill a specific enemy or group of enemies."
+  }
+}

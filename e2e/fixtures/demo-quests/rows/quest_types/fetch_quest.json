@@ -1,0 +1,13 @@
+{
+  "createdId": "uzM1gJq15Vjg79QA4zvhX",
+  "id": "fetch_quest",
+  "versionId": "pVhn-XTsHXKQ1HSlsVlte",
+  "createdAt": "2025-08-19T18:21:45.132Z",
+  "updatedAt": "2025-08-19T18:21:45.132Z",
+  "publishedAt": "2025-08-19T18:21:45.132Z",
+  "readonly": true,
+  "data": {
+    "name": "Deliver Item",
+    "description": "A quest where the player must collect and deliver items."
+  }
+}

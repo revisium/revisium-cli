@@ -1,0 +1,27 @@
+{
+  "createdId": "J1a0VcZhSGBDr70Jtf-EM",
+  "id": "whirlwind_blades",
+  "versionId": "1b8FPs235pC0-dHcBaiH0",
+  "createdAt": "2025-08-19T18:21:59.785Z",
+  "updatedAt": "2025-08-19T18:21:59.785Z",
+  "publishedAt": "2025-08-19T18:21:59.785Z",
+  "readonly": true,
+  "data": {
+    "name": "Whirlwind Blades",
+    "description": "Deals damage to all nearby enemies by spinning with weapons.",
+    "effect_data": {
+      "type": "physical damage",
+      "duration": 5,
+      "application": {
+        "chance": 100,
+        "target_type": "enemy"
+      },
+      "stat_changes": [
+        {
+          "value": -30,
+          "stat_id": "health"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "createdId": "zBy0ww7TDJ6lrTL5CvJmh",
+  "id": "rogue",
+  "versionId": "VcRM06J1rxG0BmbSGVXb7",
+  "createdAt": "2025-08-19T18:21:37.276Z",
+  "updatedAt": "2025-08-19T18:21:37.276Z",
+  "publishedAt": "2025-08-19T18:21:37.276Z",
+  "readonly": true,
+  "data": {
+    "name": "Rogue",
+    "description": "An agile and fast character specializing in stealth attacks."
+  }
+}

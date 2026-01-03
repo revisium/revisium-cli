@@ -1,0 +1,13 @@
+{
+  "createdId": "AKqlRkhJCik6IXZzm4olZ",
+  "id": "accessory",
+  "versionId": "xHXFf8ZBrShTpFw7NZeEZ",
+  "createdAt": "2025-08-19T18:21:42.583Z",
+  "updatedAt": "2025-08-19T18:21:42.583Z",
+  "publishedAt": "2025-08-19T18:21:42.583Z",
+  "readonly": true,
+  "data": {
+    "name": "Accessory",
+    "description": "Items that enhance character stats."
+  }
+}

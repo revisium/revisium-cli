@@ -10,280 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface AddUserToOrganizationDto {
-  roleId:
-    | 'organizationOwner'
-    | 'organizationAdmin'
-    | 'developer'
-    | 'editor'
-    | 'reader';
-  userId: string;
-}
-
-export interface AddUserToProjectDto {
-  roleId: 'developer' | 'editor' | 'reader';
-  userId: string;
-}
-
-export interface ApplyMigrationsResponseDto {
-  /** Error message if the migration failed */
-  error?: string;
-  /** The ID of the migration */
-  id: string;
-  /** The migration application status */
-  status: 'applied' | 'failed' | 'skipped';
-}
-
-export interface BoolFilterDto {
-  equals?: boolean;
-  /** Filter negation (not). */
-  not?: BoolFilterDto | boolean;
-}
-
-export interface BranchModel {
-  /** @format date-time */
-  createdAt: string;
-  id: string;
-  isRoot: boolean;
-  name: string;
-  projectId: string;
-}
-
-export interface BranchModelEdgeType {
-  cursor: string;
-  node: BranchModel;
-}
-
-export interface BranchesConnection {
-  edges: BranchModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface ChildBranchResponse {
-  branch: Id;
-  revision: Id;
-}
-
-export interface ConfigurationResponse {
-  availableEmailSignUp: boolean;
-  github: GithubOauth;
-  google: GoogleOauth;
-}
-
-export interface CreateBranchByRevisionDto {
-  branchName: string;
-}
-
-export interface CreateEndpointDto {
-  type: 'GRAPHQL' | 'REST_API';
-}
-
-export interface CreateProjectDto {
-  /** @default "master" */
-  branchName?: string;
-  projectName: string;
-}
-
-export interface CreateRevisionDto {
-  /** @default "" */
-  comment?: string;
-}
-
-export interface CreateRowDto {
-  data: Record<string, any>;
-  isRestore?: boolean;
-  rowId: string;
-}
-
-export interface CreateRowResponse {
-  previousVersionTableId: string;
-  row: RowModel;
-  table: TableModel;
-}
-
-export interface CreateRowsDto {
-  isRestore?: boolean;
-  /** @maxItems 1000 */
-  rows: CreateRowsRowDto[];
-}
-
-export interface CreateRowsResponse {
-  previousVersionTableId: string;
-  rows: RowModel[];
-  table: TableModel;
-}
-
-export interface CreateRowsRowDto {
-  data: Record<string, any>;
-  rowId: string;
-}
-
-export interface CreateTableDto {
-  schema: Record<string, any>;
-  tableId: string;
-}
-
-export interface CreateTableResponse {
-  branch: BranchModel;
-  table: TableModel;
-}
-
-export interface CreateUserDto {
-  email?: string;
-  password: string;
-  roleId: 'systemAdmin' | 'systemFullApiRead' | 'systemUser';
-  username: string;
-}
-
-export interface DateTimeFilterDto {
-  /** @format date-time */
-  equals?: string;
-  /** @format date-time */
-  gt?: string;
-  /** @format date-time */
-  gte?: string;
-  in?: string[];
-  /** @format date-time */
-  lt?: string;
-  /** @format date-time */
-  lte?: string;
-  notIn?: string[];
-}
-
-export interface EndpointModel {
-  /** @format date-time */
-  createdAt: string;
-  id: string;
-  type: 'GRAPHQL' | 'REST_API';
-}
-
-export interface ErrorModel {
-  error: string;
-  message: string;
-  statusCode: number;
-}
-
-export interface GetEndpointResultDto {
-  branch: BranchModel;
-  endpoint: EndpointModel;
-  project: ProjectModel;
-  revision: RevisionModel;
-}
-
-export interface GetTableRowsDto {
-  /** @example "" */
-  after?: string;
-  /** @default 100 */
-  first: number;
-  /**
-   * Array of sorting criteria
-   * @example [{"direction":"asc","field":"id"}]
-   */
-  orderBy?: OrderByDto[];
-  /** Row filtering conditions */
-  where?: RowWhereInputDto;
-}
-
-export interface GithubOauth {
-  available: boolean;
-  clientId?: string;
-}
-
-export interface GoogleOauth {
-  available: boolean;
-  clientId?: string;
-}
-
-export interface Id {
-  id: string;
-}
-
-export interface InitMigrationDto {
-  /**
-   * Indicates an initialization migration
-   * @example "init"
-   */
-  changeType: 'init';
-  /** Checksum of the initial schema */
-  hash: string;
-  /**
-   * Timestamp when the table was created (ISO 8601)
-   * @example "2025-07-31T12:34:56Z"
-   */
-  id: string;
-  /** JSON Schema definition of the table */
-  schema: object;
-  /** Identifier of the newly created table */
-  tableId: string;
-}
-
-export interface JsonFilterDto {
-  /** Filter on arrays: target JSON array must contain *all* of these values */
-  array_contains?: object[];
-  /** JSON value that the target JSON array must end with (could be object, array, primitive) */
-  array_ends_with?: object;
-  /** JSON value that the target JSON array must start with (could be object, array, primitive) */
-  array_starts_with?: object;
-  /** Exact JSON match */
-  equals?: object;
-  /** Greater-than comparison. Must be a number or numeric JSON value */
-  gt?: number;
-  /** Greater-than-or-equal comparison. Must be a number or numeric JSON value */
-  gte?: number;
-  /** Less-than comparison. Must be a number or numeric JSON value */
-  lt?: number;
-  /** Less-than-or-equal comparison. Must be a number or numeric JSON value */
-  lte?: number;
-  /** Case sensitivity mode for string filters within JSON ("insensitive" uses ILIKE on PostgreSQL) */
-  mode?: 'default' | 'insensitive';
-  /** Path in JSON (PostgreSQL: array of keys/indexes, e.g. ["pet1","petName"] or dot notation "pet1.petName") */
-  path?: string | string[];
-  /** Full-text search string for JSON content */
-  search?: string;
-  /** Scope of search within JSON structure */
-  searchIn?: 'all' | 'values' | 'keys' | 'strings' | 'numbers' | 'booleans';
-  /** Language for full-text search. Default: simple */
-  searchLanguage?:
-    | 'simple'
-    | 'arabic'
-    | 'armenian'
-    | 'basque'
-    | 'catalan'
-    | 'danish'
-    | 'dutch'
-    | 'english'
-    | 'finnish'
-    | 'french'
-    | 'german'
-    | 'greek'
-    | 'hindi'
-    | 'hungarian'
-    | 'indonesian'
-    | 'irish'
-    | 'italian'
-    | 'lithuanian'
-    | 'nepali'
-    | 'norwegian'
-    | 'portuguese'
-    | 'romanian'
-    | 'russian'
-    | 'serbian'
-    | 'spanish'
-    | 'swedish'
-    | 'tamil'
-    | 'turkish'
-    | 'yiddish';
-  /** Search type: plain (individual words), phrase (exact phrase), prefix (word beginnings with :*), tsquery (raw PostgreSQL tsquery syntax) */
-  searchType?: 'plain' | 'phrase' | 'prefix' | 'tsquery';
-  /** Substring match in JSON string value */
-  string_contains?: string;
-  /** Suffix match in JSON string value */
-  string_ends_with?: string;
-  /** Prefix match in JSON string value */
-  string_starts_with?: string;
-}
-
 export interface LoginDto {
   emailOrUsername: string;
   password: string;
@@ -293,12 +19,35 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-export interface OrderByDto {
-  aggregation?: 'min' | 'max' | 'avg' | 'first' | 'last';
-  direction: 'asc' | 'desc';
-  field: 'createdAt' | 'updatedAt' | 'publishedAt' | 'id' | 'data';
-  path?: string;
-  type?: 'text' | 'int' | 'float' | 'boolean' | 'timestamp';
+export interface CreateUserDto {
+  username: string;
+  roleId: "systemAdmin" | "systemFullApiRead" | "systemUser";
+  password: string;
+  email?: string;
+}
+
+export interface UpdatePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface UserModel {
+  id: string;
+  username?: string;
+  email?: string;
+}
+
+export interface ProjectModel {
+  id: string;
+  organizationId: string;
+  /** @format date-time */
+  createdAt: string;
+  name: string;
+}
+
+export interface ProjectModelEdgeType {
+  cursor: string;
+  node: ProjectModel;
 }
 
 export interface PageInfo {
@@ -308,9 +57,490 @@ export interface PageInfo {
   startCursor?: string;
 }
 
+export interface ProjectsConnection {
+  edges: ProjectModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface CreateProjectDto {
+  projectName: string;
+  /** @default "master" */
+  branchName?: string;
+}
+
+export interface RoleModel {
+  id: string;
+  name: string;
+}
+
+export interface UsersOrganizationModel {
+  id: string;
+  user: UserModel;
+  role: RoleModel;
+}
+
+export interface UsersOrganizationModelEdgeType {
+  cursor: string;
+  node: UsersOrganizationModel;
+}
+
+export interface UsersOrganizationConnection {
+  edges: UsersOrganizationModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface AddUserToOrganizationDto {
+  userId: string;
+  roleId:
+    | "organizationOwner"
+    | "organizationAdmin"
+    | "developer"
+    | "editor"
+    | "reader";
+}
+
+export interface RemoveUserFromOrganizationDto {
+  userId: string;
+}
+
+export interface BranchModel {
+  id: string;
+  projectId: string;
+  /** @format date-time */
+  createdAt: string;
+  isRoot: boolean;
+  name: string;
+}
+
+export interface BranchModelEdgeType {
+  cursor: string;
+  node: BranchModel;
+}
+
+export interface BranchesConnection {
+  edges: BranchModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface SuccessModelDto {
+  /** @example true */
+  success: boolean;
+}
+
+export interface UpdateProjectDto {
+  isPublic: boolean;
+}
+
+export interface UsersProjectModel {
+  id: string;
+  user: UserModel;
+  role: RoleModel;
+}
+
+export interface UsersProjectModelEdgeType {
+  cursor: string;
+  node: UsersProjectModel;
+}
+
+export interface UsersProjectConnection {
+  edges: UsersProjectModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface AddUserToProjectDto {
+  userId: string;
+  roleId: "developer" | "editor" | "reader";
+}
+
+export interface TouchedModelDto {
+  /** @example true */
+  touched: boolean;
+}
+
+export interface Id {
+  id: string;
+}
+
 export interface ParentBranchResponse {
   branch: Id;
   revision: Id;
+}
+
+export interface RevisionModel {
+  id: string;
+  /** @format date-time */
+  createdAt: string;
+  isDraft: boolean;
+  isHead: boolean;
+}
+
+export interface RevisionModelEdgeType {
+  cursor: string;
+  node: RevisionModel;
+}
+
+export interface RevisionsConnection {
+  edges: RevisionModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface CreateRevisionDto {
+  /** @default "" */
+  comment?: string;
+}
+
+export interface RemoveMigrationDto {
+  /**
+   * Indicates a remove migration
+   * @example "remove"
+   */
+  changeType: "remove";
+  /** Timestamp when the table was removed (ISO 8601) */
+  id: string;
+  /** Current table identifier */
+  tableId: string;
+}
+
+export interface RenameMigrationDto {
+  /**
+   * Indicates a rename migration
+   * @example "rename"
+   */
+  changeType: "rename";
+  /** Timestamp when the table was renamed (ISO 8601) */
+  id: string;
+  /** Current table identifier */
+  tableId: string;
+  /** New table identifier after renaming */
+  nextTableId: string;
+}
+
+export interface UpdateMigrationDto {
+  /**
+   * Indicates an update migration
+   * @example "update"
+   */
+  changeType: "update";
+  /** Identifier of the table */
+  tableId: string;
+  /** Checksum of the patch set */
+  hash: string;
+  /** Timestamp when the update was applied (ISO 8601) */
+  id: string;
+  /** Array of JSON Patch operations */
+  patches: object[];
+}
+
+export interface InitMigrationDto {
+  /**
+   * Indicates an initialization migration
+   * @example "init"
+   */
+  changeType: "init";
+  /** Identifier of the newly created table */
+  tableId: string;
+  /** Checksum of the initial schema */
+  hash: string;
+  /**
+   * Timestamp when the table was created (ISO 8601)
+   * @example "2025-07-31T12:34:56Z"
+   */
+  id: string;
+  /** JSON Schema definition of the table */
+  schema: object;
+}
+
+export interface ChildBranchResponse {
+  branch: Id;
+  revision: Id;
+}
+
+export interface TableModel {
+  createdId: string;
+  id: string;
+  versionId: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+  readonly: boolean;
+}
+
+export interface TableModelEdgeType {
+  cursor: string;
+  node: TableModel;
+}
+
+export interface TablesConnection {
+  edges: TableModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface EndpointModel {
+  id: string;
+  /** @format date-time */
+  createdAt: string;
+  type: "GRAPHQL" | "REST_API";
+}
+
+export interface CreateBranchByRevisionDto {
+  branchName: string;
+}
+
+export interface CreateEndpointDto {
+  type: "GRAPHQL" | "REST_API";
+}
+
+export interface CreateTableDto {
+  tableId: string;
+  schema: Record<string, any>;
+}
+
+export interface CreateTableResponse {
+  branch: BranchModel;
+  table: TableModel;
+}
+
+export interface ApplyMigrationsResponseDto {
+  /** The ID of the migration */
+  id: string;
+  /** The migration application status */
+  status: "applied" | "failed" | "skipped";
+  /** Error message if the migration failed */
+  error?: string;
+}
+
+export interface OrderByDto {
+  field: "createdAt" | "updatedAt" | "publishedAt" | "id" | "data";
+  direction: "asc" | "desc";
+  path?: string;
+  type?: "text" | "int" | "float" | "boolean" | "timestamp";
+  aggregation?: "min" | "max" | "avg" | "first" | "last";
+}
+
+export interface StringFilterDto {
+  equals?: string;
+  in?: string[];
+  notIn?: string[];
+  lt?: string;
+  lte?: string;
+  gt?: string;
+  gte?: string;
+  contains?: string;
+  startsWith?: string;
+  endsWith?: string;
+  mode?: "default" | "insensitive";
+  /** Negation filter (not): a simple string */
+  not?: string;
+}
+
+export interface BoolFilterDto {
+  equals?: boolean;
+  /** Filter negation (not). */
+  not?: BoolFilterDto | boolean;
+}
+
+export interface DateTimeFilterDto {
+  /** @format date-time */
+  equals?: string;
+  in?: string[];
+  notIn?: string[];
+  /** @format date-time */
+  lt?: string;
+  /** @format date-time */
+  lte?: string;
+  /** @format date-time */
+  gt?: string;
+  /** @format date-time */
+  gte?: string;
+}
+
+export interface JsonFilterDto {
+  /** Exact JSON match */
+  equals?: object;
+  /** Path in JSON (PostgreSQL: array of keys/indexes, e.g. ["pet1","petName"] or dot notation "pet1.petName") */
+  path?: string | string[];
+  /** Case sensitivity mode for string filters within JSON ("insensitive" uses ILIKE on PostgreSQL) */
+  mode?: "default" | "insensitive";
+  /** Substring match in JSON string value */
+  string_contains?: string;
+  /** Prefix match in JSON string value */
+  string_starts_with?: string;
+  /** Suffix match in JSON string value */
+  string_ends_with?: string;
+  /** Filter on arrays: target JSON array must contain *all* of these values */
+  array_contains?: object[];
+  /** JSON value that the target JSON array must start with (could be object, array, primitive) */
+  array_starts_with?: object;
+  /** JSON value that the target JSON array must end with (could be object, array, primitive) */
+  array_ends_with?: object;
+  /** Less-than comparison. Must be a number or numeric JSON value */
+  lt?: number;
+  /** Less-than-or-equal comparison. Must be a number or numeric JSON value */
+  lte?: number;
+  /** Greater-than comparison. Must be a number or numeric JSON value */
+  gt?: number;
+  /** Greater-than-or-equal comparison. Must be a number or numeric JSON value */
+  gte?: number;
+  /** Full-text search string for JSON content */
+  search?: string;
+  /** Language for full-text search. Default: simple */
+  searchLanguage?:
+    | "simple"
+    | "arabic"
+    | "armenian"
+    | "basque"
+    | "catalan"
+    | "danish"
+    | "dutch"
+    | "english"
+    | "finnish"
+    | "french"
+    | "german"
+    | "greek"
+    | "hindi"
+    | "hungarian"
+    | "indonesian"
+    | "irish"
+    | "italian"
+    | "lithuanian"
+    | "nepali"
+    | "norwegian"
+    | "portuguese"
+    | "romanian"
+    | "russian"
+    | "serbian"
+    | "spanish"
+    | "swedish"
+    | "tamil"
+    | "turkish"
+    | "yiddish";
+  /** Search type: plain (individual words), phrase (exact phrase), prefix (word beginnings with :*), tsquery (raw PostgreSQL tsquery syntax) */
+  searchType?: "plain" | "phrase" | "prefix" | "tsquery";
+  /** Scope of search within JSON structure */
+  searchIn?: "all" | "values" | "keys" | "strings" | "numbers" | "booleans";
+}
+
+export interface RowWhereInputDto {
+  /** AND conditions */
+  AND?: RowWhereInputDto[];
+  /** OR conditions */
+  OR?: RowWhereInputDto[];
+  /** NOT conditions */
+  NOT?: RowWhereInputDto[];
+  /** Filter by versionId */
+  versionId?: StringFilterDto;
+  /** Filter by createdId */
+  createdId?: StringFilterDto;
+  /** Filter by id */
+  id?: StringFilterDto;
+  /** Filter by readonly */
+  readonly?: BoolFilterDto;
+  /** Filter by createdAt */
+  createdAt?: DateTimeFilterDto;
+  /** Filter by updatedAt */
+  updatedAt?: DateTimeFilterDto;
+  /** Filter by publishedAt */
+  publishedAt?: DateTimeFilterDto;
+  /** Filter by data */
+  data?: JsonFilterDto;
+  /** Filter by meta */
+  meta?: JsonFilterDto;
+  /** Filter by hash */
+  hash?: StringFilterDto;
+  /** Filter by schemaHash */
+  schemaHash?: StringFilterDto;
+}
+
+export interface GetTableRowsDto {
+  /** @default 100 */
+  first: number;
+  /** @example "" */
+  after?: string;
+  /**
+   * Array of sorting criteria
+   * @example [{"field":"id","direction":"asc"}]
+   */
+  orderBy?: OrderByDto[];
+  /** Row filtering conditions */
+  where?: RowWhereInputDto;
+}
+
+export interface RowModel {
+  createdId: string;
+  id: string;
+  versionId: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+  /** @format date-time */
+  publishedAt: string;
+  readonly: boolean;
+  data: Record<string, any>;
+}
+
+export interface RowModelEdgeType {
+  cursor: string;
+  node: RowModel;
+}
+
+export interface RowsConnection {
+  edges: RowModelEdgeType[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
+export interface CreateRowDto {
+  rowId: string;
+  data: Record<string, any>;
+  isRestore?: boolean;
+}
+
+export interface CreateRowResponse {
+  table: TableModel;
+  previousVersionTableId: string;
+  row: RowModel;
+}
+
+export interface CreateRowsRowDto {
+  rowId: string;
+  data: Record<string, any>;
+}
+
+export interface CreateRowsDto {
+  /** @maxItems 1000 */
+  rows: CreateRowsRowDto[];
+  isRestore?: boolean;
+}
+
+export interface CreateRowsResponse {
+  table: TableModel;
+  previousVersionTableId: string;
+  rows: RowModel[];
+}
+
+export interface UpdateRowsRowDto {
+  rowId: string;
+  data: Record<string, any>;
+}
+
+export interface UpdateRowsDto {
+  /** @maxItems 1000 */
+  rows: UpdateRowsRowDto[];
+  isRestore?: boolean;
+}
+
+export interface UpdateRowsResponse {
+  table: TableModel;
+  previousVersionTableId: string;
+  rows: RowModel[];
 }
 
 export interface PatchRow {
@@ -318,7 +548,7 @@ export interface PatchRow {
    * The operation to perform. Currently only "replace" is supported
    * @example "replace"
    */
-  op: 'replace';
+  op: "replace";
   /**
    * JSON path using dot notation for objects and [index] for arrays. Examples: "name", "user.email", "items[0]", "data.list[2].value"
    * @example "list[0].nestedList[2].name"
@@ -331,15 +561,9 @@ export interface PatchRow {
   value: string | number | boolean | object | any[] | null;
 }
 
-export interface PatchRowDto {
+export interface PatchRowsRowDto {
+  rowId: string;
   patches: PatchRow[];
-}
-
-export interface PatchRowResponse {
-  previousVersionRowId?: string;
-  previousVersionTableId?: string;
-  row?: RowModel;
-  table?: TableModel;
 }
 
 export interface PatchRowsDto {
@@ -348,51 +572,9 @@ export interface PatchRowsDto {
 }
 
 export interface PatchRowsResponse {
+  table: TableModel;
   previousVersionTableId: string;
   rows: RowModel[];
-  table: TableModel;
-}
-
-export interface PatchRowsRowDto {
-  patches: PatchRow[];
-  rowId: string;
-}
-
-export interface ProjectModel {
-  /** @format date-time */
-  createdAt: string;
-  id: string;
-  name: string;
-  organizationId: string;
-}
-
-export interface ProjectModelEdgeType {
-  cursor: string;
-  node: ProjectModel;
-}
-
-export interface ProjectsConnection {
-  edges: ProjectModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface RemoveMigrationDto {
-  /**
-   * Indicates a remove migration
-   * @example "remove"
-   */
-  changeType: 'remove';
-  /** Timestamp when the table was removed (ISO 8601) */
-  id: string;
-  /** Current table identifier */
-  tableId: string;
-}
-
-export interface RemoveRowResponse {
-  branch: BranchModel;
-  previousVersionTableId?: string;
-  table?: TableModel;
 }
 
 export interface RemoveRowsDto {
@@ -402,190 +584,29 @@ export interface RemoveRowsDto {
 
 export interface RemoveRowsResponse {
   branch: BranchModel;
-  previousVersionTableId?: string;
   table?: TableModel;
-}
-
-export interface RemoveUserFromOrganizationDto {
-  userId: string;
-}
-
-export interface RenameMigrationDto {
-  /**
-   * Indicates a rename migration
-   * @example "rename"
-   */
-  changeType: 'rename';
-  /** Timestamp when the table was renamed (ISO 8601) */
-  id: string;
-  /** New table identifier after renaming */
-  nextTableId: string;
-  /** Current table identifier */
-  tableId: string;
-}
-
-export interface RenameRowDto {
-  nextRowId: string;
-}
-
-export interface RenameRowResponse {
-  previousVersionRowId?: string;
   previousVersionTableId?: string;
-  row?: RowModel;
-  table?: TableModel;
 }
 
-export interface RevisionModel {
-  /** @format date-time */
-  createdAt: string;
-  id: string;
-  isDraft: boolean;
-  isHead: boolean;
-}
-
-export interface RevisionModelEdgeType {
-  cursor: string;
-  node: RevisionModel;
-}
-
-export interface RevisionsConnection {
-  edges: RevisionModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface RoleModel {
-  id: string;
-  name: string;
-}
-
-export interface RowModel {
-  /** @format date-time */
-  createdAt: string;
-  createdId: string;
-  data: Record<string, any>;
-  id: string;
-  /** @format date-time */
-  publishedAt: string;
-  readonly: boolean;
-  /** @format date-time */
-  updatedAt: string;
-  versionId: string;
-}
-
-export interface RowModelEdgeType {
-  cursor: string;
-  node: RowModel;
-}
-
-export interface RowWhereInputDto {
-  /** AND conditions */
-  AND?: RowWhereInputDto[];
-  /** NOT conditions */
-  NOT?: RowWhereInputDto[];
-  /** OR conditions */
-  OR?: RowWhereInputDto[];
-  /** Filter by createdAt */
-  createdAt?: DateTimeFilterDto;
-  /** Filter by createdId */
-  createdId?: StringFilterDto;
-  /** Filter by data */
-  data?: JsonFilterDto;
-  /** Filter by hash */
-  hash?: StringFilterDto;
-  /** Filter by id */
-  id?: StringFilterDto;
-  /** Filter by meta */
-  meta?: JsonFilterDto;
-  /** Filter by publishedAt */
-  publishedAt?: DateTimeFilterDto;
-  /** Filter by readonly */
-  readonly?: BoolFilterDto;
-  /** Filter by schemaHash */
-  schemaHash?: StringFilterDto;
-  /** Filter by updatedAt */
-  updatedAt?: DateTimeFilterDto;
-  /** Filter by versionId */
-  versionId?: StringFilterDto;
-}
-
-export interface RowsConnection {
-  edges: RowModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface StringFilterDto {
-  contains?: string;
-  endsWith?: string;
-  equals?: string;
-  gt?: string;
-  gte?: string;
-  in?: string[];
-  lt?: string;
-  lte?: string;
-  mode?: 'default' | 'insensitive';
-  /** Negation filter (not): a simple string */
-  not?: string;
-  notIn?: string[];
-  startsWith?: string;
-}
-
-export interface SuccessModelDto {
-  /** @example true */
-  success: boolean;
-}
-
-export interface TableModel {
-  /** @format date-time */
-  createdAt: string;
-  createdId: string;
-  id: string;
-  readonly: boolean;
-  /** @format date-time */
-  updatedAt: string;
-  versionId: string;
-}
-
-export interface TableModelEdgeType {
-  cursor: string;
-  node: TableModel;
-}
-
-export interface TablesConnection {
-  edges: TableModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface TouchedModelDto {
-  /** @example true */
-  touched: boolean;
-}
-
-export interface UpdateMigrationDto {
-  /**
-   * Indicates an update migration
-   * @example "update"
-   */
-  changeType: 'update';
-  /** Checksum of the patch set */
-  hash: string;
-  /** Timestamp when the update was applied (ISO 8601) */
-  id: string;
-  /** Array of JSON Patch operations */
+export interface UpdateTableDto {
   patches: object[];
-  /** Identifier of the table */
-  tableId: string;
 }
 
-export interface UpdatePasswordDto {
-  newPassword: string;
-  oldPassword: string;
+export interface UpdateTableResponse {
+  table?: TableModel;
+  previousVersionTableId: string;
 }
 
-export interface UpdateProjectDto {
-  isPublic: boolean;
+export interface ErrorModel {
+  statusCode: number;
+  message: string;
+  error: string;
+}
+
+export interface RemoveRowResponse {
+  branch: BranchModel;
+  table?: TableModel;
+  previousVersionTableId?: string;
 }
 
 export interface UpdateRowDto {
@@ -594,82 +615,62 @@ export interface UpdateRowDto {
 }
 
 export interface UpdateRowResponse {
-  previousVersionRowId?: string;
+  table?: TableModel;
   previousVersionTableId?: string;
   row?: RowModel;
+  previousVersionRowId?: string;
+}
+
+export interface PatchRowDto {
+  patches: PatchRow[];
+}
+
+export interface PatchRowResponse {
   table?: TableModel;
+  previousVersionTableId?: string;
+  row?: RowModel;
+  previousVersionRowId?: string;
 }
 
-export interface UpdateRowsDto {
-  /** @maxItems 1000 */
-  rows: UpdateRowsRowDto[];
+export interface RenameRowDto {
+  nextRowId: string;
 }
 
-export interface UpdateRowsResponse {
-  previousVersionTableId: string;
-  rows: RowModel[];
-  table: TableModel;
-}
-
-export interface UpdateRowsRowDto {
-  data: Record<string, any>;
-  rowId: string;
-}
-
-export interface UpdateTableDto {
-  patches: object[];
-}
-
-export interface UpdateTableResponse {
-  previousVersionTableId: string;
+export interface RenameRowResponse {
   table?: TableModel;
+  previousVersionTableId?: string;
+  row?: RowModel;
+  previousVersionRowId?: string;
 }
 
 export interface UploadFileResponse {
-  previousVersionRowId?: string;
+  table?: TableModel;
   previousVersionTableId?: string;
   row?: RowModel;
-  table?: TableModel;
+  previousVersionRowId?: string;
 }
 
-export interface UserModel {
-  email?: string;
-  id: string;
-  username?: string;
+export interface GetEndpointResultDto {
+  endpoint: EndpointModel;
+  revision: RevisionModel;
+  branch: BranchModel;
+  project: ProjectModel;
 }
 
-export interface UsersOrganizationConnection {
-  edges: UsersOrganizationModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
+export interface GoogleOauth {
+  available: boolean;
+  clientId?: string;
 }
 
-export interface UsersOrganizationModel {
-  id: string;
-  role: RoleModel;
-  user: UserModel;
+export interface GithubOauth {
+  available: boolean;
+  clientId?: string;
 }
 
-export interface UsersOrganizationModelEdgeType {
-  cursor: string;
-  node: UsersOrganizationModel;
-}
-
-export interface UsersProjectConnection {
-  edges: UsersProjectModelEdgeType[];
-  pageInfo: PageInfo;
-  totalCount: number;
-}
-
-export interface UsersProjectModel {
-  id: string;
-  role: RoleModel;
-  user: UserModel;
-}
-
-export interface UsersProjectModelEdgeType {
-  cursor: string;
-  node: UsersProjectModel;
+export interface ConfigurationResponse {
+  availableEmailSignUp: boolean;
+  google: GoogleOauth;
+  github: GithubOauth;
 }
 
 export interface ProjectsParams {
@@ -684,7 +685,22 @@ export interface CreateProjectParams {
   organizationId: string;
 }
 
+export interface UsersOrganizationParams {
+  /** @default 100 */
+  first: number;
+  after?: string;
+  organizationId: string;
+}
+
 export interface BranchesParams {
+  /** @default 100 */
+  first: number;
+  after?: string;
+  organizationId: string;
+  projectName: string;
+}
+
+export interface UsersProjectParams {
   /** @default 100 */
   first: number;
   after?: string;
@@ -699,25 +715,10 @@ export interface RevisionsParams {
   before?: string;
   inclusive?: boolean;
   /** Sort order: asc (default) or desc */
-  sort?: 'asc' | 'desc';
+  sort?: "asc" | "desc";
   organizationId: string;
   projectName: string;
   branchName: string;
-}
-
-export interface UsersProjectParams {
-  /** @default 100 */
-  first: number;
-  after?: string;
-  organizationId: string;
-  projectName: string;
-}
-
-export interface UsersOrganizationParams {
-  /** @default 100 */
-  first: number;
-  after?: string;
-  organizationId: string;
 }
 
 export interface TablesParams {
@@ -764,9 +765,9 @@ export interface RowForeignKeysToParams {
 }
 
 export type QueryParamsType = Record<string | number, any>;
-export type ResponseFormat = keyof Omit<Body, 'body' | 'bodyUsed'>;
+export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
-export interface FullRequestParams extends Omit<RequestInit, 'body'> {
+export interface FullRequestParams extends Omit<RequestInit, "body"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -787,12 +788,12 @@ export interface FullRequestParams extends Omit<RequestInit, 'body'> {
 
 export type RequestParams = Omit<
   FullRequestParams,
-  'body' | 'method' | 'query' | 'path'
+  "body" | "method" | "query" | "path"
 >;
 
 export interface ApiConfig<SecurityDataType = unknown> {
   baseUrl?: string;
-  baseApiParams?: Omit<RequestParams, 'baseUrl' | 'cancelToken' | 'signal'>;
+  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
   securityWorker?: (
     securityData: SecurityDataType | null,
   ) => Promise<RequestParams | void> | RequestParams | void;
@@ -808,26 +809,26 @@ export interface HttpResponse<D extends unknown, E extends unknown = unknown>
 type CancelToken = Symbol | string | number;
 
 export enum ContentType {
-  Json = 'application/json',
-  JsonApi = 'application/vnd.api+json',
-  FormData = 'multipart/form-data',
-  UrlEncoded = 'application/x-www-form-urlencoded',
-  Text = 'text/plain',
+  Json = "application/json",
+  JsonApi = "application/vnd.api+json",
+  FormData = "multipart/form-data",
+  UrlEncoded = "application/x-www-form-urlencoded",
+  Text = "text/plain",
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = '';
+  public baseUrl: string = "";
   private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
+  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
   private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
     fetch(...fetchParams);
 
   private baseApiParams: RequestParams = {
-    credentials: 'same-origin',
+    credentials: "same-origin",
     headers: {},
-    redirect: 'follow',
-    referrerPolicy: 'no-referrer',
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
   };
 
   constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
@@ -840,7 +841,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected encodeQueryParam(key: string, value: any) {
     const encodedKey = encodeURIComponent(key);
-    return `${encodedKey}=${encodeURIComponent(typeof value === 'number' ? value : `${value}`)}`;
+    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
   }
 
   protected addQueryParam(query: QueryParamsType, key: string) {
@@ -849,13 +850,13 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected addArrayQueryParam(query: QueryParamsType, key: string) {
     const value = query[key];
-    return value.map((v: any) => this.encodeQueryParam(key, v)).join('&');
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
   }
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
     const query = rawQuery || {};
     const keys = Object.keys(query).filter(
-      (key) => 'undefined' !== typeof query[key],
+      (key) => "undefined" !== typeof query[key],
     );
     return keys
       .map((key) =>
@@ -863,25 +864,25 @@ export class HttpClient<SecurityDataType = unknown> {
           ? this.addArrayQueryParam(query, key)
           : this.addQueryParam(query, key),
       )
-      .join('&');
+      .join("&");
   }
 
   protected addQueryParams(rawQuery?: QueryParamsType): string {
     const queryString = this.toQueryString(rawQuery);
-    return queryString ? `?${queryString}` : '';
+    return queryString ? `?${queryString}` : "";
   }
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === 'object' || typeof input === 'string')
+      input !== null && (typeof input === "object" || typeof input === "string")
         ? JSON.stringify(input)
         : input,
     [ContentType.JsonApi]: (input: any) =>
-      input !== null && (typeof input === 'object' || typeof input === 'string')
+      input !== null && (typeof input === "object" || typeof input === "string")
         ? JSON.stringify(input)
         : input,
     [ContentType.Text]: (input: any) =>
-      input !== null && typeof input !== 'string'
+      input !== null && typeof input !== "string"
         ? JSON.stringify(input)
         : input,
     [ContentType.FormData]: (input: any) =>
@@ -891,7 +892,7 @@ export class HttpClient<SecurityDataType = unknown> {
           key,
           property instanceof Blob
             ? property
-            : typeof property === 'object' && property !== null
+            : typeof property === "object" && property !== null
               ? JSON.stringify(property)
               : `${property}`,
         );
@@ -953,7 +954,7 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<HttpResponse<T, E>> => {
     const secureParams =
-      ((typeof secure === 'boolean' ? secure : this.baseApiParams.secure) &&
+      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
@@ -963,13 +964,13 @@ export class HttpClient<SecurityDataType = unknown> {
     const responseFormat = format || requestParams.format;
 
     return this.customFetch(
-      `${baseUrl || this.baseUrl || ''}${path}${queryString ? `?${queryString}` : ''}`,
+      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
       {
         ...requestParams,
         headers: {
           ...(requestParams.headers || {}),
           ...(type && type !== ContentType.FormData
-            ? { 'Content-Type': type }
+            ? { "Content-Type": type }
             : {}),
         },
         signal:
@@ -977,7 +978,7 @@ export class HttpClient<SecurityDataType = unknown> {
             ? this.createAbortSignal(cancelToken)
             : requestParams.signal) || null,
         body:
-          typeof body === 'undefined' || body === null
+          typeof body === "undefined" || body === null
             ? null
             : payloadFormatter(body),
       },
@@ -1013,7 +1014,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title Revisium API
- * @version 2.6.0-alpha.1
+ * @version 2.6.0-alpha.3
  * @contact
  */
 export class Api<
@@ -1031,30 +1032,11 @@ export class Api<
     login: (data: LoginDto, params: RequestParams = {}) =>
       this.request<LoginResponse, any>({
         path: `/api/auth/login`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Auth
-     * @name UpdatePassword
-     * @request PUT:/api/auth/password
-     * @secure
-     */
-    updatePassword: (data: UpdatePasswordDto, params: RequestParams = {}) =>
-      this.request<boolean, any>({
-        path: `/api/auth/password`,
-        method: 'PUT',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1069,61 +1051,47 @@ export class Api<
     createUser: (data: CreateUserDto, params: RequestParams = {}) =>
       this.request<boolean, any>({
         path: `/api/auth/user`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Configuration
-     * @name GetConfiguration
-     * @request GET:/api/configuration
-     */
-    getConfiguration: (params: RequestParams = {}) =>
-      this.request<ConfigurationResponse, any>({
-        path: `/api/configuration`,
-        method: 'GET',
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Endpoint
-     * @name DeleteEndpoint
-     * @request DELETE:/api/endpoints/{endpointId}
+     * @tags Auth
+     * @name UpdatePassword
+     * @request PUT:/api/auth/password
      * @secure
      */
-    deleteEndpoint: (endpointId: string, params: RequestParams = {}) =>
+    updatePassword: (data: UpdatePasswordDto, params: RequestParams = {}) =>
       this.request<boolean, any>({
-        path: `/api/endpoints/${endpointId}`,
-        method: 'DELETE',
+        path: `/api/auth/password`,
+        method: "PUT",
+        body: data,
         secure: true,
-        format: 'json',
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Endpoint
-     * @name EndpointRelatives
-     * @summary Retrieve all related entities for a given endpoint
-     * @request GET:/api/endpoints/{endpointId}/relatives
+     * @tags User
+     * @name Me
+     * @request GET:/api/user/me
      * @secure
      */
-    endpointRelatives: (endpointId: string, params: RequestParams = {}) =>
-      this.request<GetEndpointResultDto, any>({
-        path: `/api/endpoints/${endpointId}/relatives`,
-        method: 'GET',
+    me: (params: RequestParams = {}) =>
+      this.request<UserModel, any>({
+        path: `/api/user/me`,
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1141,10 +1109,10 @@ export class Api<
     ) =>
       this.request<ProjectsConnection, any>({
         path: `/api/organization/${organizationId}/projects`,
-        method: 'GET',
+        method: "GET",
         query: query,
         secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1163,33 +1131,79 @@ export class Api<
     ) =>
       this.request<ProjectModel, any>({
         path: `/api/organization/${organizationId}/projects`,
-        method: 'POST',
+        method: "POST",
         query: query,
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Project
-     * @name DeleteProject
-     * @request DELETE:/api/organization/{organizationId}/projects/{projectName}
+     * @tags Organization
+     * @name UsersOrganization
+     * @request GET:/api/organization/{organizationId}/users
      * @secure
      */
-    deleteProject: (
-      organizationId: string,
-      projectName: string,
+    usersOrganization: (
+      { organizationId, ...query }: UsersOrganizationParams,
       params: RequestParams = {},
     ) =>
-      this.request<SuccessModelDto, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: 'DELETE',
+      this.request<UsersOrganizationConnection, any>({
+        path: `/api/organization/${organizationId}/users`,
+        method: "GET",
+        query: query,
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Organization
+     * @name AddUserToOrganization
+     * @request POST:/api/organization/{organizationId}/users
+     * @secure
+     */
+    addUserToOrganization: (
+      organizationId: string,
+      data: AddUserToOrganizationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<boolean, any>({
+        path: `/api/organization/${organizationId}/users`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Organization
+     * @name RemoveUserFromOrganization
+     * @request DELETE:/api/organization/{organizationId}/users
+     * @secure
+     */
+    removeUserFromOrganization: (
+      organizationId: string,
+      data: RemoveUserFromOrganizationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<boolean, any>({
+        path: `/api/organization/${organizationId}/users`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -1208,9 +1222,30 @@ export class Api<
     ) =>
       this.request<ProjectModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Project
+     * @name DeleteProject
+     * @request DELETE:/api/organization/{organizationId}/projects/{projectName}
+     * @secure
+     */
+    deleteProject: (
+      organizationId: string,
+      projectName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<SuccessModelDto, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -1230,11 +1265,32 @@ export class Api<
     ) =>
       this.request<SuccessModelDto, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Project
+     * @name RootBranch
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/root-branch
+     * @secure
+     */
+    rootBranch: (
+      organizationId: string,
+      projectName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<BranchModel, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/root-branch`,
+        method: "GET",
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -1252,10 +1308,77 @@ export class Api<
     ) =>
       this.request<BranchesConnection, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches`,
-        method: 'GET',
+        method: "GET",
         query: query,
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Project
+     * @name UsersProject
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/users
+     * @secure
+     */
+    usersProject: (
+      { organizationId, projectName, ...query }: UsersProjectParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<UsersProjectConnection, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/users`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Project
+     * @name AddUserToProject
+     * @request POST:/api/organization/{organizationId}/projects/{projectName}/users
+     * @secure
+     */
+    addUserToProject: (
+      organizationId: string,
+      projectName: string,
+      data: AddUserToProjectDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<SuccessModelDto, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/users`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Project
+     * @name RemoveUserFromProject
+     * @request DELETE:/api/organization/{organizationId}/projects/{projectName}/users/{userId}
+     * @secure
+     */
+    removeUserFromProject: (
+      organizationId: string,
+      projectName: string,
+      userId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<SuccessModelDto, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/users/${userId}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -1275,9 +1398,140 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name BranchTouched
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/touched
+     * @secure
+     */
+    branchTouched: (
+      organizationId: string,
+      projectName: string,
+      branchName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<TouchedModelDto, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/touched`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name ParentBranch
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/parent-branch
+     * @secure
+     */
+    parentBranch: (
+      organizationId: string,
+      projectName: string,
+      branchName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ParentBranchResponse, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/parent-branch`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name StartRevision
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/start-revision
+     * @secure
+     */
+    startRevision: (
+      organizationId: string,
+      projectName: string,
+      branchName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<RevisionModel, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/start-revision`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name HeadRevision
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/head-revision
+     * @secure
+     */
+    headRevision: (
+      organizationId: string,
+      projectName: string,
+      branchName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<RevisionModel, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/head-revision`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name DraftRevision
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/draft-revision
+     * @secure
+     */
+    draftRevision: (
+      organizationId: string,
+      projectName: string,
+      branchName: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<RevisionModel, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/draft-revision`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Branch
+     * @name Revisions
+     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/revisions
+     * @secure
+     */
+    revisions: (
+      { organizationId, projectName, branchName, ...query }: RevisionsParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<RevisionsConnection, any>({
+        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/revisions`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -1298,77 +1552,11 @@ export class Api<
     ) =>
       this.request<RevisionModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/create-revision`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name DraftRevision
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/draft-revision
-     * @secure
-     */
-    draftRevision: (
-      organizationId: string,
-      projectName: string,
-      branchName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<RevisionModel, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/draft-revision`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name HeadRevision
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/head-revision
-     * @secure
-     */
-    headRevision: (
-      organizationId: string,
-      projectName: string,
-      branchName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<RevisionModel, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/head-revision`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name ParentBranch
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/parent-branch
-     * @secure
-     */
-    parentBranch: (
-      organizationId: string,
-      projectName: string,
-      branchName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<ParentBranchResponse, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/parent-branch`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1388,229 +1576,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/revert-changes`,
-        method: 'POST',
+        method: "POST",
         secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name Revisions
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/revisions
-     * @secure
-     */
-    revisions: (
-      { organizationId, projectName, branchName, ...query }: RevisionsParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<RevisionsConnection, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/revisions`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name StartRevision
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/start-revision
-     * @secure
-     */
-    startRevision: (
-      organizationId: string,
-      projectName: string,
-      branchName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<RevisionModel, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/start-revision`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Branch
-     * @name BranchTouched
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/branches/{branchName}/touched
-     * @secure
-     */
-    branchTouched: (
-      organizationId: string,
-      projectName: string,
-      branchName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<TouchedModelDto, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/branches/${branchName}/touched`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Project
-     * @name RootBranch
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/root-branch
-     * @secure
-     */
-    rootBranch: (
-      organizationId: string,
-      projectName: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<BranchModel, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/root-branch`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Project
-     * @name UsersProject
-     * @request GET:/api/organization/{organizationId}/projects/{projectName}/users
-     * @secure
-     */
-    usersProject: (
-      { organizationId, projectName, ...query }: UsersProjectParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<UsersProjectConnection, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/users`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Project
-     * @name AddUserToProject
-     * @request POST:/api/organization/{organizationId}/projects/{projectName}/users
-     * @secure
-     */
-    addUserToProject: (
-      organizationId: string,
-      projectName: string,
-      data: AddUserToProjectDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<SuccessModelDto, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/users`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Project
-     * @name RemoveUserFromProject
-     * @request DELETE:/api/organization/{organizationId}/projects/{projectName}/users/{userId}
-     * @secure
-     */
-    removeUserFromProject: (
-      organizationId: string,
-      projectName: string,
-      userId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<SuccessModelDto, any>({
-        path: `/api/organization/${organizationId}/projects/${projectName}/users/${userId}`,
-        method: 'DELETE',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Organization
-     * @name RemoveUserFromOrganization
-     * @request DELETE:/api/organization/{organizationId}/users
-     * @secure
-     */
-    removeUserFromOrganization: (
-      organizationId: string,
-      data: RemoveUserFromOrganizationDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<boolean, any>({
-        path: `/api/organization/${organizationId}/users`,
-        method: 'DELETE',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Organization
-     * @name UsersOrganization
-     * @request GET:/api/organization/{organizationId}/users
-     * @secure
-     */
-    usersOrganization: (
-      { organizationId, ...query }: UsersOrganizationParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<UsersOrganizationConnection, any>({
-        path: `/api/organization/${organizationId}/users`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Organization
-     * @name AddUserToOrganization
-     * @request POST:/api/organization/{organizationId}/users
-     * @secure
-     */
-    addUserToOrganization: (
-      organizationId: string,
-      data: AddUserToOrganizationDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<boolean, any>({
-        path: `/api/organization/${organizationId}/users`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1625,9 +1593,192 @@ export class Api<
     revision: (revisionId: string, params: RequestParams = {}) =>
       this.request<RevisionModel, any>({
         path: `/api/revision/${revisionId}`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name ParentRevision
+     * @request GET:/api/revision/{revisionId}/parent-revision
+     * @secure
+     */
+    parentRevision: (revisionId: string, params: RequestParams = {}) =>
+      this.request<RevisionModel, any>({
+        path: `/api/revision/${revisionId}/parent-revision`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name ChildRevision
+     * @request GET:/api/revision/{revisionId}/child-revision
+     * @secure
+     */
+    childRevision: (revisionId: string, params: RequestParams = {}) =>
+      this.request<RevisionModel, any>({
+        path: `/api/revision/${revisionId}/child-revision`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name ChildBranches
+     * @request GET:/api/revision/{revisionId}/child-branches
+     * @secure
+     */
+    childBranches: (revisionId: string, params: RequestParams = {}) =>
+      this.request<ChildBranchResponse[], any>({
+        path: `/api/revision/${revisionId}/child-branches`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name CreateBranch
+     * @request POST:/api/revision/{revisionId}/child-branches
+     * @secure
+     */
+    createBranch: (
+      revisionId: string,
+      data: CreateBranchByRevisionDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<BranchModel, any>({
+        path: `/api/revision/${revisionId}/child-branches`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name Tables
+     * @request GET:/api/revision/{revisionId}/tables
+     * @secure
+     */
+    tables: (
+      { revisionId, ...query }: TablesParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<TablesConnection, any>({
+        path: `/api/revision/${revisionId}/tables`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name CreateTable
+     * @request POST:/api/revision/{revisionId}/tables
+     * @secure
+     */
+    createTable: (
+      revisionId: string,
+      data: CreateTableDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateTableResponse, any>({
+        path: `/api/revision/${revisionId}/tables`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name Endpoints
+     * @request GET:/api/revision/{revisionId}/endpoints
+     * @secure
+     */
+    endpoints: (revisionId: string, params: RequestParams = {}) =>
+      this.request<EndpointModel[], any>({
+        path: `/api/revision/${revisionId}/endpoints`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name CreateEndpoint
+     * @request POST:/api/revision/{revisionId}/endpoints
+     * @secure
+     */
+    createEndpoint: (
+      revisionId: string,
+      data: CreateEndpointDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<EndpointModel, any>({
+        path: `/api/revision/${revisionId}/endpoints`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Revision
+     * @name Migrations
+     * @request GET:/api/revision/{revisionId}/migrations
+     * @secure
+     */
+    migrations: (revisionId: string, params: RequestParams = {}) =>
+      this.request<
+        (
+          | InitMigrationDto
+          | UpdateMigrationDto
+          | RenameMigrationDto
+          | RemoveMigrationDto
+        )[],
+        any
+      >({
+        path: `/api/revision/${revisionId}/migrations`,
+        method: "GET",
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -1651,194 +1802,28 @@ export class Api<
     ) =>
       this.request<ApplyMigrationsResponseDto[], any>({
         path: `/api/revision/${revisionId}/apply-migrations`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Revision
-     * @name ChildBranches
-     * @request GET:/api/revision/{revisionId}/child-branches
+     * @tags Table
+     * @name Table
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}
      * @secure
      */
-    childBranches: (revisionId: string, params: RequestParams = {}) =>
-      this.request<ChildBranchResponse[], any>({
-        path: `/api/revision/${revisionId}/child-branches`,
-        method: 'GET',
+    table: (revisionId: string, tableId: string, params: RequestParams = {}) =>
+      this.request<TableModel, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}`,
+        method: "GET",
         secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name CreateBranch
-     * @request POST:/api/revision/{revisionId}/child-branches
-     * @secure
-     */
-    createBranch: (
-      revisionId: string,
-      data: CreateBranchByRevisionDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<BranchModel, any>({
-        path: `/api/revision/${revisionId}/child-branches`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name ChildRevision
-     * @request GET:/api/revision/{revisionId}/child-revision
-     * @secure
-     */
-    childRevision: (revisionId: string, params: RequestParams = {}) =>
-      this.request<RevisionModel, any>({
-        path: `/api/revision/${revisionId}/child-revision`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name Endpoints
-     * @request GET:/api/revision/{revisionId}/endpoints
-     * @secure
-     */
-    endpoints: (revisionId: string, params: RequestParams = {}) =>
-      this.request<EndpointModel[], any>({
-        path: `/api/revision/${revisionId}/endpoints`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name CreateEndpoint
-     * @request POST:/api/revision/{revisionId}/endpoints
-     * @secure
-     */
-    createEndpoint: (
-      revisionId: string,
-      data: CreateEndpointDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<EndpointModel, any>({
-        path: `/api/revision/${revisionId}/endpoints`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name Migrations
-     * @request GET:/api/revision/{revisionId}/migrations
-     * @secure
-     */
-    migrations: (revisionId: string, params: RequestParams = {}) =>
-      this.request<
-        (
-          | InitMigrationDto
-          | UpdateMigrationDto
-          | RenameMigrationDto
-          | RemoveMigrationDto
-        )[],
-        any
-      >({
-        path: `/api/revision/${revisionId}/migrations`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name ParentRevision
-     * @request GET:/api/revision/{revisionId}/parent-revision
-     * @secure
-     */
-    parentRevision: (revisionId: string, params: RequestParams = {}) =>
-      this.request<RevisionModel, any>({
-        path: `/api/revision/${revisionId}/parent-revision`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name Tables
-     * @request GET:/api/revision/{revisionId}/tables
-     * @secure
-     */
-    tables: (
-      { revisionId, ...query }: TablesParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<TablesConnection, any>({
-        path: `/api/revision/${revisionId}/tables`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Revision
-     * @name CreateTable
-     * @request POST:/api/revision/{revisionId}/tables
-     * @secure
-     */
-    createTable: (
-      revisionId: string,
-      data: CreateTableDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateTableResponse, any>({
-        path: `/api/revision/${revisionId}/tables`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1857,26 +1842,9 @@ export class Api<
     ) =>
       this.request<BranchModel, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: 'DELETE',
+        method: "DELETE",
         secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name Table
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}
-     * @secure
-     */
-    table: (revisionId: string, tableId: string, params: RequestParams = {}) =>
-      this.request<TableModel, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1896,53 +1864,11 @@ export class Api<
     ) =>
       this.request<UpdateTableResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name TableCountForeignKeysBy
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/count-foreign-keys-by
-     * @secure
-     */
-    tableCountForeignKeysBy: (
-      revisionId: string,
-      tableId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<number, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-by`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name TableCountForeignKeysTo
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/count-foreign-keys-to
-     * @secure
-     */
-    tableCountForeignKeysTo: (
-      revisionId: string,
-      tableId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<number, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-to`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1961,171 +1887,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/count-rows`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name CreateRow
-     * @request POST:/api/revision/{revisionId}/tables/{tableId}/create-row
-     * @secure
-     */
-    createRow: (
-      revisionId: string,
-      tableId: string,
-      data: CreateRowDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateRowResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/create-row`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name CreateRows
-     * @request POST:/api/revision/{revisionId}/tables/{tableId}/create-rows
-     * @secure
-     */
-    createRows: (
-      revisionId: string,
-      tableId: string,
-      data: CreateRowsDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateRowsResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/create-rows`,
-        method: 'POST',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name TableForeignKeysBy
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/foreign-keys-by
-     * @secure
-     */
-    tableForeignKeysBy: (
-      { revisionId, tableId, ...query }: TableForeignKeysByParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<TablesConnection, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-by`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name TableForeignKeysTo
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/foreign-keys-to
-     * @secure
-     */
-    tableForeignKeysTo: (
-      { revisionId, tableId, ...query }: TableForeignKeysToParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<TablesConnection, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-to`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name PatchRows
-     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/patch-rows
-     * @secure
-     */
-    patchRows: (
-      revisionId: string,
-      tableId: string,
-      data: PatchRowsDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<PatchRowsResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/patch-rows`,
-        method: 'PATCH',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name RenameTable
-     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/rename
-     * @secure
-     */
-    renameTable: (
-      revisionId: string,
-      tableId: string,
-      data: UpdateTableDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateTableResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/rename`,
-        method: 'PATCH',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Table
-     * @name DeleteRows
-     * @request DELETE:/api/revision/{revisionId}/tables/{tableId}/rows
-     * @secure
-     */
-    deleteRows: (
-      revisionId: string,
-      tableId: string,
-      data: RemoveRowsDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<RemoveRowsResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/rows`,
-        method: 'DELETE',
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2145,33 +1909,260 @@ export class Api<
     ) =>
       this.request<RowsConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Row
-     * @name DeleteRow
-     * @request DELETE:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}
+     * @tags Table
+     * @name DeleteRows
+     * @request DELETE:/api/revision/{revisionId}/tables/{tableId}/rows
      * @secure
      */
-    deleteRow: (
+    deleteRows: (
       revisionId: string,
       tableId: string,
-      rowId: string,
+      data: RemoveRowsDto,
       params: RequestParams = {},
     ) =>
-      this.request<RemoveRowResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: 'DELETE',
+      this.request<RemoveRowsResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/rows`,
+        method: "DELETE",
+        body: data,
         secure: true,
-        format: 'json',
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name CreateRow
+     * @request POST:/api/revision/{revisionId}/tables/{tableId}/create-row
+     * @secure
+     */
+    createRow: (
+      revisionId: string,
+      tableId: string,
+      data: CreateRowDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateRowResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/create-row`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name CreateRows
+     * @request POST:/api/revision/{revisionId}/tables/{tableId}/create-rows
+     * @secure
+     */
+    createRows: (
+      revisionId: string,
+      tableId: string,
+      data: CreateRowsDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateRowsResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/create-rows`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name UpdateRows
+     * @request PUT:/api/revision/{revisionId}/tables/{tableId}/update-rows
+     * @secure
+     */
+    updateRows: (
+      revisionId: string,
+      tableId: string,
+      data: UpdateRowsDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateRowsResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/update-rows`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name PatchRows
+     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/patch-rows
+     * @secure
+     */
+    patchRows: (
+      revisionId: string,
+      tableId: string,
+      data: PatchRowsDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<PatchRowsResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/patch-rows`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name TableSchema
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/schema
+     * @secure
+     */
+    tableSchema: (
+      revisionId: string,
+      tableId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<object, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/schema`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name TableCountForeignKeysBy
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/count-foreign-keys-by
+     * @secure
+     */
+    tableCountForeignKeysBy: (
+      revisionId: string,
+      tableId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<number, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-by`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name TableForeignKeysBy
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/foreign-keys-by
+     * @secure
+     */
+    tableForeignKeysBy: (
+      { revisionId, tableId, ...query }: TableForeignKeysByParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<TablesConnection, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-by`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name TableCountForeignKeysTo
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/count-foreign-keys-to
+     * @secure
+     */
+    tableCountForeignKeysTo: (
+      revisionId: string,
+      tableId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<number, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/count-foreign-keys-to`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name TableForeignKeysTo
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/foreign-keys-to
+     * @secure
+     */
+    tableForeignKeysTo: (
+      { revisionId, tableId, ...query }: TableForeignKeysToParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<TablesConnection, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/foreign-keys-to`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Table
+     * @name RenameTable
+     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/rename
+     * @secure
+     */
+    renameTable: (
+      revisionId: string,
+      tableId: string,
+      data: UpdateTableDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTableResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/rename`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -2191,9 +2182,9 @@ export class Api<
     ) =>
       this.request<RowModel, ErrorModel>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2201,24 +2192,21 @@ export class Api<
      * No description
      *
      * @tags Row
-     * @name PatchRow
-     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}
+     * @name DeleteRow
+     * @request DELETE:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}
      * @secure
      */
-    patchRow: (
+    deleteRow: (
       revisionId: string,
       tableId: string,
       rowId: string,
-      data: PatchRowDto,
       params: RequestParams = {},
     ) =>
-      this.request<PatchRowResponse, any>({
+      this.request<RemoveRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: 'PATCH',
-        body: data,
+        method: "DELETE",
         secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2239,11 +2227,36 @@ export class Api<
     ) =>
       this.request<UpdateRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Row
+     * @name PatchRow
+     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}
+     * @secure
+     */
+    patchRow: (
+      revisionId: string,
+      tableId: string,
+      rowId: string,
+      data: PatchRowDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<PatchRowResponse, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -2263,9 +2276,30 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/count-foreign-keys-by`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Row
+     * @name RowForeignKeysBy
+     * @request GET:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}/foreign-keys-by
+     * @secure
+     */
+    rowForeignKeysBy: (
+      { revisionId, tableId, rowId, ...query }: RowForeignKeysByParams,
+      params: RequestParams = {},
+    ) =>
+      this.request<RowsConnection, any>({
+        path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/foreign-keys-by`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
         ...params,
       }),
 
@@ -2285,30 +2319,9 @@ export class Api<
     ) =>
       this.request<number, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/count-foreign-keys-to`,
-        method: 'GET',
+        method: "GET",
         secure: true,
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Row
-     * @name RowForeignKeysBy
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/rows/{rowId}/foreign-keys-by
-     * @secure
-     */
-    rowForeignKeysBy: (
-      { revisionId, tableId, rowId, ...query }: RowForeignKeysByParams,
-      params: RequestParams = {},
-    ) =>
-      this.request<RowsConnection, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/foreign-keys-by`,
-        method: 'GET',
-        query: query,
-        secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2326,10 +2339,10 @@ export class Api<
     ) =>
       this.request<RowsConnection, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/foreign-keys-to`,
-        method: 'GET',
+        method: "GET",
         query: query,
         secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2350,11 +2363,11 @@ export class Api<
     ) =>
       this.request<RenameRowResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/rename`,
-        method: 'PATCH',
+        method: "PATCH",
         body: data,
         secure: true,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -2379,149 +2392,65 @@ export class Api<
     ) =>
       this.request<UploadFileResponse, any>({
         path: `/api/revision/${revisionId}/tables/${tableId}/rows/${rowId}/upload/${fileId}`,
-        method: 'POST',
+        method: "POST",
         body: data,
         secure: true,
         type: ContentType.FormData,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Table
-     * @name TableSchema
-     * @request GET:/api/revision/{revisionId}/tables/{tableId}/schema
+     * @tags Endpoint
+     * @name EndpointRelatives
+     * @summary Retrieve all related entities for a given endpoint
+     * @request GET:/api/endpoints/{endpointId}/relatives
      * @secure
      */
-    tableSchema: (
-      revisionId: string,
-      tableId: string,
-      params: RequestParams = {},
-    ) =>
-      this.request<object, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/schema`,
-        method: 'GET',
+    endpointRelatives: (endpointId: string, params: RequestParams = {}) =>
+      this.request<GetEndpointResultDto, any>({
+        path: `/api/endpoints/${endpointId}/relatives`,
+        method: "GET",
         secure: true,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags Table
-     * @name UpdateRows
-     * @request PATCH:/api/revision/{revisionId}/tables/{tableId}/update-rows
+     * @tags Endpoint
+     * @name DeleteEndpoint
+     * @request DELETE:/api/endpoints/{endpointId}
      * @secure
      */
-    updateRows: (
-      revisionId: string,
-      tableId: string,
-      data: UpdateRowsDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateRowsResponse, any>({
-        path: `/api/revision/${revisionId}/tables/${tableId}/update-rows`,
-        method: 'PATCH',
-        body: data,
+    deleteEndpoint: (endpointId: string, params: RequestParams = {}) =>
+      this.request<boolean, any>({
+        path: `/api/endpoints/${endpointId}`,
+        method: "DELETE",
         secure: true,
-        type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags User
-     * @name Me
-     * @request GET:/api/user/me
-     * @secure
+     * @tags Configuration
+     * @name GetConfiguration
+     * @request GET:/api/configuration
      */
-    me: (params: RequestParams = {}) =>
-      this.request<UserModel, any>({
-        path: `/api/user/me`,
-        method: 'GET',
-        secure: true,
-        format: 'json',
+    getConfiguration: (params: RequestParams = {}) =>
+      this.request<ConfigurationResponse, any>({
+        path: `/api/configuration`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };
   health = {
-    /**
-     * No description
-     *
-     * @tags health
-     * @name Liveness
-     * @request GET:/health/liveness
-     */
-    liveness: (params: RequestParams = {}) =>
-      this.request<
-        {
-          /** @example {"database":{"status":"up"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example "ok" */
-          status?: string;
-        },
-        {
-          /** @example {"database":{"status":"up"},"redis":{"message":"Could not connect","status":"down"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"redis":{"message":"Could not connect","status":"down"}} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example "error" */
-          status?: string;
-        }
-      >({
-        path: `/health/liveness`,
-        method: 'GET',
-        format: 'json',
-        ...params,
-      }),
-
     /**
      * No description
      *
@@ -2532,8 +2461,10 @@ export class Api<
     readiness: (params: RequestParams = {}) =>
       this.request<
         {
+          /** @example "ok" */
+          status?: string;
           /** @example {"database":{"status":"up"}} */
-          details?: Record<
+          info?: Record<
             string,
             {
               status: string;
@@ -2549,18 +2480,6 @@ export class Api<
             }
           >;
           /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example "ok" */
-          status?: string;
-        },
-        {
-          /** @example {"database":{"status":"up"},"redis":{"message":"Could not connect","status":"down"}} */
           details?: Record<
             string,
             {
@@ -2568,14 +2487,10 @@ export class Api<
               [key: string]: any;
             }
           >;
-          /** @example {"redis":{"message":"Could not connect","status":"down"}} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
+        },
+        {
+          /** @example "error" */
+          status?: string;
           /** @example {"database":{"status":"up"}} */
           info?: Record<
             string,
@@ -2584,13 +2499,99 @@ export class Api<
               [key: string]: any;
             }
           >;
-          /** @example "error" */
-          status?: string;
+          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
         }
       >({
         path: `/health/readiness`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags health
+     * @name Liveness
+     * @request GET:/health/liveness
+     */
+    liveness: (params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example "ok" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        },
+        {
+          /** @example "error" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        }
+      >({
+        path: `/health/liveness`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };

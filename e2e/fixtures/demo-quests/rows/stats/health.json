@@ -1,0 +1,13 @@
+{
+  "createdId": "0oY1gqYBRhknDnQEPSjXn",
+  "id": "health",
+  "versionId": "5sV2RROfXpButyUp0hmWZ",
+  "createdAt": "2025-08-19T18:21:51.303Z",
+  "updatedAt": "2025-08-19T18:21:51.303Z",
+  "publishedAt": "2025-08-19T18:21:51.303Z",
+  "readonly": true,
+  "data": {
+    "name": "Health",
+    "description": "Determines the amount of damage the character can withstand."
+  }
+}

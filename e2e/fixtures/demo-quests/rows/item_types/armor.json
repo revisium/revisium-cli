@@ -1,0 +1,13 @@
+{
+  "createdId": "-1OI2yrdX3XtHbVRUTr7I",
+  "id": "armor",
+  "versionId": "OWK0yw4rhvj9Z7mPYrK_n",
+  "createdAt": "2025-08-19T18:21:42.985Z",
+  "updatedAt": "2025-08-19T18:21:42.985Z",
+  "publishedAt": "2025-08-19T18:21:42.985Z",
+  "readonly": true,
+  "data": {
+    "name": "Armor",
+    "description": "Items used for protection from damage."
+  }
+}

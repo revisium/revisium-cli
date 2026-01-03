@@ -35,13 +35,22 @@ jobs:
         run: npm ci
 
       - name: Run linter
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Compile TypeScript
         run: npm run tsc
 
-      - name: Run tests
+      - name: Run unit tests with coverage
         run: npm run test:cov
+
+      - name: Build CLI for E2E tests
+        run: npm run build
+
+      - name: Run E2E tests with coverage
+        run: npm run test:e2e:cov
+
+      - name: Merge coverage reports
+        run: npm run coverage:merge
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9 #SonarSource/sonarqube-scan-action@v5
@@ -52,3 +61,4 @@ jobs:
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 #codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info

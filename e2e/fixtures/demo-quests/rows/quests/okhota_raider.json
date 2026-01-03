@@ -1,0 +1,70 @@
+{
+  "createdId": "qWG2zqRjqk6MOpN9NwWBQ",
+  "id": "okhota_raider",
+  "versionId": "Bu061PVQ8H56NfZ_NM7II",
+  "createdAt": "2025-08-19T18:22:14.530Z",
+  "updatedAt": "2025-08-19T18:22:14.530Z",
+  "publishedAt": "2025-08-19T18:22:14.530Z",
+  "readonly": true,
+  "data": {
+    "name": "Hunt for the Desert Raider",
+    "steps": [
+      {
+        "items": [],
+        "npc_id": "desert_raider",
+        "coordinates": {
+          "x": 512,
+          "y": 128
+        },
+        "description": "Find and defeat the Desert Raider in the Scorched Dunes.",
+        "location_id": "scorched_dunes",
+        "step_number": 1,
+        "objective_type": "combat"
+      }
+    ],
+    "preview": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/43378f356828cba8daab829332f1674ca1cbfdf8",
+      "hash": "43378f356828cba8daab829332f1674ca1cbfdf8",
+      "size": 2113659,
+      "width": 1024,
+      "fileId": "lnkQXtgtH2jmmauCpqn77",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "ChatGPT Image 1 Ð¸ÑÐ½. 2025 Ð³., 17_52_32.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "rewards": {
+      "items": [
+        {
+          "item_id": "shadow_dagger",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 150,
+        "silver": 75
+      },
+      "abilities": [
+        "stealth"
+      ],
+      "experience": 600
+    },
+    "description": "Defeat the Desert Raider to ensure caravan safety.",
+    "requirements": {
+      "required_items": [],
+      "required_level": 10,
+      "required_skills": [
+        "boevoy_klich"
+      ],
+      "required_factions": [
+        {
+          "faction_id": "desert_nomads",
+          "reputation": "neutral"
+        }
+      ]
+    },
+    "is_repeatable": true,
+    "quest_type_id": "kill_quest"
+  }
+}

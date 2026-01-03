@@ -50,7 +50,7 @@ export interface ApiClient {
   updateRows(
     revisionId: string,
     tableId: string,
-    data: { rows: { rowId: string; data: object }[] },
+    data: { rows: { rowId: string; data: object }[]; isRestore?: boolean },
   ): Promise<{ data?: unknown; error?: unknown }>;
 
   createRow(
@@ -63,7 +63,7 @@ export interface ApiClient {
     revisionId: string,
     tableId: string,
     rowId: string,
-    data: { data: object },
+    data: { data: object; isRestore?: boolean },
   ): Promise<{ data?: unknown; error?: unknown }>;
 }
 
@@ -280,6 +280,7 @@ export class RowSyncService {
       executeBatch: (batch) =>
         api.updateRows(revisionId, tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
+          isRestore: true,
         }),
       fallbackSingle: (remainingRows) =>
         this.updateRowsSingle(
@@ -520,6 +521,7 @@ export class RowSyncService {
       try {
         const result = await api.updateRow(revisionId, tableId, row.id, {
           data: row.data as object,
+          isRestore: true,
         });
 
         if (result.error) {

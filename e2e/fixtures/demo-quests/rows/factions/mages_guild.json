@@ -1,0 +1,13 @@
+{
+  "createdId": "8vDHwiYaA2dLtNN_0o5xq",
+  "id": "mages_guild",
+  "versionId": "lEcq9R2lzC1jftK4jtBaK",
+  "createdAt": "2025-08-19T18:21:40.968Z",
+  "updatedAt": "2025-08-19T18:21:40.968Z",
+  "publishedAt": "2025-08-19T18:21:40.968Z",
+  "readonly": true,
+  "data": {
+    "name": "Mages Guild",
+    "description": "A union of mages striving to study and protect magic."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "createdId": "7G3bJPtU4dBN24bGKwdEl",
+  "id": "crystal_keeper",
+  "versionId": "4FuUu-2Q_8Y16IVZR99Py",
+  "createdAt": "2025-08-19T18:22:12.305Z",
+  "updatedAt": "2025-08-19T18:22:12.305Z",
+  "publishedAt": "2025-08-19T18:22:12.305Z",
+  "readonly": true,
+  "data": {
+    "name": "Crystal Keeper",
+    "avatar": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/96c9db2fb341a2a56b1373aa8b06ca58fdf24b8c",
+      "hash": "96c9db2fb341a2a56b1373aa8b06ca58fdf24b8c",
+      "size": 2504440,
+      "width": 1024,
+      "fileId": "bQB7Hqp9QPYD9L0zvPLn9",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "crystal_keeper.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "attributes": {
+      "level": 15,
+      "stats": {
+        "agility": 12,
+        "strength": 10,
+        "intelligence": 20
+      },
+      "health": 160,
+      "equipment": [
+        {
+          "slot": "armor",
+          "item_id": "crystal_armor"
+        }
+      ],
+      "faction_id": "black_order"
+    },
+    "location_id": "crystal_maze"
+  }
+}

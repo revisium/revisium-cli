@@ -1,0 +1,13 @@
+{
+  "createdId": "Cjnajku_ySXOZueamfBPG",
+  "id": "mage",
+  "versionId": "eS94lJVrnjY-ke_yHHQqO",
+  "createdAt": "2025-08-19T18:21:36.894Z",
+  "updatedAt": "2025-08-19T18:21:36.894Z",
+  "publishedAt": "2025-08-19T18:21:36.894Z",
+  "readonly": true,
+  "data": {
+    "name": "Mage",
+    "description": "A master of spells who uses magic to deal damage."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "createdId": "7q31XulbhWBuhhQ-V6onx",
+  "id": "crystal_caves",
+  "versionId": "kHkjqEpPryLtjo8EAF5MU",
+  "createdAt": "2025-08-19T18:21:46.081Z",
+  "updatedAt": "2025-08-19T18:21:46.081Z",
+  "publishedAt": "2025-08-19T18:21:46.081Z",
+  "readonly": true,
+  "data": {
+    "name": "Crystal Caves",
+    "description": "Underground caves sparkling with crystals and hiding many secrets."
+  }
+}

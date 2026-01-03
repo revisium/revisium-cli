@@ -13,19 +13,26 @@
   "scripts": {
     "build": "nest build",
     "prepublishOnly": "npm run build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"e2e/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings 0 --fix",
-    "lint:ci": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings 0",
+    "lint": "eslint \"{src,apps,libs,test,e2e}/**/*.ts\" --max-warnings 0 --fix",
+    "lint:ci": "eslint \"{src,apps,libs,test,e2e}/**/*.ts\" --max-warnings 0",
     "tsc": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test:cov": "jest --coverage --coverageDirectory=coverage/unit",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./e2e/jest-e2e.json",
+    "test:e2e:cov": "npm run build:instrumented && E2E_INSTRUMENTED=1 jest --config ./e2e/jest-e2e.json",
+    "build:instrumented": "npm run build && rm -rf dist-instrumented && mkdir -p dist-instrumented && cp dist/package.json dist-instrumented/ && npx nyc instrument dist/src dist-instrumented/src --include='**/*.js'",
+    "test:all": "npm run test:cov && npm run test:e2e:cov && npm run coverage:merge",
+    "coverage:merge": "node scripts/merge-coverage.js",
+    "docker:e2e:up": "docker-compose -f e2e/docker-compose.e2e.yml up -d",
+    "docker:e2e:down": "docker-compose -f e2e/docker-compose.e2e.yml down -v",
+    "docker:e2e:logs": "docker-compose -f e2e/docker-compose.e2e.yml logs -f",
     "generate:api": "npx swagger-typescript-api generate -p https://cloud.revisium.io/api-json -o src/__generated__ -n api.ts --extract-request-params --disable-throw-on-error"
   },
   "bin": {
@@ -73,7 +80,9 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "nyc": "^17.1.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2"
   },
   "jest": {
     "modulePaths": [
@@ -99,7 +108,8 @@
     ],
     "coverageReporters": [
       "text-summary",
-      "lcov"
+      "lcov",
+      "json"
     ],
     "testEnvironment": "node",
     "moduleNameMapper": {

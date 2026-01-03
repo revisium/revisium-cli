@@ -1,0 +1,13 @@
+{
+  "createdId": "vKnfWSNhbPWyd60csVjtm",
+  "id": "intelligence",
+  "versionId": "Hze8zgA9GjdsFFX_gXqkQ",
+  "createdAt": "2025-08-19T18:21:52.081Z",
+  "updatedAt": "2025-08-19T18:21:52.081Z",
+  "publishedAt": "2025-08-19T18:21:52.081Z",
+  "readonly": true,
+  "data": {
+    "name": "Intelligence",
+    "description": "Affects spell effectiveness and mana amount."
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "createdId": "Fa1YdzM10-buww96M39Ol",
+  "id": "whispering_grove",
+  "versionId": "6Y1qKLWim5-AX3r0vLEqq",
+  "createdAt": "2025-08-19T18:22:11.708Z",
+  "updatedAt": "2025-08-19T18:22:11.708Z",
+  "publishedAt": "2025-08-19T18:22:11.708Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/813353b2e8fb569151957477650acdf4a627ee2d",
+      "hash": "813353b2e8fb569151957477650acdf4a627ee2d",
+      "size": 2337864,
+      "width": 1024,
+      "fileId": "JMQWO80-dYpHaVBp1Favn",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "whispering_grove.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "name": "Whispering Grove",
+    "region_id": "enchanted_forest",
+    "coordinates": {
+      "x": 200,
+      "y": 350,
+      "z": 0,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/40067b96471a1302817f82a43cd9d69364ba1664",
+            "hash": "40067b96471a1302817f82a43cd9d69364ba1664",
+            "size": 2275223,
+            "width": 1024,
+            "fileId": "9WgUyAgvGPio9JqILmxkl",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "whispering_grove2.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Sacred Tree",
+          "item_id": "enchanted_staff",
+          "description": "A tree emanating magical energy used by mages."
+        },
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/22d5cdcf46415b3a26a1d82587ececf01b7c0f50",
+            "hash": "22d5cdcf46415b3a26a1d82587ececf01b7c0f50",
+            "size": 2249744,
+            "width": 1024,
+            "fileId": "27T5BUTV95pJUgnb2YYU9",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "whispering_grove3.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Lake of Mysteries",
+          "item_id": "crystal_armor",
+          "description": "A mysterious lake hiding magical armor."
+        }
+      ]
+    },
+    "description": "A place in the Enchanted Forest where mysterious whispers are constantly heard."
+  }
+}

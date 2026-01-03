@@ -1,0 +1,67 @@
+{
+  "createdId": "ToXWlYTaQLIXDMSNXphxF",
+  "id": "crystal_maze",
+  "versionId": "0-IFzEbO1ngvefjoPFXJz",
+  "createdAt": "2025-08-19T18:22:09.280Z",
+  "updatedAt": "2025-08-19T18:22:09.280Z",
+  "publishedAt": "2025-08-19T18:22:09.280Z",
+  "readonly": true,
+  "data": {
+    "icon": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/cf4d9e2bff71bdfbe2f186bc8d92b0da49b635be",
+      "hash": "cf4d9e2bff71bdfbe2f186bc8d92b0da49b635be",
+      "size": 2862025,
+      "width": 1024,
+      "fileId": "CzOZOtYtT2GOvuS0ibgDs",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "crystal_maze2.png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "name": "Crystal Labyrinth",
+    "region_id": "crystal_caves",
+    "coordinates": {
+      "x": 640,
+      "y": 480,
+      "z": -20,
+      "points_of_interest": [
+        {
+          "icon": {
+            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/e88ab526025cca45fc023512e531e1d3b97c2e19",
+            "hash": "e88ab526025cca45fc023512e531e1d3b97c2e19",
+            "size": 2725877,
+            "width": 1024,
+            "fileId": "pAP_G1ML3E9kPIKuNPk80",
+            "height": 1024,
+            "status": "uploaded",
+            "fileName": "crystal_maze.png",
+            "mimeType": "image/png",
+            "extension": "png"
+          },
+          "name": "Crystal Heart",
+          "item_id": "enchanted_staff",
+          "description": "A giant crystal that gives power to mages."
+        },
+        {
+          "icon": {
+            "url": "",
+            "hash": "",
+            "size": 0,
+            "width": 0,
+            "fileId": "Fj6Zs9SBJ1L6MQhfsARJp",
+            "height": 0,
+            "status": "ready",
+            "fileName": "",
+            "mimeType": "",
+            "extension": ""
+          },
+          "name": "Cave of Reflections",
+          "item_id": "flaming_sword",
+          "description": "A place where reflections can come alive and attack."
+        }
+      ]
+    },
+    "description": "A complex crystal labyrinth hiding many dangers and secrets."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "createdId": "zBh7SondcnKqJaMU89O7v",
+  "id": "enchanted_druid",
+  "versionId": "8fwp4OhkH3RJEe7BlXWSg",
+  "createdAt": "2025-08-19T18:22:13.116Z",
+  "updatedAt": "2025-08-19T18:22:13.116Z",
+  "publishedAt": "2025-08-19T18:22:13.116Z",
+  "readonly": true,
+  "data": {
+    "name": "Enchanted Druid",
+    "avatar": {
+      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/ab6b96a27c8413168d75e6549d335250589eaf5c",
+      "hash": "ab6b96a27c8413168d75e6549d335250589eaf5c",
+      "size": 2619218,
+      "width": 1024,
+      "fileId": "Q1QVy6og5laLVCKSmJSXA",
+      "height": 1024,
+      "status": "uploaded",
+      "fileName": "enchanted_druid  .png",
+      "mimeType": "image/png",
+      "extension": "png"
+    },
+    "attributes": {
+      "level": 8,
+      "stats": {
+        "agility": 10,
+        "strength": 8,
+        "intelligence": 18
+      },
+      "health": 120,
+      "equipment": [
+        {
+          "slot": "weapon",
+          "item_id": "enchanted_staff"
+        }
+      ],
+      "faction_id": "mages_guild"
+    },
+    "location_id": "whispering_grove"
+  }
+}
