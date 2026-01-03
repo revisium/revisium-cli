@@ -1,13 +1,12 @@
 import { Option } from 'nest-commander';
 import { ConfigService } from '@nestjs/config';
 import { BaseCommand } from 'src/commands/base.command';
-import { SyncApiService } from 'src/services/sync-api.service';
+import { SyncApiService, CommitRevisionService } from 'src/services/sync';
 import {
   RevisiumUrlComplete,
   UrlBuilderService,
   UrlEnvConfig,
-} from 'src/services/url-builder.service';
-import { CommitRevisionService } from 'src/services/commit-revision.service';
+} from 'src/services/url';
 import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 export interface BaseSyncOptions {
