@@ -4,26 +4,28 @@
 
 All commands support configuration via environment variables:
 
-| Variable | Description | Default |
+| Variable | Description | Example |
 |----------|-------------|---------|
-| `REVISIUM_API_URL` | API base URL | `https://cloud.revisium.io/` |
-| `REVISIUM_USERNAME` | Username for authentication | - |
-| `REVISIUM_PASSWORD` | Password for authentication | - |
-| `REVISIUM_ORGANIZATION` | Organization name | - |
-| `REVISIUM_PROJECT` | Project name | - |
-| `REVISIUM_BRANCH` | Branch name | `master` |
+| `REVISIUM_URL` | Revisium URL with host/org/project/branch | `revisium://cloud.revisium.io/org/proj/main` |
+| `REVISIUM_TOKEN` | JWT authentication token | - |
+| `REVISIUM_USERNAME` | Username (for password auth) | - |
+| `REVISIUM_PASSWORD` | Password (for password auth) | - |
+
+See [URL Format](./url-format.md) for complete URL syntax.
 
 ## .env File
 
 Create a `.env` file in your project directory:
 
 ```env
-REVISIUM_API_URL=https://cloud.revisium.io/
+# Recommended: URL + Token
+REVISIUM_URL=revisium://cloud.revisium.io/your_organization/your_project/master
+REVISIUM_TOKEN=your_jwt_token
+
+# Alternative: URL + Username/Password
+REVISIUM_URL=revisium://cloud.revisium.io/your_organization/your_project/master
 REVISIUM_USERNAME=your_username
 REVISIUM_PASSWORD=your_password
-REVISIUM_ORGANIZATION=your_organization
-REVISIUM_PROJECT=your_project
-REVISIUM_BRANCH=master
 ```
 
 ## Custom Environment File
@@ -42,23 +44,20 @@ revisium migrate apply --file ./migrations.json
 
 ## Command-Line Options
 
-Override any environment variable with CLI options:
+Override environment variables with CLI options:
 
 ```bash
 revisium schema save --folder ./schemas \
-  --url http://api.example.com \
-  --organization my-org \
-  --project my-project \
-  --branch develop
+  --url revisium://api.example.com/my-org/my-project/develop
 ```
 
 ## Priority
 
 Configuration is resolved in this order (highest to lowest):
 
-1. **Command-line options** (`--url`, `--organization`, etc.)
-2. **Environment variables** (`REVISIUM_*`)
-3. **Default values**
+1. **Command-line options** (`--url`)
+2. **Environment variables** (`REVISIUM_URL`, `REVISIUM_TOKEN`, etc.)
+3. **Interactive prompts** (for missing values)
 
 ## Examples
 
@@ -70,8 +69,7 @@ revisium rows upload --folder ./data
 
 # Production (override with CLI)
 revisium rows upload --folder ./data \
-  --url https://prod.example.com \
-  --organization prod-org
+  --url revisium://prod.example.com/prod-org/main-app/master?token=$PROD_TOKEN
 ```
 
 ### Multiple Environments
@@ -87,15 +85,12 @@ REVISIUM_ENV_FILE=./config/production.env revisium migrate apply --file ./migrat
 ```yaml
 # GitHub Actions example
 env:
-  REVISIUM_API_URL: ${{ secrets.REVISIUM_API_URL }}
+  REVISIUM_URL: revisium://cloud.revisium.io/production/main-app/master
   REVISIUM_USERNAME: ${{ secrets.REVISIUM_USERNAME }}
   REVISIUM_PASSWORD: ${{ secrets.REVISIUM_PASSWORD }}
-  REVISIUM_ORGANIZATION: production
-  REVISIUM_PROJECT: main-app
-  REVISIUM_BRANCH: master
 ```
 
 ## See Also
 
 - [Authentication](./authentication.md) - Token, API key, and password auth
-- [URL Format](./url-format.md) - Revisium URL syntax for sync commands
+- [URL Format](./url-format.md) - Revisium URL syntax

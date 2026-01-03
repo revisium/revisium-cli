@@ -11,34 +11,6 @@ import {
 class RevisiumApiClient extends Api<unknown> {
   public authToken: string | undefined = undefined;
 
-  private _bulkCreateSupported: boolean | undefined = undefined;
-  private _bulkUpdateSupported: boolean | undefined = undefined;
-  private _bulkPatchSupported: boolean | undefined = undefined;
-
-  public get bulkCreateSupported(): boolean | undefined {
-    return this._bulkCreateSupported;
-  }
-
-  public set bulkCreateSupported(value: boolean) {
-    this._bulkCreateSupported = value;
-  }
-
-  public get bulkUpdateSupported(): boolean | undefined {
-    return this._bulkUpdateSupported;
-  }
-
-  public set bulkUpdateSupported(value: boolean) {
-    this._bulkUpdateSupported = value;
-  }
-
-  public get bulkPatchSupported(): boolean | undefined {
-    return this._bulkPatchSupported;
-  }
-
-  public set bulkPatchSupported(value: boolean) {
-    this._bulkPatchSupported = value;
-  }
-
   constructor(baseUrl: string) {
     super({ baseUrl });
   }
@@ -138,30 +110,6 @@ export class ConnectionService {
 
   public get headRevisionId(): string {
     return this.connection.headRevisionId;
-  }
-
-  public get bulkCreateSupported(): boolean | undefined {
-    return this.connection.client.bulkCreateSupported;
-  }
-
-  public set bulkCreateSupported(value: boolean) {
-    this.connection.client.bulkCreateSupported = value;
-  }
-
-  public get bulkUpdateSupported(): boolean | undefined {
-    return this.connection.client.bulkUpdateSupported;
-  }
-
-  public set bulkUpdateSupported(value: boolean) {
-    this.connection.client.bulkUpdateSupported = value;
-  }
-
-  public get bulkPatchSupported(): boolean | undefined {
-    return this.connection.client.bulkPatchSupported;
-  }
-
-  public set bulkPatchSupported(value: boolean) {
-    this.connection.client.bulkPatchSupported = value;
   }
 
   public async connect(options: ConnectionOptions = {}): Promise<void> {

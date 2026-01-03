@@ -38,7 +38,57 @@ npx revisium --help
 
 ## Examples
 
+### CI/CD Migrations (Prisma-like Workflow)
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│    DEV      │      │    GIT      │      │   CI/CD     │
+│             │      │             │      │             │
+│  Revisium   │ save │ migrations  │ push │   apply     │
+│    UI       │─────▶│   .json     │─────▶│  migrations │
+│             │      │   data/     │      │   + seed    │
+└─────────────┘      └─────────────┘      └─────────────┘
+```
+
+Like Prisma, save schema migrations locally and apply them in CI/CD:
+
+```bash
+# 1. Save migrations locally (during development)
+revisium migrate save --file ./revisium/migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+
+# 2. Commit to git
+git add revisium/migrations.json
+git commit -m "Add new schema fields"
+
+# 3. Apply in CI/CD (on deploy)
+revisium migrate apply --file ./revisium/migrations.json --commit \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
+```
+
+Add to package.json scripts:
+
+```json
+{
+  "scripts": {
+    "revisium:save-migrations": "revisium migrate save --file ./revisium/migrations.json",
+    "revisium:apply-migrations": "revisium migrate apply --file ./revisium/migrations.json --commit",
+    "start:prod": "npm run revisium:apply-migrations && node dist/main"
+  }
+}
+```
+
+See [Docker Deployment](docs/docker-deployment.md) for complete CI/CD examples.
+
 ### Export & Import (File-based)
+
+```
+┌─────────────┐                          ┌─────────────┐
+│   SOURCE    │    migrations.json       │   TARGET    │
+│  Revisium   │ ────────────────────▶    │  Revisium   │
+│             │        data/             │             │
+└─────────────┘                          └─────────────┘
+```
 
 Save project to files for backup or deployment to another instance:
 
@@ -48,11 +98,21 @@ revisium migrate save --file ./migrations.json
 revisium rows save --folder ./data
 
 # Import to target
-revisium migrate apply --file ./migrations.json --commit --url https://target.example.com
-revisium rows upload --folder ./data --commit --url https://target.example.com
+revisium migrate apply --file ./migrations.json --commit \
+  --url revisium://target.example.com/org/proj/main
+revisium rows upload --folder ./data --commit \
+  --url revisium://target.example.com/org/proj/master
 ```
 
 ### Sync (Direct Transfer)
+
+```
+┌─────────────┐                          ┌─────────────┐
+│   SOURCE    │    schema + data         │   TARGET    │
+│  Revisium   │ ════════════════════▶    │  Revisium   │
+│             │       (direct)           │   :draft    │
+└─────────────┘                          └─────────────┘
+```
 
 Synchronize directly between two projects without intermediate files:
 
@@ -64,6 +124,12 @@ revisium sync all \
 ```
 
 ### Patches (Selective Updates)
+
+```
+┌────────┐      ┌────────┐      ┌──────────┐      ┌────────┐
+│  SAVE  │─────▶│  EDIT  │─────▶│ VALIDATE │─────▶│ APPLY  │
+└────────┘      └────────┘      └──────────┘      └────────┘
+```
 
 Update specific fields without affecting other data:
 
@@ -96,24 +162,19 @@ revisium patches apply --input ./patches --commit
 Configure via environment variables or `.env` file:
 
 ```env
-REVISIUM_API_URL=https://cloud.revisium.io/
+REVISIUM_URL=revisium://cloud.revisium.io/your_org/your_project/main
 REVISIUM_USERNAME=your_username
 REVISIUM_PASSWORD=your_password
-REVISIUM_ORGANIZATION=your_organization
-REVISIUM_PROJECT=your_project
-REVISIUM_BRANCH=master
 ```
 
-Or use command-line options:
+Or use command-line options with URL:
 
 ```bash
 revisium schema save --folder ./schemas \
-  --url https://api.example.com \
-  --organization my-org \
-  --project my-project
+  --url revisium://cloud.revisium.io/my-org/my-project/develop?token=$TOKEN
 ```
 
-See [Configuration](docs/configuration.md) for details.
+See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) for details.
 
 ## Documentation
 

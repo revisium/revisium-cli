@@ -9,25 +9,6 @@ import {
 class RevisiumApiClient extends Api<unknown> {
   public authToken: string | undefined = undefined;
 
-  private _bulkCreateSupported: boolean | undefined = undefined;
-  private _bulkUpdateSupported: boolean | undefined = undefined;
-
-  public get bulkCreateSupported(): boolean | undefined {
-    return this._bulkCreateSupported;
-  }
-
-  public set bulkCreateSupported(value: boolean) {
-    this._bulkCreateSupported = value;
-  }
-
-  public get bulkUpdateSupported(): boolean | undefined {
-    return this._bulkUpdateSupported;
-  }
-
-  public set bulkUpdateSupported(value: boolean) {
-    this._bulkUpdateSupported = value;
-  }
-
   constructor(baseUrl: string) {
     super({ baseUrl });
   }

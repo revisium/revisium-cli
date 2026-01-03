@@ -493,11 +493,6 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
-    if (this.connectionService.bulkCreateSupported === false) {
-      await this.createRowsSingle(revisionId, tableId, rows, stats);
-      return;
-    }
-
     await this.processBulkOperation({
       rows,
       batchSize,
@@ -508,12 +503,6 @@ export class UploadRowsCommand extends BaseCommand {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
         }),
-      fallbackSingle: (remaining) =>
-        this.createRowsSingle(revisionId, tableId, remaining, stats),
-      getBulkSupported: () => this.connectionService.bulkCreateSupported,
-      setBulkSupported: (value) => {
-        this.connectionService.bulkCreateSupported = value;
-      },
       updateStats: (count) => {
         stats.uploaded += count;
       },
@@ -532,11 +521,6 @@ export class UploadRowsCommand extends BaseCommand {
       return;
     }
 
-    if (this.connectionService.bulkUpdateSupported === false) {
-      await this.updateRowsSingle(revisionId, tableId, rows, stats);
-      return;
-    }
-
     await this.processBulkOperation({
       rows,
       batchSize,
@@ -547,12 +531,6 @@ export class UploadRowsCommand extends BaseCommand {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
         }),
-      fallbackSingle: (remaining) =>
-        this.updateRowsSingle(revisionId, tableId, remaining, stats),
-      getBulkSupported: () => this.connectionService.bulkUpdateSupported,
-      setBulkSupported: (value) => {
-        this.connectionService.bulkUpdateSupported = value;
-      },
       updateStats: (count) => {
         stats.updated += count;
       },
@@ -568,9 +546,6 @@ export class UploadRowsCommand extends BaseCommand {
     executeBatch: (
       batch: RowData[],
     ) => Promise<{ data?: unknown; error?: unknown }>;
-    fallbackSingle: (rows: RowData[]) => Promise<void>;
-    getBulkSupported: () => boolean | undefined;
-    setBulkSupported: (value: boolean) => void;
     updateStats: (count: number) => void;
     operationName: string;
   }): Promise<void> {
@@ -587,254 +562,39 @@ export class UploadRowsCommand extends BaseCommand {
         total: rows.length,
       });
 
-      const shouldReturn = await this.executeBatchWithFallback(
-        batch,
-        rows.slice(i),
-        config,
-        batchSize,
-        tableId,
-      );
+      try {
+        const result = await config.executeBatch(batch);
 
-      if (shouldReturn) {
-        return;
-      }
+        if (result.error) {
+          this.clearProgressLine();
+          const statusCode = this.getErrorStatusCode(result.error);
+          throw new UploadError(
+            `Batch ${config.operationName.replace('Rows', '')} failed: ${JSON.stringify(result.error)}`,
+            tableId,
+            statusCode,
+            batchSize,
+          );
+        }
 
-      config.setBulkSupported(true);
-      config.updateStats(batch.length);
-      processed += batch.length;
-    }
+        config.updateStats(batch.length);
+        processed += batch.length;
+      } catch (error: unknown) {
+        if (error instanceof UploadError) {
+          throw error;
+        }
 
-    this.clearProgressLine();
-  }
-
-  private async executeBatchWithFallback(
-    batch: RowData[],
-    remainingRows: RowData[],
-    config: {
-      executeBatch: (
-        batch: RowData[],
-      ) => Promise<{ data?: unknown; error?: unknown }>;
-      fallbackSingle: (rows: RowData[]) => Promise<void>;
-      setBulkSupported: (value: boolean) => void;
-      operationName: string;
-    },
-    batchSize: number,
-    tableId: string,
-  ): Promise<boolean> {
-    try {
-      const result = await config.executeBatch(batch);
-
-      if (result.error) {
-        return this.handleBulkError(
-          result.error,
-          remainingRows,
-          config,
+        this.clearProgressLine();
+        const statusCode = this.getErrorStatusCode(error);
+        throw new UploadError(
+          `Batch ${config.operationName.replace('Rows', '')} exception: ${error instanceof Error ? error.message : String(error)}`,
+          tableId,
+          statusCode,
           batchSize,
-          tableId,
         );
       }
-      return false;
-    } catch (error: unknown) {
-      return this.handleBulkException(
-        error,
-        remainingRows,
-        config,
-        batchSize,
-        tableId,
-      );
-    }
-  }
-
-  private async handleBulkError(
-    error: unknown,
-    remainingRows: RowData[],
-    config: {
-      fallbackSingle: (rows: RowData[]) => Promise<void>;
-      setBulkSupported: (value: boolean) => void;
-      operationName: string;
-    },
-    batchSize: number,
-    tableId: string,
-  ): Promise<boolean> {
-    if (this.is404Error(error)) {
-      await this.fallbackToSingleRowMode(remainingRows, config);
-      return true;
     }
 
     this.clearProgressLine();
-    const statusCode = this.getErrorStatusCode(error);
-    throw new UploadError(
-      `Batch ${config.operationName.replace('Rows', '')} failed: ${JSON.stringify(error)}`,
-      tableId,
-      statusCode,
-      batchSize,
-    );
-  }
-
-  private async handleBulkException(
-    error: unknown,
-    remainingRows: RowData[],
-    config: {
-      fallbackSingle: (rows: RowData[]) => Promise<void>;
-      setBulkSupported: (value: boolean) => void;
-      operationName: string;
-    },
-    batchSize: number,
-    tableId: string,
-  ): Promise<boolean> {
-    if (error instanceof UploadError) {
-      throw error;
-    }
-
-    if (this.is404Error(error)) {
-      await this.fallbackToSingleRowMode(remainingRows, config);
-      return true;
-    }
-
-    this.clearProgressLine();
-    const statusCode = this.getErrorStatusCode(error);
-    throw new UploadError(
-      `Batch ${config.operationName.replace('Rows', '')} exception: ${error instanceof Error ? error.message : String(error)}`,
-      tableId,
-      statusCode,
-      batchSize,
-    );
-  }
-
-  private async fallbackToSingleRowMode(
-    remainingRows: RowData[],
-    config: {
-      fallbackSingle: (rows: RowData[]) => Promise<void>;
-      setBulkSupported: (value: boolean) => void;
-      operationName: string;
-    },
-  ): Promise<void> {
-    this.clearProgressLine();
-    console.log(
-      `  ⚠️ Bulk ${config.operationName} not supported, falling back to single-row mode`,
-    );
-    config.setBulkSupported(false);
-    await config.fallbackSingle(remainingRows);
-  }
-
-  private async createRowsSingle(
-    revisionId: string,
-    tableId: string,
-    rows: RowData[],
-    stats: UploadStats,
-  ): Promise<void> {
-    let processed = 0;
-    for (const row of rows) {
-      this.printProgress({
-        tableId,
-        operation: 'create',
-        current: processed,
-        total: rows.length,
-      });
-
-      try {
-        const result = await this.api.createRow(revisionId, tableId, {
-          rowId: row.id,
-          data: row.data as object,
-          isRestore: true,
-        });
-
-        if (result.error) {
-          this.clearProgressLine();
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new UploadError(
-            `Failed to create row ${row.id}: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-          );
-        }
-
-        stats.uploaded++;
-      } catch (error) {
-        if (error instanceof UploadError) {
-          throw error;
-        }
-
-        this.clearProgressLine();
-        const statusCode = this.getErrorStatusCode(error);
-        throw new UploadError(
-          `Failed to create row ${row.id}: ${error instanceof Error ? error.message : String(error)}`,
-          tableId,
-          statusCode,
-        );
-      }
-      processed++;
-    }
-
-    this.clearProgressLine();
-  }
-
-  private async updateRowsSingle(
-    revisionId: string,
-    tableId: string,
-    rows: RowData[],
-    stats: UploadStats,
-  ): Promise<void> {
-    let processed = 0;
-    for (const row of rows) {
-      this.printProgress({
-        tableId,
-        operation: 'update',
-        current: processed,
-        total: rows.length,
-      });
-
-      try {
-        const result = await this.api.updateRow(revisionId, tableId, row.id, {
-          data: row.data as object,
-          isRestore: true,
-        });
-
-        if (result.error) {
-          this.clearProgressLine();
-          const statusCode = this.getErrorStatusCode(result.error);
-          throw new UploadError(
-            `Failed to update row ${row.id}: ${JSON.stringify(result.error)}`,
-            tableId,
-            statusCode,
-          );
-        }
-
-        stats.updated++;
-      } catch (error) {
-        if (error instanceof UploadError) {
-          throw error;
-        }
-
-        this.clearProgressLine();
-        const statusCode = this.getErrorStatusCode(error);
-        throw new UploadError(
-          `Failed to update row ${row.id}: ${error instanceof Error ? error.message : String(error)}`,
-          tableId,
-          statusCode,
-        );
-      }
-      processed++;
-    }
-
-    this.clearProgressLine();
-  }
-
-  private is404Error(error: unknown): boolean {
-    if (typeof error === 'object' && error !== null) {
-      const err = error as Record<string, unknown>;
-      if (err.status === 404 || err.statusCode === 404) {
-        return true;
-      }
-      if (
-        typeof err.response === 'object' &&
-        err.response !== null &&
-        (err.response as Record<string, unknown>).status === 404
-      ) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private getErrorStatusCode(error: unknown): number | undefined {

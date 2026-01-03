@@ -4,7 +4,6 @@ import { TableDependencyService } from './table-dependency.service';
 import {
   RowSyncService,
   RowData,
-  BulkSupportFlags,
   ApiClient,
   RowSyncError,
   ProgressState,
@@ -252,17 +251,9 @@ export class SyncDataService {
     let totalRowsUpdated = 0;
     let totalRowsSkipped = 0;
 
-    const bulkFlags: BulkSupportFlags = {};
-
     for (const tableId of tables) {
       try {
-        const result = await this.syncTable(
-          source,
-          target,
-          tableId,
-          batchSize,
-          bulkFlags,
-        );
+        const result = await this.syncTable(source, target, tableId, batchSize);
 
         tableResults.push(result);
         totalRowsCreated += result.rowsCreated;
@@ -313,7 +304,6 @@ export class SyncDataService {
     target: ConnectionInfo,
     tableId: string,
     batchSize: number,
-    bulkFlags: BulkSupportFlags,
   ): Promise<TableSyncResult> {
     console.log(`  📋 Processing table: ${tableId}`);
 
@@ -326,7 +316,6 @@ export class SyncDataService {
       tableId,
       sourceRows,
       batchSize,
-      bulkFlags,
       (state) => this.printProgress(state),
     );
 

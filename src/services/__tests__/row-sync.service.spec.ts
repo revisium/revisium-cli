@@ -95,8 +95,6 @@ describe('RowSyncService', () => {
           }),
         createRows: jest.fn(),
         updateRows: jest.fn(),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
 
       const result = await service.getExistingRows(mockApi, 'rev1', 'table1');
@@ -113,8 +111,6 @@ describe('RowSyncService', () => {
         rows: jest.fn().mockResolvedValue({ error: 'Some error' }),
         createRows: jest.fn(),
         updateRows: jest.fn(),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
 
       const result = await service.getExistingRows(mockApi, 'rev1', 'table1');
@@ -132,8 +128,6 @@ describe('RowSyncService', () => {
         }),
         createRows: jest.fn(),
         updateRows: jest.fn(),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
       const onProgress = jest.fn();
 
@@ -157,11 +151,7 @@ describe('RowSyncService', () => {
         }),
         createRows: jest.fn().mockResolvedValue({ data: {} }),
         updateRows: jest.fn(),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
-
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const sourceRows: RowData[] = [
         { id: 'row1', data: { name: 'A' } },
@@ -180,8 +170,6 @@ describe('RowSyncService', () => {
       expect(stats.updated).toBe(0);
       expect(stats.skipped).toBe(0);
       expect(mockApi.createRows).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
     });
 
     it('skips identical rows', async () => {
@@ -194,8 +182,6 @@ describe('RowSyncService', () => {
         }),
         createRows: jest.fn(),
         updateRows: jest.fn(),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
 
       const sourceRows: RowData[] = [{ id: 'row1', data: { name: 'A' } }];
@@ -225,11 +211,7 @@ describe('RowSyncService', () => {
         }),
         createRows: jest.fn(),
         updateRows: jest.fn().mockResolvedValue({ data: {} }),
-        createRow: jest.fn(),
-        updateRow: jest.fn(),
       };
-
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const sourceRows: RowData[] = [{ id: 'row1', data: { name: 'New' } }];
 
@@ -245,8 +227,6 @@ describe('RowSyncService', () => {
       expect(stats.updated).toBe(1);
       expect(stats.skipped).toBe(0);
       expect(mockApi.updateRows).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
     });
   });
 
