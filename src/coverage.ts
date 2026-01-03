@@ -1,14 +1,13 @@
-/* istanbul ignore file */
 export function saveCoverage() {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const globalCoverage = (global as any).__coverage__ as
+  const globalCoverage = (globalThis as any).__coverage__ as
     | Record<string, unknown>
     | undefined;
   if (globalCoverage && process.env.NYC_OUTPUT_DIR) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fs = require('fs') as typeof import('fs');
+    const fs = require('node:fs') as typeof import('node:fs');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const path = require('path') as typeof import('path');
+    const path = require('node:path') as typeof import('node:path');
     const outputDir = process.env.NYC_OUTPUT_DIR;
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
