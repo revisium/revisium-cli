@@ -15,15 +15,27 @@ revisium schema save --folder <path>
 | Option | Description | Required |
 |--------|-------------|----------|
 | `-f, --folder <path>` | Output folder for schema files | Yes |
+| `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | No* |
+
+*If `--url` is not provided, uses `REVISIUM_URL` environment variable or prompts interactively.
 
 ### Examples
 
 ```bash
-# Export all schemas
+# Export all schemas (using REVISIUM_URL from environment)
 revisium schema save --folder ./schemas
 
-# Export from specific branch
-revisium schema save --folder ./schemas --branch develop
+# Export with explicit URL and token
+revisium schema save --folder ./schemas \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+
+# Export from head revision
+revisium schema save --folder ./schemas \
+  --url revisium://cloud.revisium.io/myorg/myproject/master:head?token=$TOKEN
+
+# Local development
+revisium schema save --folder ./schemas \
+  --url revisium://localhost:8080/admin/demo/master?token=$TOKEN
 ```
 
 ### Output Format
@@ -111,11 +123,15 @@ Typical workflow for schema management:
 
 ```bash
 # 1. Export schemas from source environment
-revisium schema save --folder ./schemas --url https://source.example.com
+revisium schema save --folder ./schemas \
+  --url revisium://source.example.com/myorg/myproject/master:head?token=$SOURCE_TOKEN
 
 # 2. Convert to migrations
 revisium schema create-migrations --schemas-folder ./schemas --file ./migrations.json
 
 # 3. Apply to target environment
-revisium migrate apply --file ./migrations.json --url https://target.example.com --commit
+revisium migrate apply --file ./migrations.json --commit \
+  --url revisium://target.example.com/myorg/myproject/master?token=$TARGET_TOKEN
 ```
+
+See [URL Format](./url-format.md) for complete URL syntax and authentication options.

@@ -17,13 +17,14 @@ docker pull revisium/revisium-cli:2.0.0
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `REVISIUM_URL` | Revisium URL (see [URL Format](./url-format.md)) | Yes |
-| `REVISIUM_TOKEN` | JWT authentication token | Yes* |
-| `REVISIUM_USERNAME` | Username (alternative to token) | Yes* |
-| `REVISIUM_PASSWORD` | Password (alternative to token) | Yes* |
-| `MIGRATIONS_FILE` | Path to migrations file | No |
-| `DATA_DIR` | Path to data directory | No |
+| `REVISIUM_TOKEN` | JWT authentication token (recommended) | Yes* |
+| `REVISIUM_API_KEY` | API key (for automated access) | Yes* |
+| `REVISIUM_USERNAME` | Username (for password auth) | Yes* |
+| `REVISIUM_PASSWORD` | Password (for password auth) | Yes* |
 
-*Either `REVISIUM_TOKEN` or `REVISIUM_USERNAME`/`REVISIUM_PASSWORD` is required.
+*One authentication method is required: `REVISIUM_TOKEN`, `REVISIUM_API_KEY`, or `REVISIUM_USERNAME`/`REVISIUM_PASSWORD`.
+
+**Note:** The `--url` parameter can specify host/org/project/branch while credentials come from environment variables. This is the recommended approach for CI/CD.
 
 ## CI/CD Workflow (Prisma-like)
 
@@ -195,7 +196,34 @@ spec:
 
 ## GitHub Actions Examples
 
-### Basic Migration Apply
+### Basic Migration Apply (Token - Recommended)
+
+```yaml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Apply Revisium Migrations
+        run: npx revisium migrate apply --file ./revisium/migrations.json --commit
+        env:
+          REVISIUM_URL: revisium://cloud.revisium.io/${{ vars.ORG }}/${{ vars.PROJECT }}/main
+          REVISIUM_TOKEN: ${{ secrets.REVISIUM_TOKEN }}
+```
+
+### Basic Migration Apply (Username/Password)
 
 ```yaml
 name: Deploy
@@ -296,7 +324,15 @@ jobs:
 Run CLI commands directly with Docker:
 
 ```bash
-# Apply migrations
+# Apply migrations (with token - recommended)
+docker run --rm \
+  -e REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/main \
+  -e REVISIUM_TOKEN=$REVISIUM_TOKEN \
+  -v ./revisium/migrations.json:/app/migrations.json \
+  revisium/revisium-cli \
+  revisium migrate apply --file /app/migrations.json --commit
+
+# Apply migrations (with username/password)
 docker run --rm \
   -e REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/main \
   -e REVISIUM_USERNAME=admin \
@@ -308,8 +344,7 @@ docker run --rm \
 # Upload data
 docker run --rm \
   -e REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/main \
-  -e REVISIUM_USERNAME=admin \
-  -e REVISIUM_PASSWORD=secret \
+  -e REVISIUM_TOKEN=$REVISIUM_TOKEN \
   -v ./data:/app/data \
   revisium/revisium-cli \
   revisium rows upload --folder /app/data --commit
