@@ -16,18 +16,26 @@ revisium rows save --folder <path> [--tables <list>]
 |--------|-------------|----------|
 | `-f, --folder <path>` | Output folder for row files | Yes |
 | `-t, --tables <list>` | Comma-separated table IDs | No (all tables) |
+| `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | No* |
+
+*If `--url` is not provided, uses `REVISIUM_URL` environment variable or prompts interactively.
 
 ### Examples
 
 ```bash
-# Export all tables
+# Export all tables (using REVISIUM_URL from environment)
 revisium rows save --folder ./data
 
 # Export specific tables
 revisium rows save --folder ./data --tables users,posts
 
-# Export from specific branch
-revisium rows save --folder ./data --branch develop
+# Export with explicit URL and token
+revisium rows save --folder ./data \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+
+# Export from head revision
+revisium rows save --folder ./data \
+  --url revisium://cloud.revisium.io/myorg/myproject/master:head?token=$TOKEN
 ```
 
 ### Output Format
@@ -69,11 +77,12 @@ revisium rows upload --folder <path> [options]
 | `-t, --tables <list>` | Comma-separated table IDs | All tables |
 | `--batch-size <n>` | Rows per batch | 100 |
 | `-c, --commit` | Create revision after upload | false |
+| `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | Environment |
 
 ### Examples
 
 ```bash
-# Basic upload
+# Basic upload (using REVISIUM_URL from environment)
 revisium rows upload --folder ./data
 
 # Upload specific tables
@@ -84,6 +93,16 @@ revisium rows upload --folder ./data --batch-size 500
 
 # Upload and create revision
 revisium rows upload --folder ./data --commit
+
+# Upload with explicit URL and token
+revisium rows upload --folder ./data --commit \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+
+# Upload with credentials via environment variables
+export REVISIUM_USERNAME=admin
+export REVISIUM_PASSWORD=secret
+revisium rows upload --folder ./data --commit \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
 ```
 
 ## Features
@@ -145,16 +164,20 @@ revisium rows upload --folder ./data --tables users --commit
 
 ```bash
 # Export from source
-revisium rows save --folder ./data --url https://source.example.com
+revisium rows save --folder ./data \
+  --url revisium://source.example.com/myorg/myproject/master:head?token=$SOURCE_TOKEN
 
 # Import to target
-revisium rows upload --folder ./data --url https://target.example.com --commit
+revisium rows upload --folder ./data --commit \
+  --url revisium://target.example.com/myorg/myproject/master?token=$TARGET_TOKEN
 ```
 
 ### Incremental Updates
 
 ```bash
 # Edit local JSON files
-# Then upload changes
+# Then upload changes (using REVISIUM_URL from environment)
 revisium rows upload --folder ./data --commit
 ```
+
+See [URL Format](./url-format.md) for complete URL syntax and [Authentication](./authentication.md) for auth options.

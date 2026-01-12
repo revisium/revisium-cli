@@ -15,15 +15,23 @@ revisium migrate save --file <path>
 | Option | Description | Required |
 |--------|-------------|----------|
 | `-f, --file <path>` | Output file path | Yes |
+| `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | No* |
+
+*If `--url` is not provided, uses `REVISIUM_URL` environment variable or prompts interactively.
 
 ### Examples
 
 ```bash
-# Save migrations
+# Save migrations (using REVISIUM_URL from environment)
 revisium migrate save --file ./migrations.json
 
-# Save from specific branch
-revisium migrate save --file ./migrations.json --branch develop
+# Save with explicit URL and token
+revisium migrate save --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
+
+# Save from head revision
+revisium migrate save --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master:head?token=$TOKEN
 ```
 
 ## migrate apply
@@ -40,18 +48,28 @@ revisium migrate apply --file <path> [--commit]
 |--------|-------------|----------|
 | `-f, --file <path>` | Migrations file path | Yes |
 | `-c, --commit` | Create revision after applying | No |
+| `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | No* |
+
+*If `--url` is not provided, uses `REVISIUM_URL` environment variable or prompts interactively.
 
 ### Examples
 
 ```bash
-# Apply migrations
+# Apply migrations (using REVISIUM_URL from environment)
 revisium migrate apply --file ./migrations.json
 
 # Apply and create revision
 revisium migrate apply --file ./migrations.json --commit
 
-# Apply to different environment
-revisium migrate apply --file ./migrations.json --url https://staging.example.com
+# Apply to specific environment with token
+revisium migrate apply --file ./migrations.json --commit \
+  --url revisium://staging.example.com/myorg/myproject/master?token=$TOKEN
+
+# Apply with credentials via environment variables
+export REVISIUM_USERNAME=admin
+export REVISIUM_PASSWORD=secret
+revisium migrate apply --file ./migrations.json --commit \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
 ```
 
 ## Migration Format
@@ -126,20 +144,27 @@ Deletes a table:
 
 ```bash
 # Export from source
-revisium migrate save --file ./migrations.json --url https://source.example.com
+revisium migrate save --file ./migrations.json \
+  --url revisium://source.example.com/myorg/myproject/master:head?token=$SOURCE_TOKEN
 
 # Apply to target
-revisium migrate apply --file ./migrations.json --url https://target.example.com --commit
+revisium migrate apply --file ./migrations.json --commit \
+  --url revisium://target.example.com/myorg/myproject/master?token=$TARGET_TOKEN
 ```
 
 ### Version Control
 
 ```bash
 # Save migrations to git
-revisium migrate save --file ./migrations.json
+revisium migrate save --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master?token=$TOKEN
 git add migrations.json
 git commit -m "Add user phone field migration"
 
-# Apply in CI/CD
+# Apply in CI/CD (credentials via environment)
+export REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/master
+export REVISIUM_TOKEN=$DEPLOY_TOKEN
 revisium migrate apply --file ./migrations.json --commit
 ```
+
+See [URL Format](./url-format.md) for complete URL syntax and [Authentication](./authentication.md) for auth options.

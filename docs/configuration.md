@@ -2,16 +2,50 @@
 
 ## Environment Variables
 
-All commands support configuration via environment variables:
+All commands support configuration via environment variables.
+
+### Single-Endpoint Commands (schema, migrate, rows)
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `REVISIUM_URL` | Revisium URL with host/org/project/branch | `revisium://cloud.revisium.io/org/proj/main` |
-| `REVISIUM_TOKEN` | JWT authentication token | - |
-| `REVISIUM_USERNAME` | Username (for password auth) | - |
-| `REVISIUM_PASSWORD` | Password (for password auth) | - |
+| `REVISIUM_URL` | Revisium URL (see [URL Format](./url-format.md)) | `revisium://cloud.revisium.io/org/proj/main` |
+| `REVISIUM_TOKEN` | JWT authentication token | `eyJhbGciOiJIUzI1NiIs...` |
+| `REVISIUM_API_KEY` | API key (for automated access) | `ak_xxxxxxxxxxxxx` |
+| `REVISIUM_USERNAME` | Username (for password auth) | `admin` |
+| `REVISIUM_PASSWORD` | Password (for password auth) | `secret` |
 
-See [URL Format](./url-format.md) for complete URL syntax.
+### Sync Commands (source/target)
+
+| Variable | Description |
+|----------|-------------|
+| `REVISIUM_SOURCE_URL` | Source project URL |
+| `REVISIUM_SOURCE_TOKEN` | Source JWT token |
+| `REVISIUM_SOURCE_API_KEY` | Source API key |
+| `REVISIUM_SOURCE_USERNAME` | Source username |
+| `REVISIUM_SOURCE_PASSWORD` | Source password |
+| `REVISIUM_TARGET_URL` | Target project URL |
+| `REVISIUM_TARGET_TOKEN` | Target JWT token |
+| `REVISIUM_TARGET_API_KEY` | Target API key |
+| `REVISIUM_TARGET_USERNAME` | Target username |
+| `REVISIUM_TARGET_PASSWORD` | Target password |
+
+### Authentication Priority
+
+When using `--url`, authentication is resolved in this order:
+
+1. **URL query parameter** - `?token=...` or `?apikey=...`
+2. **URL credentials** - `user:pass@host`
+3. **Environment variable** - `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME/PASSWORD`
+4. **Interactive prompt** - if running in terminal
+
+**Important:** You can use `--url` to specify host/org/project/branch and provide credentials via environment:
+
+```bash
+# URL specifies target, credentials from environment
+export REVISIUM_TOKEN=$MY_TOKEN
+revisium migrate apply --file ./migrations.json \
+  --url revisium://cloud.revisium.io/myorg/myproject/master
+```
 
 ## .env File
 
@@ -47,8 +81,18 @@ revisium migrate apply --file ./migrations.json
 Override environment variables with CLI options:
 
 ```bash
+# Full URL with token in query parameter
 revisium schema save --folder ./schemas \
-  --url revisium://api.example.com/my-org/my-project/develop
+  --url revisium://cloud.revisium.io/my-org/my-project/develop?token=$TOKEN
+
+# URL without credentials (uses REVISIUM_TOKEN from environment)
+export REVISIUM_TOKEN=$MY_TOKEN
+revisium schema save --folder ./schemas \
+  --url revisium://cloud.revisium.io/my-org/my-project/develop
+
+# URL with credentials in URL
+revisium schema save --folder ./schemas \
+  --url revisium://admin:secret@localhost:8080/my-org/my-project/develop
 ```
 
 ## Priority
@@ -67,9 +111,14 @@ Configuration is resolved in this order (highest to lowest):
 # Development (uses .env defaults)
 revisium rows upload --folder ./data
 
-# Production (override with CLI)
-revisium rows upload --folder ./data \
+# Production with token in URL
+revisium rows upload --folder ./data --commit \
   --url revisium://prod.example.com/prod-org/main-app/master?token=$PROD_TOKEN
+
+# Production with token in environment (recommended for CI/CD)
+export REVISIUM_TOKEN=$PROD_TOKEN
+revisium rows upload --folder ./data --commit \
+  --url revisium://prod.example.com/prod-org/main-app/master
 ```
 
 ### Multiple Environments

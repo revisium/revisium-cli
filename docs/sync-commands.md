@@ -114,7 +114,14 @@ revisium sync all --source <url> --target <url> [options]
 
 ### Options
 
-Combines all options from `sync schema` and `sync data`.
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-s, --source <url>` | Source project URL | Required |
+| `-t, --target <url>` | Target project URL | Required |
+| `--tables <list>` | Comma-separated tables | All tables |
+| `--batch-size <n>` | Rows per batch | 100 |
+| `-c, --commit` | Create revision after sync | false |
+| `-d, --dry-run` | Preview without applying | false |
 
 ### Examples
 
@@ -133,24 +140,49 @@ revisium sync all \
   --commit
 ```
 
-## Environment Variables
+## Authentication
 
-For non-interactive usage:
+Sync commands support separate authentication for source and target.
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `REVISIUM_SOURCE_URL` | Source project URL |
+| `REVISIUM_SOURCE_TOKEN` | Source JWT token |
+| `REVISIUM_SOURCE_API_KEY` | Source API key |
+| `REVISIUM_SOURCE_USERNAME` | Source username |
+| `REVISIUM_SOURCE_PASSWORD` | Source password |
+| `REVISIUM_TARGET_URL` | Target project URL |
+| `REVISIUM_TARGET_TOKEN` | Target JWT token |
+| `REVISIUM_TARGET_API_KEY` | Target API key |
+| `REVISIUM_TARGET_USERNAME` | Target username |
+| `REVISIUM_TARGET_PASSWORD` | Target password |
+
+### Non-Interactive Usage
 
 ```bash
-# Source
-REVISIUM_SOURCE_URL=revisium://cloud.revisium.io/org/proj/master:head
-REVISIUM_SOURCE_TOKEN=<YOUR_SOURCE_TOKEN>
+# Using tokens
+export REVISIUM_SOURCE_TOKEN=<YOUR_SOURCE_TOKEN>
+export REVISIUM_TARGET_TOKEN=<YOUR_TARGET_TOKEN>
 
-# Target
-REVISIUM_TARGET_URL=revisium://localhost:8080/org/proj
-REVISIUM_TARGET_TOKEN=<YOUR_TARGET_TOKEN>
+revisium sync all \
+  --source revisium://cloud.revisium.io/org/proj/master:head \
+  --target revisium://localhost:8080/org/proj/master \
+  --commit
 ```
 
-Then run without URL arguments:
-
 ```bash
-revisium sync all --commit
+# Using username/password
+export REVISIUM_SOURCE_USERNAME=admin
+export REVISIUM_SOURCE_PASSWORD=source_secret
+export REVISIUM_TARGET_USERNAME=admin
+export REVISIUM_TARGET_PASSWORD=target_secret
+
+revisium sync all \
+  --source revisium://source.example.com/org/proj/master:head \
+  --target revisium://target.example.com/org/proj/master \
+  --commit
 ```
 
 ## Examples

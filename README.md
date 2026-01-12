@@ -116,9 +116,18 @@ revisium rows upload --folder ./data --commit \
 Synchronize directly between two projects without intermediate files:
 
 ```bash
+# With tokens in URL
 revisium sync all \
   --source revisium://source.example.com/org/proj/master:head?token=xxx \
-  --target revisium://target.example.com/org/proj?token=yyy \
+  --target revisium://target.example.com/org/proj/master?token=yyy \
+  --commit
+
+# With tokens via environment (recommended for CI/CD)
+export REVISIUM_SOURCE_TOKEN=$SOURCE_TOKEN
+export REVISIUM_TARGET_TOKEN=$TARGET_TOKEN
+revisium sync all \
+  --source revisium://source.example.com/org/proj/master:head \
+  --target revisium://target.example.com/org/proj/master \
   --commit
 ```
 
@@ -141,14 +150,25 @@ revisium sync all \
 Configure via environment variables or `.env` file:
 
 ```env
+# Recommended: URL + Token
+REVISIUM_URL=revisium://cloud.revisium.io/your_org/your_project/main
+REVISIUM_TOKEN=your_jwt_token
+
+# Alternative: URL + Username/Password
 REVISIUM_URL=revisium://cloud.revisium.io/your_org/your_project/main
 REVISIUM_USERNAME=your_username
 REVISIUM_PASSWORD=your_password
 ```
 
-Or use command-line options with URL:
+Or use command-line `--url` option with credentials via environment:
 
 ```bash
+# Token in environment, target in URL
+export REVISIUM_TOKEN=$MY_TOKEN
+revisium schema save --folder ./schemas \
+  --url revisium://cloud.revisium.io/my-org/my-project/develop
+
+# Token in URL query parameter
 revisium schema save --folder ./schemas \
   --url revisium://cloud.revisium.io/my-org/my-project/develop?token=$TOKEN
 ```
