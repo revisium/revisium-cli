@@ -37,12 +37,7 @@ run() {
 }
 
 require_envs() {
-  : "${REVISIUM_API_URL:?REVISIUM_API_URL is required}"
-  : "${REVISIUM_USERNAME:?REVISIUM_USERNAME is required}"
-  : "${REVISIUM_PASSWORD:?REVISIUM_PASSWORD is required}"
-  : "${REVISIUM_ORGANIZATION:?REVISIUM_ORGANIZATION is required}"
-  : "${REVISIUM_PROJECT:?REVISIUM_PROJECT is required}"
-  : "${REVISIUM_BRANCH:?REVISIUM_BRANCH is required}"
+  : "${REVISIUM_URL:?REVISIUM_URL is required (format: revisium://[user:pass@]host/org/project/branch:draft[?token=...]). See https://github.com/revisium/revisium-cli/blob/master/docs/url-format.md}"
 }
 
 log "==> Revisium CLI: $(revisium --version || true)"
@@ -53,7 +48,7 @@ log "==> Using data dir:        ${DATA_DIR}"
 if [[ -f "$MIGRATIONS_FILE" ]]; then
   require_envs
   log "==> Apply migrations"
-  run "revisium migrate apply --file '${MIGRATIONS_FILE}' ${MIGRATE_COMMIT_FLAG}"
+  run "revisium migrate apply --file '${MIGRATIONS_FILE}' --url '${REVISIUM_URL}' ${MIGRATE_COMMIT_FLAG}"
 else
   log "==> No migrations file found, skip migrations"
 fi
@@ -61,7 +56,7 @@ fi
 if [[ -d "$DATA_DIR" ]] && [ -n "$(ls -A "$DATA_DIR" 2>/dev/null || true)" ]; then
   require_envs
   log "==> Upload rows from ${DATA_DIR}"
-  run "revisium rows upload --folder '${DATA_DIR}' ${UPLOAD_COMMIT_FLAG}"
+  run "revisium rows upload --folder '${DATA_DIR}' --url '${REVISIUM_URL}' ${UPLOAD_COMMIT_FLAG}"
 else
   log "==> Data dir empty or missing, skip rows upload"
 fi
