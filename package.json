@@ -1,6 +1,6 @@
 {
   "name": "revisium",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://revisium.io",
   "description": "A CLI tool for interacting with Revisium instances, providing migration management, schema export, and data export capabilities.",
   "author": "Anton Kashirov",
