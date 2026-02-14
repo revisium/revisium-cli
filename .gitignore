@@ -40,3 +40,8 @@ lerna-debug.log*
 /examples
 
 dist-instrumented
+
+# E2E standalone
+.e2e-test
+.e2e-test.pid
+.e2e-env.json
