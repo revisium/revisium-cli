@@ -46,8 +46,40 @@ jobs:
       - name: Build CLI for E2E tests
         run: npm run build
 
+      - name: Start Revisium
+        run: |
+          npx @revisium/standalone --auth --port 8082 --data .e2e-test > revisium.log 2>&1 &
+          echo $! > revisium.pid
+          echo "Started with PID $(cat revisium.pid)"
+
+      - name: Wait for Revisium to be ready
+        run: |
+          for i in $(seq 1 300); do
+            if curl -sf http://localhost:8082/health/readiness > /dev/null 2>&1; then
+              echo "Ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Timed out waiting for Revisium"
+          cat revisium.log
+          exit 1
+
       - name: Run E2E tests with coverage
         run: npm run test:e2e:cov
+
+      - name: Stop Revisium
+        if: always()
+        run: |
+          if [ -f revisium.pid ]; then
+            kill $(cat revisium.pid) 2>/dev/null || true
+            rm -f revisium.pid
+          fi
+          rm -rf .e2e-test
+
+      - name: Show Revisium logs on failure
+        if: failure()
+        run: cat revisium.log 2>/dev/null || true
 
       - name: Merge coverage reports
         run: npm run coverage:merge

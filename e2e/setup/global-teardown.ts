@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import { stopDocker } from '../utils/docker-helper';
 
 const ENV_FILE = path.join(process.cwd(), '.e2e-env.json');
 
@@ -10,10 +9,6 @@ export default function globalTeardown(): void {
   console.log('E2E Global Teardown');
   console.log('========================================\n');
 
-  // 1. Stop Docker containers
-  stopDocker();
-
-  // 2. Merge coverage if E2E coverage exists
   const nycOutputDir = path.join(process.cwd(), '.nyc_output');
   if (fs.existsSync(nycOutputDir)) {
     const files = fs
@@ -32,7 +27,6 @@ export default function globalTeardown(): void {
     }
   }
 
-  // 3. Cleanup env file
   if (fs.existsSync(ENV_FILE)) {
     fs.rmSync(ENV_FILE);
     console.log(`\nCleaned up ${ENV_FILE}`);
