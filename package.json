@@ -27,7 +27,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./e2e/jest-e2e.json",
     "test:e2e:cov": "npm run build:instrumented && E2E_INSTRUMENTED=1 jest --config ./e2e/jest-e2e.json",
-    "test:e2e:up": "npx @revisium/standalone --auth --port 8082 --data .e2e-test & echo $! > .e2e-test.pid",
+    "test:e2e:up": "FILE_PLUGIN_PUBLIC_ENDPOINT=https://cdn.example.com npx @revisium/standalone --auth --port 8082 --data .e2e-test & echo $! > .e2e-test.pid",
     "test:e2e:down": "if [ -f .e2e-test.pid ]; then kill $(cat .e2e-test.pid) 2>/dev/null; rm -f .e2e-test.pid; fi; rm -rf .e2e-test",
     "build:instrumented": "npm run build && rm -rf dist-instrumented && mkdir -p dist-instrumented && cp dist/package.json dist-instrumented/ && npx nyc instrument dist/src dist-instrumented/src --include='**/*.js'",
     "test:all": "npm run test:cov && npm run test:e2e:cov && npm run coverage:merge",
