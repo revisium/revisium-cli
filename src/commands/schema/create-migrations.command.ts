@@ -1,10 +1,10 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
 import { CommandRunner, Option, SubCommand } from 'nest-commander';
+import type { InitMigrationDto } from '@revisium/client';
 import { JsonValidatorService, LoggerService } from 'src/services/common';
 import { TableDependencyService } from 'src/services/sync';
 import { JsonSchema } from 'src/types/schema.types';
-import { InitMigrationDto } from 'src/__generated__/api';
 import * as objectHash from 'object-hash';
 
 type Options = {

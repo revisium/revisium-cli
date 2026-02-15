@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { RevisionScope } from '@revisium/client';
 import { SyncApiService, ConnectionInfo } from './sync-api.service';
 import { TableDependencyService } from './table-dependency.service';
-import {
-  RowSyncService,
-  RowData,
-  ApiClient,
-  RowSyncError,
-} from './row-sync.service';
+import { RowSyncService, RowData, RowSyncError } from './row-sync.service';
+import { createApiClientAdapter } from '../connection';
 import { LoggerService } from '../common';
 import {
   DataSyncResult,
@@ -60,17 +57,12 @@ export class SyncDataService {
     tables: string[],
   ): Promise<Record<string, JsonSchema>> {
     const schemas: Record<string, JsonSchema> = {};
+    const revisionScope = this.getRevisionScope(connection);
 
     for (const tableId of tables) {
       try {
-        const result = await connection.client.api.tableSchema(
-          connection.revisionId,
-          tableId,
-        );
-
-        if (result.data) {
-          schemas[tableId] = result.data as JsonSchema;
-        }
+        const schema = await revisionScope.getTableSchema(tableId);
+        schemas[tableId] = schema as JsonSchema;
       } catch (error) {
         this.logger.indentWarn(
           `Could not fetch schema for table ${tableId}: ${error instanceof Error ? error.message : String(error)}`,
@@ -105,30 +97,24 @@ export class SyncDataService {
     tableFilter?: string[],
   ): Promise<string[]> {
     const tables: string[] = [];
+    const revisionScope = this.getRevisionScope(connection);
     let cursor: string | undefined;
 
     do {
-      const result = await connection.client.api.tables({
-        revisionId: connection.revisionId,
+      const result = await revisionScope.getTables({
         first: 100,
         after: cursor,
       });
 
-      if (result.error) {
-        throw new Error(
-          `Failed to get tables: ${JSON.stringify(result.error)}`,
-        );
-      }
-
-      for (const edge of result.data.edges) {
+      for (const edge of result.edges) {
         const tableId = edge.node.id;
         if (!tableFilter || tableFilter.includes(tableId)) {
           tables.push(tableId);
         }
       }
 
-      cursor = result.data.pageInfo.hasNextPage
-        ? result.data.pageInfo.endCursor
+      cursor = result.pageInfo.hasNextPage
+        ? (result.pageInfo.endCursor ?? undefined)
         : undefined;
     } while (cursor);
 
@@ -140,24 +126,17 @@ export class SyncDataService {
     tableId: string,
   ): Promise<RowData[]> {
     const rows: RowData[] = [];
+    const revisionScope = this.getRevisionScope(connection);
     let cursor: string | undefined;
 
     do {
-      const result = await connection.client.api.rows(
-        connection.revisionId,
-        tableId,
-        {
-          first: 100,
-          after: cursor,
-          orderBy: [{ field: 'id', direction: 'asc' }],
-        },
-      );
+      const result = await revisionScope.getRows(tableId, {
+        first: 100,
+        after: cursor,
+        orderBy: [{ field: 'id', direction: 'asc' }],
+      });
 
-      if (result.error) {
-        throw new Error(`Failed to get rows: ${JSON.stringify(result.error)}`);
-      }
-
-      for (const edge of result.data.edges) {
+      for (const edge of result.edges) {
         rows.push({
           id: edge.node.id,
           data: edge.node.data as Record<string, unknown>,
@@ -169,8 +148,8 @@ export class SyncDataService {
         { labels: { fetch: 'Loading from source' }, indent: '    ' },
       );
 
-      cursor = result.data.pageInfo.hasNextPage
-        ? result.data.pageInfo.endCursor
+      cursor = result.pageInfo.hasNextPage
+        ? (result.pageInfo.endCursor ?? undefined)
         : undefined;
     } while (cursor);
 
@@ -195,9 +174,11 @@ export class SyncDataService {
 
       let existingRows: Map<string, JsonValue>;
       try {
+        const targetApiClient = createApiClientAdapter(
+          this.getRevisionScope(target),
+        );
         existingRows = await this.rowSync.getExistingRows(
-          target.client.api as unknown as ApiClient,
-          target.draftRevisionId,
+          targetApiClient,
           tableId,
         );
       } catch {
@@ -310,9 +291,11 @@ export class SyncDataService {
     const sourceRows = await this.getSourceRows(source, tableId);
     this.logger.syncFound(sourceRows.length, 'rows in source');
 
+    const targetApiClient = createApiClientAdapter(
+      this.getRevisionScope(target),
+    );
     const stats = await this.rowSync.syncTableRows(
-      target.client.api as unknown as ApiClient,
-      target.draftRevisionId,
+      targetApiClient,
       tableId,
       sourceRows,
       batchSize,
@@ -332,6 +315,10 @@ export class SyncDataService {
       rowsSkipped: stats.skipped,
       errors: 0,
     };
+  }
+
+  private getRevisionScope(connection: ConnectionInfo): RevisionScope {
+    return connection.revisionScope;
   }
 
   private createEmptyResult(): DataSyncResult {

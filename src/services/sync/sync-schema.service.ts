@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RevisionScope } from '@revisium/client';
 import { SyncApiService, ConnectionInfo } from './sync-api.service';
 import { LoggerService } from '../common';
 import { SchemaSyncResult } from 'src/types/sync.types';
@@ -41,17 +42,9 @@ export class SyncSchemaService {
   private async getMigrations(
     connection: ConnectionInfo,
   ): Promise<Migration[]> {
-    const result = await connection.client.api.migrations(
-      connection.revisionId,
-    );
-
-    if (result.error) {
-      throw new Error(
-        `Failed to get migrations: ${JSON.stringify(result.error)}`,
-      );
-    }
-
-    return result.data as Migration[];
+    const revisionScope = this.getRevisionScope(connection);
+    const migrations = await revisionScope.getMigrations();
+    return migrations as Migration[];
   }
 
   private analyzeMigrations(migrations: Migration[]): SchemaSyncResult {
@@ -99,19 +92,14 @@ export class SyncSchemaService {
     const tablesRemoved: string[] = [];
     let migrationsApplied = 0;
 
+    const revisionScope = this.getRevisionScope(connection);
+
     for (const migration of migrations) {
-      const result = await connection.client.api.applyMigrations(
-        connection.draftRevisionId,
-        [migration],
-      );
+      const results = await revisionScope.applyMigrationsWithStatus([
+        migration,
+      ]);
 
-      if (result.error) {
-        throw new Error(
-          `Failed to apply migration: ${JSON.stringify(result.error)}`,
-        );
-      }
-
-      const response = result.data[0];
+      const response = results[0];
 
       if (response.status === 'failed') {
         throw new Error(
@@ -151,5 +139,9 @@ export class SyncSchemaService {
       tablesUpdated,
       tablesRemoved,
     };
+  }
+
+  private getRevisionScope(connection: ConnectionInfo): RevisionScope {
+    return connection.revisionScope;
   }
 }

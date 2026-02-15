@@ -29,7 +29,6 @@ export interface OrderBy {
 
 export interface ApiClient {
   rows(
-    revisionId: string,
     tableId: string,
     options: { first: number; after?: string; orderBy?: OrderBy[] },
   ): Promise<{
@@ -41,13 +40,11 @@ export interface ApiClient {
   }>;
 
   createRows(
-    revisionId: string,
     tableId: string,
     data: { rows: { rowId: string; data: object }[]; isRestore?: boolean },
   ): Promise<{ data?: unknown; error?: unknown }>;
 
   updateRows(
-    revisionId: string,
     tableId: string,
     data: { rows: { rowId: string; data: object }[]; isRestore?: boolean },
   ): Promise<{ data?: unknown; error?: unknown }>;
@@ -65,7 +62,6 @@ const DEFAULT_BATCH_SIZE = 100;
 export class RowSyncService {
   async syncTableRows(
     api: ApiClient,
-    targetRevisionId: string,
     tableId: string,
     sourceRows: RowData[],
     batchSize: number = DEFAULT_BATCH_SIZE,
@@ -80,12 +76,7 @@ export class RowSyncService {
       updateErrors: 0,
     };
 
-    const existingRows = await this.getExistingRows(
-      api,
-      targetRevisionId,
-      tableId,
-      onProgress,
-    );
+    const existingRows = await this.getExistingRows(api, tableId, onProgress);
 
     const { rowsToCreate, rowsToUpdate, skippedCount } = this.categorizeRows(
       sourceRows,
@@ -96,7 +87,6 @@ export class RowSyncService {
     if (rowsToCreate.length > 0) {
       const createResult = await this.processBatchCreate(
         api,
-        targetRevisionId,
         tableId,
         rowsToCreate,
         batchSize,
@@ -109,7 +99,6 @@ export class RowSyncService {
     if (rowsToUpdate.length > 0) {
       const updateResult = await this.processBatchUpdate(
         api,
-        targetRevisionId,
         tableId,
         rowsToUpdate,
         batchSize,
@@ -124,7 +113,6 @@ export class RowSyncService {
 
   async getExistingRows(
     api: ApiClient,
-    revisionId: string,
     tableId: string,
     onProgress?: ProgressCallback,
   ): Promise<Map<string, JsonValue>> {
@@ -133,7 +121,7 @@ export class RowSyncService {
     let hasMore = true;
 
     while (hasMore) {
-      const result = await api.rows(revisionId, tableId, {
+      const result = await api.rows(tableId, {
         first: 100,
         after,
         orderBy: [{ field: 'id', direction: 'asc' }],
@@ -194,7 +182,6 @@ export class RowSyncService {
 
   private async processBatchCreate(
     api: ApiClient,
-    revisionId: string,
     tableId: string,
     rows: RowData[],
     batchSize: number,
@@ -207,7 +194,7 @@ export class RowSyncService {
       operation: 'create',
       onProgress,
       executeBatch: (batch) =>
-        api.createRows(revisionId, tableId, {
+        api.createRows(tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
         }),
@@ -217,7 +204,6 @@ export class RowSyncService {
 
   private async processBatchUpdate(
     api: ApiClient,
-    revisionId: string,
     tableId: string,
     rows: RowData[],
     batchSize: number,
@@ -230,7 +216,7 @@ export class RowSyncService {
       operation: 'update',
       onProgress,
       executeBatch: (batch) =>
-        api.updateRows(revisionId, tableId, {
+        api.updateRows(tableId, {
           rows: batch.map((r) => ({ rowId: r.id, data: r.data as object })),
           isRestore: true,
         }),

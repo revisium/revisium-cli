@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
+import { RevisionScope } from '@revisium/client';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection';
 import { JsonValidatorService, LoggerService } from 'src/services/common';
@@ -61,8 +62,6 @@ export class ApplyMigrationsCommand extends BaseCommand {
   }
 
   private async applyMigration(migrations: Migration[]) {
-    const revisionId = this.connectionService.draftRevisionId;
-
     if (migrations.length === 0) {
       this.logger.success(
         'No migrations to apply - all migrations are up to date',
@@ -76,11 +75,11 @@ export class ApplyMigrationsCommand extends BaseCommand {
 
     try {
       for (const localMigration of migrations) {
-        const result = await this.api.applyMigrations(revisionId, [
+        const results = await this.revisionScope.applyMigrationsWithStatus([
           localMigration,
         ]);
 
-        const response = result.data[0];
+        const response = results[0];
 
         if (response.status === 'failed') {
           this.logger.migrationFailed(response);
@@ -114,8 +113,8 @@ export class ApplyMigrationsCommand extends BaseCommand {
     return countAppliedMigrations;
   }
 
-  private get api() {
-    return this.connectionService.api;
+  private get revisionScope(): RevisionScope {
+    return this.connectionService.revisionScope;
   }
 
   @Option({

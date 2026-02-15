@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
+import { RevisionScope } from '@revisium/client';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection';
 import { LoggerService } from 'src/services/common';
@@ -32,30 +33,19 @@ export class SaveRowsCommand extends BaseCommand {
     }
 
     await this.connectionService.connect(options);
-    await this.saveAllTableRows(
-      this.connectionService.revisionId,
-      options.folder,
-      options.tables,
-    );
+    await this.saveAllTableRows(options.folder, options.tables);
   }
 
-  private async saveAllTableRows(
-    revisionId: string,
-    folderPath: string,
-    tableFilter?: string,
-  ) {
+  private async saveAllTableRows(folderPath: string, tableFilter?: string) {
     try {
       await mkdir(folderPath, { recursive: true });
 
-      const tablesToProcess = await this.getTargetTables(
-        revisionId,
-        tableFilter,
-      );
+      const tablesToProcess = await this.getTargetTables(tableFilter);
 
       this.logger.foundItems(tablesToProcess.length, 'tables to process');
 
       for (const tableId of tablesToProcess) {
-        await this.saveRowsFromTable(revisionId, tableId, folderPath);
+        await this.saveRowsFromTable(tableId, folderPath);
       }
 
       this.logger.summary(
@@ -69,26 +59,19 @@ export class SaveRowsCommand extends BaseCommand {
     }
   }
 
-  private async getTargetTables(
-    revisionId: string,
-    tableFilter?: string,
-  ): Promise<string[]> {
+  private async getTargetTables(tableFilter?: string): Promise<string[]> {
     if (tableFilter) {
       return tableFilter.split(',').map((id) => id.trim());
     }
 
     const { items } = await fetchAllPages((params) =>
-      this.api.tables({ revisionId, ...params }),
+      this.revisionScope.getTables(params).then((data) => ({ data })),
     );
 
     return items.map((table) => table.id);
   }
 
-  private async saveRowsFromTable(
-    revisionId: string,
-    tableId: string,
-    folderPath: string,
-  ) {
+  private async saveRowsFromTable(tableId: string, folderPath: string) {
     try {
       this.logger.processingTable(tableId);
 
@@ -96,7 +79,10 @@ export class SaveRowsCommand extends BaseCommand {
       await mkdir(tableFolderPath, { recursive: true });
 
       const { processed, total } = await fetchAndProcessPages(
-        (params) => this.api.rows(revisionId, tableId, params),
+        (params) =>
+          this.revisionScope
+            .getRows(tableId, params)
+            .then((data) => ({ data })),
         async (row) => {
           const filePath = join(tableFolderPath, `${row.id}.json`);
           await writeFile(filePath, JSON.stringify(row, null, 2), 'utf-8');
@@ -119,8 +105,8 @@ export class SaveRowsCommand extends BaseCommand {
     }
   }
 
-  private get api() {
-    return this.connectionService.api;
+  private get revisionScope(): RevisionScope {
+    return this.connectionService.revisionScope;
   }
 
   @Option({

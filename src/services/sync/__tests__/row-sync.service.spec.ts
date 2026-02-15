@@ -97,7 +97,7 @@ describe('RowSyncService', () => {
         updateRows: jest.fn(),
       };
 
-      const result = await service.getExistingRows(mockApi, 'rev1', 'table1');
+      const result = await service.getExistingRows(mockApi, 'table1');
 
       expect(result.size).toBe(3);
       expect(result.get('row1')).toEqual({ name: 'A' });
@@ -113,7 +113,7 @@ describe('RowSyncService', () => {
         updateRows: jest.fn(),
       };
 
-      const result = await service.getExistingRows(mockApi, 'rev1', 'table1');
+      const result = await service.getExistingRows(mockApi, 'table1');
 
       expect(result.size).toBe(0);
     });
@@ -131,7 +131,7 @@ describe('RowSyncService', () => {
       };
       const onProgress = jest.fn();
 
-      await service.getExistingRows(mockApi, 'rev1', 'table1', onProgress);
+      await service.getExistingRows(mockApi, 'table1', onProgress);
 
       expect(onProgress).toHaveBeenCalledWith({
         operation: 'fetch',
@@ -160,7 +160,6 @@ describe('RowSyncService', () => {
 
       const stats = await service.syncTableRows(
         mockApi,
-        'rev1',
         'table1',
         sourceRows,
         100,
@@ -188,7 +187,6 @@ describe('RowSyncService', () => {
 
       const stats = await service.syncTableRows(
         mockApi,
-        'rev1',
         'table1',
         sourceRows,
         100,
@@ -217,7 +215,6 @@ describe('RowSyncService', () => {
 
       const stats = await service.syncTableRows(
         mockApi,
-        'rev1',
         'table1',
         sourceRows,
         100,

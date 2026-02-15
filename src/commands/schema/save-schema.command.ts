@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Option, SubCommand } from 'nest-commander';
+import { RevisionScope } from '@revisium/client';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection';
 import { LoggerService } from 'src/services/common';
@@ -28,13 +29,10 @@ export class SaveSchemaCommand extends BaseCommand {
     }
 
     await this.connectionService.connect(options);
-    await this.saveAllTableSchemas(
-      this.connectionService.revisionId,
-      options.folder,
-    );
+    await this.saveAllTableSchemas(options.folder);
   }
 
-  private async saveAllTableSchemas(revisionId: string, folderPath: string) {
+  private async saveAllTableSchemas(folderPath: string) {
     try {
       await mkdir(folderPath, { recursive: true });
 
@@ -43,19 +41,16 @@ export class SaveSchemaCommand extends BaseCommand {
       let totalTables = 0;
 
       const { processed } = await fetchAndProcessPages(
-        (params) => this.api.tables({ revisionId, ...params }),
+        (params) =>
+          this.revisionScope.getTables(params).then((data) => ({ data })),
         async (table, index) => {
           this.logger.processingTable(table.id);
 
-          const schemaResult = await this.api.tableSchema(revisionId, table.id);
+          const schema = await this.revisionScope.getTableSchema(table.id);
           const fileName = `${table.id}.json`;
           const filePath = join(folderPath, fileName);
 
-          await writeFile(
-            filePath,
-            JSON.stringify(schemaResult.data, null, 2),
-            'utf-8',
-          );
+          await writeFile(filePath, JSON.stringify(schema, null, 2), 'utf-8');
 
           this.logger.success(
             `Saved schema: ${fileName} (${index + 1}/${totalTables})`,
@@ -80,8 +75,8 @@ export class SaveSchemaCommand extends BaseCommand {
     }
   }
 
-  private get api() {
-    return this.connectionService.api;
+  private get revisionScope(): RevisionScope {
+    return this.connectionService.revisionScope;
   }
 
   @Option({

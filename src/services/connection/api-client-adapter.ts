@@ -1,58 +1,54 @@
-import { Api } from 'src/__generated__/api';
+import { RevisionScope } from '@revisium/client';
 import { ApiClient } from '../sync/row-sync.service';
 
-type GeneratedApi = Api<unknown>['api'];
-
-export function createApiClientAdapter(api: GeneratedApi): ApiClient {
+export function createApiClientAdapter(
+  revisionScope: RevisionScope,
+): ApiClient {
   return {
-    async rows(revisionId, tableId, options) {
-      const result = await api.rows(revisionId, tableId, {
-        first: options.first,
-        after: options.after,
-        orderBy: options.orderBy,
-      });
+    async rows(tableId, options) {
+      try {
+        const data = await revisionScope.getRows(tableId, {
+          first: options.first,
+          after: options.after,
+          orderBy: options.orderBy,
+        });
 
-      if (result.error) {
-        return { error: result.error };
-      }
-
-      return {
-        data: {
-          edges: result.data.edges.map((edge) => ({
-            node: { id: edge.node.id, data: edge.node.data },
-          })),
-          pageInfo: {
-            hasNextPage: result.data.pageInfo.hasNextPage,
-            endCursor: result.data.pageInfo.endCursor ?? '',
+        return {
+          data: {
+            edges: data.edges.map((e) => ({
+              node: { id: e.node.id, data: e.node.data },
+            })),
+            pageInfo: {
+              hasNextPage: data.pageInfo.hasNextPage,
+              endCursor: data.pageInfo.endCursor ?? '',
+            },
           },
-        },
-      };
+        };
+      } catch (error) {
+        return { error };
+      }
     },
 
-    async createRows(revisionId, tableId, data) {
-      const result = await api.createRows(revisionId, tableId, {
-        rows: data.rows,
-        isRestore: data.isRestore,
-      });
-
-      if (result.error) {
-        return { error: result.error };
+    async createRows(tableId, data) {
+      try {
+        await revisionScope.createRows(tableId, data.rows, {
+          isRestore: data.isRestore,
+        });
+        return { data: true };
+      } catch (error) {
+        return { error };
       }
-
-      return { data: result.data };
     },
 
-    async updateRows(revisionId, tableId, data) {
-      const result = await api.updateRows(revisionId, tableId, {
-        rows: data.rows,
-        isRestore: data.isRestore,
-      });
-
-      if (result.error) {
-        return { error: result.error };
+    async updateRows(tableId, data) {
+      try {
+        await revisionScope.updateRows(tableId, data.rows, {
+          isRestore: data.isRestore,
+        });
+        return { data: true };
+      } catch (error) {
+        return { error };
       }
-
-      return { data: result.data };
     },
   };
 }

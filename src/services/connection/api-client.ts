@@ -1,11 +1,11 @@
-import { Api, RequestParams } from 'src/__generated__/api';
+import { RevisiumClient } from '@revisium/client';
 import { AuthCredentials } from '../url';
 
-export class RevisiumApiClient extends Api<unknown> {
-  public authToken: string | undefined = undefined;
+export class RevisiumApiClient {
+  public readonly client: RevisiumClient;
 
   constructor(baseUrl: string) {
-    super({ baseUrl });
+    this.client = new RevisiumClient({ baseUrl });
   }
 
   public async authenticate(auth: AuthCredentials): Promise<string> {
@@ -32,61 +32,22 @@ export class RevisiumApiClient extends Api<unknown> {
   }
 
   private async authenticateWithToken(token: string): Promise<string> {
-    this.authToken = token;
-    const response = await this.api.me();
-
-    if (response.error) {
-      throw new Error(
-        `Token validation failed: ${JSON.stringify(response.error)}`,
-      );
-    }
-
-    return response.data.username || 'authenticated user';
+    this.client.loginWithToken(token);
+    const me = await this.client.me();
+    return me.username || 'authenticated user';
   }
 
   private async authenticateWithApiKey(apikey: string): Promise<string> {
-    this.authToken = apikey;
-    const response = await this.api.me();
-
-    if (response.error) {
-      throw new Error(
-        `API key validation failed: ${JSON.stringify(response.error)}`,
-      );
-    }
-
-    return response.data.username || 'authenticated user';
+    this.client.loginWithToken(apikey);
+    const me = await this.client.me();
+    return me.username || 'authenticated user';
   }
 
   private async authenticateWithPassword(
     username: string,
     password: string,
   ): Promise<string> {
-    const response = await this.api.login({
-      emailOrUsername: username,
-      password: password,
-    });
-
-    if (response.error) {
-      throw new Error(`Login failed: ${JSON.stringify(response.error)}`);
-    }
-
-    this.authToken = response.data.accessToken;
+    await this.client.login(username, password);
     return username;
-  }
-
-  protected mergeRequestParams(
-    params1: RequestParams,
-    params2?: RequestParams,
-  ): RequestParams {
-    const params = super.mergeRequestParams(params1, params2);
-
-    params.headers ??= {};
-
-    if (this.authToken) {
-      (params.headers as Record<string, string>)['Authorization'] =
-        `Bearer ${this.authToken}`;
-    }
-
-    return params;
   }
 }

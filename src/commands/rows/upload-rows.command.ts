@@ -1,4 +1,5 @@
 import { Option, SubCommand } from 'nest-commander';
+import { RevisionScope } from '@revisium/client';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import {
   ConnectionService,
@@ -57,11 +58,9 @@ export class UploadRowsCommand extends BaseCommand {
     }
 
     await this.connectionService.connect(options);
-    const revisionId = this.connectionService.draftRevisionId;
     const batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
 
     const totalStats = await this.uploadAllTableRows(
-      revisionId,
       options.folder,
       options.tables,
       batchSize,
@@ -76,7 +75,6 @@ export class UploadRowsCommand extends BaseCommand {
   }
 
   private async uploadAllTableRows(
-    revisionId: string,
     folderPath: string,
     tableFilter: string | undefined,
     batchSize: number,
@@ -87,7 +85,7 @@ export class UploadRowsCommand extends BaseCommand {
     );
     this.logger.foundItems(tableIds.length, 'tables to process');
 
-    const tableSchemas = await this.fetchTableSchemas(revisionId, tableIds);
+    const tableSchemas = await this.fetchTableSchemas(tableIds);
     const sortedTables = this.getSortedTables(tableSchemas, tableIds);
 
     const totalStats = createEmptyUploadStats();
@@ -95,7 +93,6 @@ export class UploadRowsCommand extends BaseCommand {
     for (const tableId of sortedTables) {
       try {
         const tableStats = await this.uploadTableRows(
-          revisionId,
           tableId,
           folderPath,
           tableSchemas[tableId],
@@ -114,17 +111,14 @@ export class UploadRowsCommand extends BaseCommand {
   }
 
   private async fetchTableSchemas(
-    revisionId: string,
     tables: string[],
   ): Promise<Record<string, JsonSchema>> {
     const schemas: Record<string, JsonSchema> = {};
 
     for (const tableId of tables) {
       try {
-        const result = await this.api.tableSchema(revisionId, tableId);
-        if (result.data) {
-          schemas[tableId] = result.data as JsonSchema;
-        }
+        const schema = await this.revisionScope.getTableSchema(tableId);
+        schemas[tableId] = schema as JsonSchema;
       } catch (error) {
         this.logger.warn(
           `Could not fetch schema for table ${tableId}: ${error instanceof Error ? error.message : String(error)}`,
@@ -153,7 +147,6 @@ export class UploadRowsCommand extends BaseCommand {
   }
 
   private async uploadTableRows(
-    revisionId: string,
     tableId: string,
     folderPath: string,
     schema: JsonSchema | undefined,
@@ -190,10 +183,9 @@ export class UploadRowsCommand extends BaseCommand {
       return stats;
     }
 
-    const apiClient = createApiClientAdapter(this.api);
+    const apiClient = createApiClientAdapter(this.revisionScope);
     const syncStats = await this.rowSyncService.syncTableRows(
       apiClient,
-      revisionId,
       tableId,
       loadResult.rows,
       batchSize,
@@ -235,8 +227,8 @@ export class UploadRowsCommand extends BaseCommand {
     }
   }
 
-  private get api() {
-    return this.connectionService.api;
+  private get revisionScope(): RevisionScope {
+    return this.connectionService.revisionScope;
   }
 
   @Option({
