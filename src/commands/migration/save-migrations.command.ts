@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { Option, SubCommand } from 'nest-commander';
+import { RevisionScope } from '@revisium/client';
 import { BaseCommand, BaseOptions } from 'src/commands/base.command';
 import { ConnectionService } from 'src/services/connection';
 import { LoggerService } from 'src/services/common';
@@ -26,14 +27,14 @@ export class SaveMigrationsCommand extends BaseCommand {
     }
 
     await this.connectionService.connect(options);
-    await this.saveFile(this.connectionService.revisionId, options.file);
+    await this.saveFile(options.file);
   }
 
-  private async saveFile(revisionId: string, filePath: string) {
+  private async saveFile(filePath: string) {
     try {
-      const result = await this.api.migrations(revisionId);
+      const migrations = await this.revisionScope.getMigrations();
 
-      await writeFile(filePath, JSON.stringify(result.data, null, 2), 'utf-8');
+      await writeFile(filePath, JSON.stringify(migrations, null, 2), 'utf-8');
 
       this.logger.success(`Save migrations to: ${filePath}`);
     } catch (error) {
@@ -53,7 +54,7 @@ export class SaveMigrationsCommand extends BaseCommand {
     return value;
   }
 
-  private get api() {
-    return this.connectionService.api;
+  private get revisionScope(): RevisionScope {
+    return this.connectionService.revisionScope;
   }
 }

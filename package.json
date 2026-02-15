@@ -31,8 +31,7 @@
     "test:e2e:down": "if [ -f .e2e-test.pid ]; then kill $(cat .e2e-test.pid) 2>/dev/null; rm -f .e2e-test.pid; fi; rm -rf .e2e-test",
     "build:instrumented": "npm run build && rm -rf dist-instrumented && mkdir -p dist-instrumented && cp dist/package.json dist-instrumented/ && npx nyc instrument dist/src dist-instrumented/src --include='**/*.js'",
     "test:all": "npm run test:cov && npm run test:e2e:cov && npm run coverage:merge",
-    "coverage:merge": "node scripts/merge-coverage.js",
-    "generate:api": "npx swagger-typescript-api generate -p https://cloud.revisium.io/api-json -o src/__generated__ -n api.ts --extract-request-params --disable-throw-on-error"
+    "coverage:merge": "node scripts/merge-coverage.js"
   },
   "bin": {
     "revisium": "dist/src/main.js"
@@ -43,6 +42,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@revisium/client": "file:../revisium-client",
     "@revisium/schema-toolkit": "^0.4.1",
     "@types/object-hash": "^3.0.6",
     "ajv": "^8.17.1",
@@ -50,8 +50,7 @@
     "nest-commander": "^3.18.0",
     "object-hash": "^3.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "swagger-typescript-api": "^13.2.7"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -102,7 +101,6 @@
       "<rootDir>/src/**/*.(t|j)s",
       "!<rootDir>/src/main.ts",
       "!<rootDir>/src/app.module.ts",
-      "!<rootDir>/src/__generated__/**",
       "!<rootDir>/src/**/__tests__/**",
       "!<rootDir>/src/**/index.ts"
     ],

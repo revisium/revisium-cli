@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { RevisionScope } from '@revisium/client';
 import {
   ConnectionFactoryService,
   ConnectionInfo,
@@ -29,20 +30,8 @@ export class ConnectionService {
     return this._connection;
   }
 
-  public get api() {
-    return this.connection.client.api;
-  }
-
-  public get revisionId(): string {
-    return this.connection.revisionId;
-  }
-
-  public get draftRevisionId(): string {
-    return this.connection.draftRevisionId;
-  }
-
-  public get headRevisionId(): string {
-    return this.connection.headRevisionId;
+  public get revisionScope(): RevisionScope {
+    return this.connection.revisionScope;
   }
 
   public async connect(options: ConnectionOptions = {}): Promise<void> {

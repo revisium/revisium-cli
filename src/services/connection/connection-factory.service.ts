@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { BranchScope, RevisionScope } from '@revisium/client';
 import { RevisiumApiClient } from './api-client';
 import { LoggerService } from '../common';
 import { RevisiumUrlComplete, UrlBuilderService } from '../url';
@@ -6,9 +7,8 @@ import { RevisiumUrlComplete, UrlBuilderService } from '../url';
 export interface ConnectionInfo {
   url: RevisiumUrlComplete;
   client: RevisiumApiClient;
-  revisionId: string;
-  headRevisionId: string;
-  draftRevisionId: string;
+  branchScope: BranchScope;
+  revisionScope: RevisionScope;
 }
 
 export interface ConnectOptions {
@@ -32,11 +32,21 @@ export class ConnectionFactoryService {
     this.logger.connecting(label, formattedUrl);
 
     const client = await this.createAuthenticatedClient(url);
-    await this.validateProject(client, url);
-    const revisions = await this.fetchRevisions(client, url);
 
-    const revisionId = this.resolveRevisionId(url.revision, revisions);
-    const revisionLabel = this.formatRevisionLabel(url.revision, revisions);
+    const branchScope = await client.client.branch({
+      org: url.organization,
+      project: url.project,
+      branch: url.branch || 'master',
+    });
+
+    const revisionScope = this.resolveRevisionScope(url.revision, branchScope);
+    const revisionId = revisionScope.revisionId;
+    const revisionLabel = this.formatRevisionLabel(
+      url.revision,
+      branchScope.headRevisionId,
+      branchScope.draftRevisionId,
+      revisionId,
+    );
 
     this.logger.connected(
       `Project: ${url.organization}/${url.project}, Branch: ${url.branch || 'master'}, Revision: ${revisionLabel}`,
@@ -45,9 +55,8 @@ export class ConnectionFactoryService {
     return {
       url,
       client,
-      revisionId,
-      headRevisionId: revisions.headRevisionId,
-      draftRevisionId: revisions.draftRevisionId,
+      branchScope,
+      revisionScope,
     };
   }
 
@@ -62,64 +71,24 @@ export class ConnectionFactoryService {
     return client;
   }
 
-  private async validateProject(
-    client: RevisiumApiClient,
-    url: RevisiumUrlComplete,
-  ): Promise<void> {
-    const response = await client.api.project(url.organization, url.project);
-
-    if (response.error) {
-      throw new Error(
-        `Failed to get project: ${JSON.stringify(response.error)}`,
-      );
-    }
-  }
-
-  private async fetchRevisions(
-    client: RevisiumApiClient,
-    url: RevisiumUrlComplete,
-  ): Promise<{ headRevisionId: string; draftRevisionId: string }> {
-    const branchName = url.branch || 'master';
-
-    const [headResponse, draftResponse] = await Promise.all([
-      client.api.headRevision(url.organization, url.project, branchName),
-      client.api.draftRevision(url.organization, url.project, branchName),
-    ]);
-
-    if (headResponse.error) {
-      throw new Error(
-        `Failed to get head revision: ${JSON.stringify(headResponse.error)}`,
-      );
-    }
-
-    if (draftResponse.error) {
-      throw new Error(
-        `Failed to get draft revision: ${JSON.stringify(draftResponse.error)}`,
-      );
-    }
-
-    return {
-      headRevisionId: headResponse.data.id,
-      draftRevisionId: draftResponse.data.id,
-    };
-  }
-
-  private resolveRevisionId(
+  private resolveRevisionScope(
     revision: string,
-    revisions: { headRevisionId: string; draftRevisionId: string },
-  ): string {
-    if (revision === 'head') {
-      return revisions.headRevisionId;
-    }
+    branchScope: BranchScope,
+  ): RevisionScope {
     if (revision === 'draft') {
-      return revisions.draftRevisionId;
+      return branchScope.draft();
     }
-    return revision;
+    if (revision === 'head') {
+      return branchScope.head();
+    }
+    return branchScope.draft();
   }
 
   private formatRevisionLabel(
     revision: string,
-    revisions: { headRevisionId: string; draftRevisionId: string },
+    headRevisionId: string,
+    draftRevisionId: string,
+    resolvedId: string,
   ): string {
     if (revision === 'head') {
       return 'head';
@@ -128,12 +97,10 @@ export class ConnectionFactoryService {
       return 'draft';
     }
 
-    const resolvedId = this.resolveRevisionId(revision, revisions);
-
-    if (resolvedId === revisions.headRevisionId) {
+    if (resolvedId === headRevisionId) {
       return `${resolvedId} (head)`;
     }
-    if (resolvedId === revisions.draftRevisionId) {
+    if (resolvedId === draftRevisionId) {
       return `${resolvedId} (draft)`;
     }
 

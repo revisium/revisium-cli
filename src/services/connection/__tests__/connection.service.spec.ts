@@ -61,26 +61,8 @@ describe('ConnectionService', () => {
       );
     });
 
-    it('throws error when accessing api before connect', () => {
-      expect(() => service.api).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when accessing revisionId before connect', () => {
-      expect(() => service.revisionId).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when accessing draftRevisionId before connect', () => {
-      expect(() => service.draftRevisionId).toThrow(
-        'Connection not established. Call connect() first.',
-      );
-    });
-
-    it('throws error when accessing headRevisionId before connect', () => {
-      expect(() => service.headRevisionId).toThrow(
+    it('throws error when accessing revisionScope before connect', () => {
+      expect(() => service.revisionScope).toThrow(
         'Connection not established. Call connect() first.',
       );
     });
@@ -179,114 +161,42 @@ describe('ConnectionService', () => {
     });
   });
 
-  describe('revision resolution', () => {
-    it('uses draft revision when revision is draft', async () => {
-      const url = { ...mockUrl, revision: 'draft' };
-      setupSuccessfulConnection(url, {
-        headId: 'head-123',
-        draftId: 'draft-456',
-      });
-
-      await service.connect();
-
-      expect(service.revisionId).toBe('draft-456');
-    });
-
-    it('uses head revision when revision is head', async () => {
-      const url = { ...mockUrl, revision: 'head' };
-      setupSuccessfulConnection(url, {
-        headId: 'head-123',
-        draftId: 'draft-456',
-      });
-
-      await service.connect();
-
-      expect(service.revisionId).toBe('head-123');
-    });
-
-    it('uses specific revision ID when provided', async () => {
-      const url = { ...mockUrl, revision: 'specific-rev-id' };
-      setupSuccessfulConnection(url, {
-        headId: 'head-123',
-        draftId: 'draft-456',
-      });
-
-      await service.connect();
-
-      expect(service.revisionId).toBe('specific-rev-id');
-    });
-  });
-
-  describe('connection properties after connect', () => {
-    it('provides access to headRevisionId', async () => {
-      setupSuccessfulConnection(mockUrl, {
-        headId: 'test-head-id',
-        draftId: 'test-draft-id',
-      });
-
-      await service.connect();
-
-      expect(service.headRevisionId).toBe('test-head-id');
-    });
-
-    it('provides access to draftRevisionId', async () => {
-      setupSuccessfulConnection(mockUrl, {
-        headId: 'test-head-id',
-        draftId: 'test-draft-id',
-      });
-
-      await service.connect();
-
-      expect(service.draftRevisionId).toBe('test-draft-id');
-    });
-  });
-
-  function setupSuccessfulConnection(
-    url: RevisiumUrlComplete,
-    revisions: { headId: string; draftId: string },
-  ) {
-    urlBuilderServiceFake.parseAndComplete.mockResolvedValue(url);
-
-    const resolveRevisionId = (): string => {
-      if (url.revision === 'head') {
-        return revisions.headId;
-      }
-      if (url.revision === 'draft') {
-        return revisions.draftId;
-      }
-      return url.revision;
-    };
-
-    connectionFactoryFake.createConnection.mockResolvedValue({
-      url,
-      client: createMockApiClient(),
-      revisionId: resolveRevisionId(),
-      headRevisionId: revisions.headId,
-      draftRevisionId: revisions.draftId,
-    });
-  }
-
   function createMockConnectionInfo(url: RevisiumUrlComplete) {
     return {
       url,
       client: createMockApiClient(),
-      revisionId: 'draft-id',
-      headRevisionId: 'head-id',
-      draftRevisionId: 'draft-id',
+      branchScope: createMockBranchScope(),
+      revisionScope: createMockRevisionScope(),
     };
   }
 
   function createMockApiClient() {
     return {
-      api: {
-        me: jest.fn().mockResolvedValue({ data: { username: 'test-user' } }),
-        project: jest.fn().mockResolvedValue({ data: { id: 'project-id' } }),
-        headRevision: jest.fn().mockResolvedValue({ data: { id: 'head-id' } }),
-        draftRevision: jest
-          .fn()
-          .mockResolvedValue({ data: { id: 'draft-id' } }),
+      client: {
+        me: jest.fn().mockResolvedValue({ username: 'test-user' }),
+        branch: jest.fn(),
       },
       authenticate: jest.fn().mockResolvedValue('test-user'),
+    };
+  }
+
+  function createMockBranchScope() {
+    return {
+      draft: jest.fn(),
+      head: jest.fn(),
+      headRevisionId: 'head-id',
+      draftRevisionId: 'draft-id',
+    };
+  }
+
+  function createMockRevisionScope() {
+    return {
+      getTables: jest.fn(),
+      getRows: jest.fn(),
+      getMigrations: jest.fn(),
+      commit: jest.fn(),
+      revisionId: 'draft-id',
+      isDraft: true,
     };
   }
 });

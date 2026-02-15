@@ -1,9 +1,9 @@
-import {
+import type {
   InitMigrationDto,
   RemoveMigrationDto,
   RenameMigrationDto,
   UpdateMigrationDto,
-} from 'src/__generated__/api';
+} from '@revisium/client';
 
 export type Migration =
   | InitMigrationDto

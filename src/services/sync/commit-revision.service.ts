@@ -1,24 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { RevisionScope } from '@revisium/client';
 import { ConnectionInfo as SyncConnectionInfo } from './sync-api.service';
 import { ConnectionService } from '../connection';
 import { LoggerService } from '../common';
 
 export interface CommitResult {
   revisionId: string;
-}
-
-interface CommitParams {
-  organization: string;
-  project: string;
-  branch: string;
-  api: {
-    createRevision: (
-      org: string,
-      proj: string,
-      branch: string,
-      data: { comment: string },
-    ) => Promise<{ data?: { id: string }; error?: unknown }>;
-  };
 }
 
 @Injectable()
@@ -34,12 +21,7 @@ export class CommitRevisionService {
   ): Promise<CommitResult> {
     const connection = this.connectionService.connection;
     return this.doCommit(
-      {
-        organization: connection.url.organization,
-        project: connection.url.project,
-        branch: connection.url.branch,
-        api: connection.client.api,
-      },
+      connection.revisionScope,
       actionDescription,
       changeCount,
     );
@@ -69,19 +51,14 @@ export class CommitRevisionService {
     }
 
     await this.doCommit(
-      {
-        organization: connection.url.organization,
-        project: connection.url.project,
-        branch: connection.url.branch,
-        api: connection.client.api,
-      },
+      connection.revisionScope,
       actionDescription,
       changeCount,
     );
   }
 
   private async doCommit(
-    params: CommitParams,
+    revisionScope: RevisionScope,
     actionDescription: string,
     changeCount: number,
   ): Promise<CommitResult> {
@@ -89,37 +66,16 @@ export class CommitRevisionService {
 
     const comment = this.generateCommitComment(actionDescription, changeCount);
 
-    let result: { data?: { id: string }; error?: unknown };
     try {
-      result = await params.api.createRevision(
-        params.organization,
-        params.project,
-        params.branch,
-        { comment },
-      );
+      const revision = await revisionScope.commit(comment);
+      this.logger.commitSuccess(revision.id);
+      return { revisionId: revision.id };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       this.logger.commitError(errorMessage);
       throw error;
     }
-
-    if (result.error) {
-      const errorMessage =
-        typeof result.error === 'string'
-          ? result.error
-          : JSON.stringify(result.error);
-      this.logger.commitError(errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    if (result.data) {
-      this.logger.commitSuccess(result.data.id);
-      return { revisionId: result.data.id };
-    }
-
-    this.logger.commitError('No data returned');
-    throw new Error('Failed to create revision');
   }
 
   private generateCommitComment(
