@@ -39,7 +39,10 @@ export class ConnectionFactoryService {
       branch: url.branch || 'master',
     });
 
-    const revisionScope = this.resolveRevisionScope(url.revision, branchScope);
+    const revisionScope = await this.resolveRevisionScope(
+      url.revision,
+      branchScope,
+    );
     const revisionId = revisionScope.revisionId;
     const revisionLabel = this.formatRevisionLabel(
       url.revision,
@@ -71,17 +74,17 @@ export class ConnectionFactoryService {
     return client;
   }
 
-  private resolveRevisionScope(
+  private async resolveRevisionScope(
     revision: string,
     branchScope: BranchScope,
-  ): RevisionScope {
+  ): Promise<RevisionScope> {
     if (revision === 'draft') {
       return branchScope.draft();
     }
     if (revision === 'head') {
       return branchScope.head();
     }
-    return branchScope.draft();
+    return branchScope.revision(revision);
   }
 
   private formatRevisionLabel(
