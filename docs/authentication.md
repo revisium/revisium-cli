@@ -8,8 +8,8 @@ JWT token from Revisium UI. Best for interactive use.
 
 ### Get Your Token
 
-- **Cloud:** <https://cloud.revisium.io/get-mcp-token>
-- **Self-hosted:** `https://your-host/get-mcp-token`
+- **Cloud:** <https://cloud.revisium.io/get-token>
+- **Self-hosted:** `https://your-host/get-token`
 
 ### Usage
 
@@ -57,7 +57,7 @@ If no credentials are provided, you'll be prompted:
 
 ```text
 Choose authentication method:
-  > Token (copy from https://cloud.revisium.io/get-mcp-token)
+  > Token (copy from https://cloud.revisium.io/get-token)
     API Key (for automated access)
     Username & Password
 

@@ -63,8 +63,8 @@ revisium migrate apply --file ./migrations.json \
 ```
 
 Get your token:
-- **Cloud:** https://cloud.revisium.io/get-mcp-token
-- **Self-hosted:** https://your-host/get-mcp-token
+- **Cloud:** https://cloud.revisium.io/get-token
+- **Self-hosted:** https://your-host/get-token
 
 ### API Key Authentication
 
