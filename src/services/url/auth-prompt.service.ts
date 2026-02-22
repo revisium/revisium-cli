@@ -68,6 +68,6 @@ export class AuthPromptService {
     const normalizedUrl = baseUrl.endsWith('/')
       ? baseUrl.slice(0, -1)
       : baseUrl;
-    return `${normalizedUrl}/get-mcp-token`;
+    return `${normalizedUrl}/get-token`;
   }
 }
