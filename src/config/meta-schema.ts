@@ -3,6 +3,45 @@ import { sharedFields } from 'src/config/shared-fields';
 
 // https://json-schema.org/specification#single-vocabulary-meta-schemas
 
+export const xFormulaSchema: Schema = {
+  type: 'object',
+  properties: {
+    version: {
+      const: 1,
+    },
+    expression: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 10000,
+    },
+  },
+  additionalProperties: false,
+  required: ['version', 'expression'],
+};
+
+// When x-formula is present, readOnly must be true
+export const xFormulaRequiresReadOnly: Schema = {
+  if: {
+    properties: { 'x-formula': { type: 'object' } },
+    required: ['x-formula'],
+  },
+  then: {
+    properties: { readOnly: { const: true } },
+    required: ['readOnly'],
+  },
+};
+
+// foreignKey and x-formula are mutually exclusive
+export const foreignKeyExcludesFormula: Schema = {
+  if: {
+    properties: { foreignKey: { type: 'string' } },
+    required: ['foreignKey'],
+  },
+  then: {
+    not: { required: ['x-formula'] },
+  },
+};
+
 export const refMetaSchema: Schema = {
   type: 'object',
   properties: {
@@ -60,18 +99,22 @@ export const stringMetaSchema: Schema = {
     foreignKey: {
       type: 'string',
     },
+    'x-formula': xFormulaSchema,
   },
   additionalProperties: false,
   required: ['type', 'default'],
+  allOf: [xFormulaRequiresReadOnly, foreignKeyExcludesFormula],
 };
 
 export const noForeignKeyStringMetaSchema: Schema = {
   type: 'object',
   properties: {
     ...baseStringFields,
+    'x-formula': xFormulaSchema,
   },
   additionalProperties: false,
   required: ['type', 'default'],
+  ...xFormulaRequiresReadOnly,
 };
 
 export const numberMetaSchema: Schema = {
@@ -87,9 +130,11 @@ export const numberMetaSchema: Schema = {
       type: 'boolean',
     },
     ...sharedFields,
+    'x-formula': xFormulaSchema,
   },
   additionalProperties: false,
   required: ['type', 'default'],
+  ...xFormulaRequiresReadOnly,
 };
 
 export const booleanMetaSchema: Schema = {
@@ -105,9 +150,11 @@ export const booleanMetaSchema: Schema = {
       type: 'boolean',
     },
     ...sharedFields,
+    'x-formula': xFormulaSchema,
   },
   additionalProperties: false,
   required: ['type', 'default'],
+  ...xFormulaRequiresReadOnly,
 };
 
 export const objectMetaSchema: Schema = {
