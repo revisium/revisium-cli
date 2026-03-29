@@ -169,7 +169,7 @@ revisium migrate apply --file ./migrations.json --commit
 
 # Apply in CI/CD with auto-create (fresh instance)
 revisium migrate apply --file ./migrations.json --commit --create-project \
-  --url revisium://admin:admin@localhost:8888/admin/billing/master/draft
+  --url revisium://admin:admin@localhost:8888/admin/billing/master:draft
 ```
 
 See [URL Format](./url-format.md) for complete URL syntax and [Authentication](./authentication.md) for auth options.
