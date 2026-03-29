@@ -110,8 +110,9 @@ export class ConnectionFactoryService {
   private isProjectNotFoundError(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
     return (
-      message.includes('project') &&
-      (message.includes('does not exist') || message.includes('not found'))
+      message.includes('does not exist') ||
+      message.includes('not found') ||
+      message.includes('Not Found')
     );
   }
 

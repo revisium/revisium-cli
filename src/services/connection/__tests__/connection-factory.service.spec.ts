@@ -194,8 +194,43 @@ describe('ConnectionFactoryService', () => {
       );
     });
 
+    it('creates project on generic not-found error when createProject is true', async () => {
+      const notFoundError = new Error('Resource not found');
+
+      const MockApiClient = RevisiumApiClient as jest.MockedClass<
+        typeof RevisiumApiClient
+      >;
+      MockApiClient.mockImplementation(
+        () =>
+          ({
+            client: {
+              branch: jest
+                .fn()
+                .mockRejectedValueOnce(notFoundError)
+                .mockResolvedValueOnce(mockBranchScope),
+              org: jest.fn().mockReturnValue(mockOrgScope),
+            },
+            authenticate: jest.fn().mockResolvedValue('test-user'),
+          }) as unknown as RevisiumApiClient,
+      );
+
+      service = new ConnectionFactoryService(
+        urlBuilderFake as unknown as UrlBuilderService,
+        loggerFake as unknown as LoggerService,
+      );
+
+      const result = await service.createConnection(baseUrl, {
+        createProject: true,
+      });
+
+      expect(mockOrgScope.createProject).toHaveBeenCalledWith({
+        projectName: 'test-project',
+      });
+      expect(result.revisionScope).toBe(mockDraftScope);
+    });
+
     it('rethrows non-project errors even with createProject', async () => {
-      const networkError = new Error('Network timeout');
+      const networkError = new Error('ECONNREFUSED');
 
       const MockApiClient = RevisiumApiClient as jest.MockedClass<
         typeof RevisiumApiClient
@@ -217,7 +252,7 @@ describe('ConnectionFactoryService', () => {
 
       await expect(
         service.createConnection(baseUrl, { createProject: true }),
-      ).rejects.toThrow('Network timeout');
+      ).rejects.toThrow('ECONNREFUSED');
     });
   });
 });
