@@ -11,6 +11,7 @@ export { ConnectionInfo } from './connection-factory.service';
 
 export interface ConnectionOptions {
   url?: string;
+  createProject?: boolean;
 }
 
 @Injectable()
@@ -38,7 +39,9 @@ export class ConnectionService {
     const env = this.getEnvConfig();
     const url = await this.urlBuilder.parseAndComplete(options.url, 'api', env);
 
-    this._connection = await this.connectionFactory.createConnection(url);
+    this._connection = await this.connectionFactory.createConnection(url, {
+      createProject: options.createProject,
+    });
   }
 
   private getEnvConfig(): UrlEnvConfig {

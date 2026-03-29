@@ -12,6 +12,7 @@ describe('ConnectionFactoryService', () => {
     connecting: jest.Mock;
     connected: jest.Mock;
     authenticated: jest.Mock;
+    info: jest.Mock;
   };
 
   const mockDraftScope = {
@@ -55,6 +56,7 @@ describe('ConnectionFactoryService', () => {
       connecting: jest.fn(),
       connected: jest.fn(),
       authenticated: jest.fn(),
+      info: jest.fn(),
     };
 
     const MockApiClient = RevisiumApiClient as jest.MockedClass<
@@ -112,6 +114,145 @@ describe('ConnectionFactoryService', () => {
       expect(mockBranchScope.draft).not.toHaveBeenCalled();
       expect(mockBranchScope.head).not.toHaveBeenCalled();
       expect(result.revisionScope).toBe(mockExplicitScope);
+    });
+  });
+
+  describe('createProject option', () => {
+    let mockOrgScope: { createProject: jest.Mock };
+
+    beforeEach(() => {
+      mockOrgScope = {
+        createProject: jest.fn().mockResolvedValue({ id: 'new-project-id' }),
+      };
+    });
+
+    it('creates project and retries when createProject is true and project not found', async () => {
+      const projectNotFoundError = new Error(
+        'A project with this name does not exist in the organization',
+      );
+
+      const MockApiClient = RevisiumApiClient as jest.MockedClass<
+        typeof RevisiumApiClient
+      >;
+      MockApiClient.mockImplementation(
+        () =>
+          ({
+            client: {
+              branch: jest
+                .fn()
+                .mockRejectedValueOnce(projectNotFoundError)
+                .mockResolvedValueOnce(mockBranchScope),
+              org: jest.fn().mockReturnValue(mockOrgScope),
+            },
+            authenticate: jest.fn().mockResolvedValue('test-user'),
+          }) as unknown as RevisiumApiClient,
+      );
+
+      service = new ConnectionFactoryService(
+        urlBuilderFake as unknown as UrlBuilderService,
+        loggerFake as unknown as LoggerService,
+      );
+
+      const result = await service.createConnection(baseUrl, {
+        createProject: true,
+      });
+
+      expect(mockOrgScope.createProject).toHaveBeenCalledWith({
+        projectName: 'test-project',
+      });
+      expect(result.revisionScope).toBe(mockDraftScope);
+      expect(loggerFake.info).toHaveBeenCalledWith(
+        'Project "test-project" not found — creating automatically',
+      );
+    });
+
+    it('throws with hint when createProject is false and project not found', async () => {
+      const projectNotFoundError = new Error(
+        'A project with this name does not exist in the organization',
+      );
+
+      const MockApiClient = RevisiumApiClient as jest.MockedClass<
+        typeof RevisiumApiClient
+      >;
+      MockApiClient.mockImplementation(
+        () =>
+          ({
+            client: {
+              branch: jest.fn().mockRejectedValue(projectNotFoundError),
+            },
+            authenticate: jest.fn().mockResolvedValue('test-user'),
+          }) as unknown as RevisiumApiClient,
+      );
+
+      service = new ConnectionFactoryService(
+        urlBuilderFake as unknown as UrlBuilderService,
+        loggerFake as unknown as LoggerService,
+      );
+
+      await expect(service.createConnection(baseUrl)).rejects.toThrow(
+        'Use --create-project to auto-create',
+      );
+    });
+
+    it('creates project on generic not-found error when createProject is true', async () => {
+      const notFoundError = new Error('Resource not found');
+
+      const MockApiClient = RevisiumApiClient as jest.MockedClass<
+        typeof RevisiumApiClient
+      >;
+      MockApiClient.mockImplementation(
+        () =>
+          ({
+            client: {
+              branch: jest
+                .fn()
+                .mockRejectedValueOnce(notFoundError)
+                .mockResolvedValueOnce(mockBranchScope),
+              org: jest.fn().mockReturnValue(mockOrgScope),
+            },
+            authenticate: jest.fn().mockResolvedValue('test-user'),
+          }) as unknown as RevisiumApiClient,
+      );
+
+      service = new ConnectionFactoryService(
+        urlBuilderFake as unknown as UrlBuilderService,
+        loggerFake as unknown as LoggerService,
+      );
+
+      const result = await service.createConnection(baseUrl, {
+        createProject: true,
+      });
+
+      expect(mockOrgScope.createProject).toHaveBeenCalledWith({
+        projectName: 'test-project',
+      });
+      expect(result.revisionScope).toBe(mockDraftScope);
+    });
+
+    it('rethrows non-project errors even with createProject', async () => {
+      const networkError = new Error('ECONNREFUSED');
+
+      const MockApiClient = RevisiumApiClient as jest.MockedClass<
+        typeof RevisiumApiClient
+      >;
+      MockApiClient.mockImplementation(
+        () =>
+          ({
+            client: {
+              branch: jest.fn().mockRejectedValue(networkError),
+            },
+            authenticate: jest.fn().mockResolvedValue('test-user'),
+          }) as unknown as RevisiumApiClient,
+      );
+
+      service = new ConnectionFactoryService(
+        urlBuilderFake as unknown as UrlBuilderService,
+        loggerFake as unknown as LoggerService,
+      );
+
+      await expect(
+        service.createConnection(baseUrl, { createProject: true }),
+      ).rejects.toThrow('ECONNREFUSED');
     });
   });
 });
