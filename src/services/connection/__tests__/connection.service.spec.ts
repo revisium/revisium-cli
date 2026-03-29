@@ -157,6 +157,7 @@ describe('ConnectionService', () => {
 
       expect(connectionFactoryFake.createConnection).toHaveBeenCalledWith(
         mockUrl,
+        { createProject: undefined },
       );
     });
   });

@@ -2,7 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { runCli, buildUrl } from '../utils/cli-runner';
-import { createTestProject } from '../utils/test-project';
+import {
+  createTestProject,
+  deleteTestProject,
+  generateProjectName,
+} from '../utils/test-project';
 import { api } from '../utils/api-client';
 import { FIXTURES_PATH } from '../utils/constants';
 
@@ -86,6 +90,50 @@ describe('Migrate Commands', () => {
       // Verify revision was created
       const updatedProject = await api.getProject('admin', project.name);
       expect(updatedProject.rootBranch.headRevisionId).not.toBe(beforeHeadId);
+    });
+
+    it('creates project with --create-project when project does not exist', async () => {
+      const projectName = generateProjectName('e2e-create');
+
+      try {
+        const result = await runCli([
+          'migrate',
+          'apply',
+          '--url',
+          buildUrl(projectName, { token }),
+          '--file',
+          path.join(FIXTURES_PATH, 'migrations.json'),
+          '--create-project',
+        ]);
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toContain('creating automatically');
+        expect(result.stdout).toContain('Successfully applied');
+
+        const project = await api.getProject('admin', projectName);
+        expect(project.name).toBe(projectName);
+
+        const tables = await api.getTables(project.rootBranch.draftRevisionId);
+        expect(tables.length).toBe(14);
+      } finally {
+        await deleteTestProject(projectName);
+      }
+    });
+
+    it('fails with hint when project not found without --create-project', async () => {
+      const projectName = generateProjectName('e2e-no-create');
+
+      const result = await runCli([
+        'migrate',
+        'apply',
+        '--url',
+        buildUrl(projectName, { token }),
+        '--file',
+        path.join(FIXTURES_PATH, 'migrations.json'),
+      ]);
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout + result.stderr).toContain('--create-project');
     });
 
     it('skips already applied migrations', async () => {

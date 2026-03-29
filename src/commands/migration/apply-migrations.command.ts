@@ -11,6 +11,7 @@ import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 type Options = BaseOptions & {
   file: string;
   commit?: boolean;
+  createProject?: boolean;
 };
 
 @SubCommand({
@@ -36,7 +37,10 @@ export class ApplyMigrationsCommand extends BaseCommand {
     const jsonData = await this.validateJsonFile(options.file);
     this.logger.success('Migration file validation passed');
 
-    await this.connectionService.connect(options);
+    await this.connectionService.connect({
+      url: options.url,
+      createProject: options.createProject,
+    });
 
     const countAppliedMigrations = await this.applyMigration(jsonData);
 
@@ -131,6 +135,15 @@ export class ApplyMigrationsCommand extends BaseCommand {
     description: 'Create a revision after applying migrations',
   })
   parseCommit(value?: string): boolean {
+    return parseBooleanOption(value);
+  }
+
+  @Option({
+    flags: '--create-project [boolean]',
+    description:
+      'Automatically create the project if it does not exist (for CI/CD)',
+  })
+  parseCreateProject(value?: string): boolean {
     return parseBooleanOption(value);
   }
 }

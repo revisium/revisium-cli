@@ -39,7 +39,7 @@ revisium migrate save --file ./migrations.json \
 Apply migrations from a JSON file to Revisium.
 
 ```bash
-revisium migrate apply --file <path> [--commit]
+revisium migrate apply --file <path> [--commit] [--create-project]
 ```
 
 ### Options
@@ -48,6 +48,7 @@ revisium migrate apply --file <path> [--commit]
 |--------|-------------|----------|
 | `-f, --file <path>` | Migrations file path | Yes |
 | `-c, --commit` | Create revision after applying | No |
+| `--create-project` | Auto-create project if it doesn't exist | No |
 | `--url <url>` | Revisium URL (see [URL Format](./url-format.md)) | No* |
 
 *If `--url` is not provided, uses `REVISIUM_URL` environment variable or prompts interactively.
@@ -165,6 +166,10 @@ git commit -m "Add user phone field migration"
 export REVISIUM_URL=revisium://cloud.revisium.io/myorg/myproject/master
 export REVISIUM_TOKEN=$DEPLOY_TOKEN
 revisium migrate apply --file ./migrations.json --commit
+
+# Apply in CI/CD with auto-create (fresh instance)
+revisium migrate apply --file ./migrations.json --commit --create-project \
+  --url revisium://admin:admin@localhost:8888/admin/billing/master/draft
 ```
 
 See [URL Format](./url-format.md) for complete URL syntax and [Authentication](./authentication.md) for auth options.

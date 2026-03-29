@@ -13,6 +13,7 @@ export interface ConnectionInfo {
 
 export interface ConnectOptions {
   label?: string;
+  createProject?: boolean;
 }
 
 @Injectable()
@@ -33,11 +34,7 @@ export class ConnectionFactoryService {
 
     const client = await this.createAuthenticatedClient(url);
 
-    const branchScope = await client.client.branch({
-      org: url.organization,
-      project: url.project,
-      branch: url.branch || 'master',
-    });
+    const branchScope = await this.resolveBranchScope(client, url, options);
 
     const revisionScope = await this.resolveRevisionScope(
       url.revision,
@@ -72,6 +69,50 @@ export class ConnectionFactoryService {
     this.logger.authenticated(username);
 
     return client;
+  }
+
+  private async resolveBranchScope(
+    client: RevisiumApiClient,
+    url: RevisiumUrlComplete,
+    options: ConnectOptions,
+  ): Promise<BranchScope> {
+    const branchOptions = {
+      org: url.organization,
+      project: url.project,
+      branch: url.branch || 'master',
+    };
+
+    try {
+      return await client.client.branch(branchOptions);
+    } catch (error) {
+      if (options.createProject && this.isProjectNotFoundError(error)) {
+        this.logger.info(
+          `Project "${url.project}" not found — creating automatically`,
+        );
+
+        await client.client
+          .org(url.organization)
+          .createProject({ projectName: url.project });
+
+        return client.client.branch(branchOptions);
+      }
+
+      if (!options.createProject && this.isProjectNotFoundError(error)) {
+        throw new Error(
+          `Project "${url.project}" not found in organization "${url.organization}". Use --create-project to auto-create`,
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  private isProjectNotFoundError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      message.includes('project') &&
+      (message.includes('does not exist') || message.includes('not found'))
+    );
   }
 
   private async resolveRevisionScope(
