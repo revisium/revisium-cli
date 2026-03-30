@@ -6,6 +6,8 @@ Revisium CLI uses a special URL format to specify project connections.
 
 ```text
 revisium://[user:password@]host[:port]/organization/project/branch[:revision][?params]
+revisium+http://[user:password@]host[:port]/organization/project/branch[:revision][?params]
+revisium+https://[user:password@]host[:port]/organization/project/branch[:revision][?params]
 ```
 
 ## URL Parts
@@ -43,6 +45,29 @@ revisium://[user:password@]host[:port]/organization/project/branch[:revision][?p
 | `localhost` | http | 8080 |
 | `127.0.0.1` | http | 8080 |
 | Other hosts | https | 443 |
+
+### Explicit Protocol Override
+
+Use `revisium+http://` or `revisium+https://` to force a specific protocol, bypassing the auto-detection logic. This is useful in Kubernetes or other environments where internal services use HTTP on non-localhost hostnames.
+
+```text
+revisium+http://[user:password@]host[:port]/organization/project/branch[:revision][?params]
+revisium+https://[user:password@]host[:port]/organization/project/branch[:revision][?params]
+```
+
+| Prefix | Behavior |
+|--------|----------|
+| `revisium://` | Auto-detect (localhost → http, others → https) |
+| `revisium+http://` | Force HTTP |
+| `revisium+https://` | Force HTTPS |
+
+```bash
+# Force HTTP for internal Kubernetes service
+revisium+http://admin:pass@payment-config-svc:80/org/proj/master?token=xxx
+
+# Force HTTPS explicitly
+revisium+https://admin:pass@my-host/org/proj/master
+```
 
 ## Authentication Examples
 

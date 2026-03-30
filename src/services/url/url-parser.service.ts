@@ -27,6 +27,14 @@ function validatePort(port: number, context: string): void {
 @Injectable()
 export class UrlParserService {
   parse(input: string): RevisiumUrl {
+    if (input.startsWith('revisium+http://')) {
+      return this.parseRevisiumUrl(input, 'http');
+    }
+
+    if (input.startsWith('revisium+https://')) {
+      return this.parseRevisiumUrl(input, 'https');
+    }
+
     if (input.startsWith('revisium://')) {
       return this.parseRevisiumUrl(input);
     }
@@ -39,7 +47,10 @@ export class UrlParserService {
     return `${protocol}://${host}${portSuffix}`;
   }
 
-  buildBaseUrlFromHost(hostWithPort: string): string {
+  buildBaseUrlFromHost(
+    hostWithPort: string,
+    protocolOverride?: 'http' | 'https',
+  ): string {
     const [host, portStr] = hostWithPort.split(':');
     const port = portStr ? Number.parseInt(portStr, 10) : undefined;
 
@@ -47,8 +58,9 @@ export class UrlParserService {
       validatePort(port, `in "${hostWithPort}"`);
     }
 
-    const isLocalhost = LOCALHOST_HOSTS.has(host.toLowerCase());
-    const protocol = isLocalhost ? 'http' : 'https';
+    const protocol =
+      protocolOverride ??
+      (LOCALHOST_HOSTS.has(host.toLowerCase()) ? 'http' : 'https');
 
     if (port) {
       return this.buildBaseUrl(protocol, host, port);
@@ -65,8 +77,11 @@ export class UrlParserService {
     validatePort(port, context);
   }
 
-  private parseRevisiumUrl(url: string): RevisiumUrl {
-    const withoutProtocol = url.replace('revisium://', '');
+  private parseRevisiumUrl(
+    url: string,
+    forceProtocol?: 'http' | 'https',
+  ): RevisiumUrl {
+    const withoutProtocol = url.replace(/^revisium(\+https?)?:\/\//, '');
 
     const [mainPart, queryString] = withoutProtocol.split('?');
     const queryParams = this.parseQueryParams(queryString);
@@ -104,7 +119,7 @@ export class UrlParserService {
     const pathParts = hostAndPath.split('/');
     const hostWithPort = pathParts[0];
 
-    const baseUrl = this.buildBaseUrlFromHost(hostWithPort);
+    const baseUrl = this.buildBaseUrlFromHost(hostWithPort, forceProtocol);
 
     const branchWithRevision = pathParts[3] || undefined;
     let branch: string | undefined;

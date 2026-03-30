@@ -156,4 +156,23 @@ describe('CLI Authentication', () => {
       expect(result.exitCode).toBe(0);
     });
   });
+
+  describe('Protocol override (revisium+http://)', () => {
+    it('connects via explicit HTTP protocol', async () => {
+      const token = process.env.E2E_ADMIN_TOKEN!;
+
+      const result = await runCli([
+        'schema',
+        'save',
+        '--url',
+        buildUrl(projectName, { token, protocol: 'http' }),
+        '--folder',
+        tempDir,
+      ]);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain('Authenticated as admin');
+      expect(result.stdout).toContain('Successfully saved');
+    });
+  });
 });
