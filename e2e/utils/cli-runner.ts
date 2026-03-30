@@ -84,7 +84,13 @@ export function buildUrl(
     protocol?: 'http' | 'https';
   } = {},
 ): string {
-  const { orgId = 'admin', branch = 'master', revision, token, protocol } = options;
+  const {
+    orgId = 'admin',
+    branch = 'master',
+    revision,
+    token,
+    protocol,
+  } = options;
 
   const scheme = protocol ? `revisium+${protocol}` : 'revisium';
   let url = `${scheme}://localhost:8082/${orgId}/${projectName}/${branch}`;
