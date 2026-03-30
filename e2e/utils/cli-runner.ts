@@ -81,11 +81,19 @@ export function buildUrl(
     branch?: string;
     revision?: 'draft' | 'head';
     token?: string;
+    protocol?: 'http' | 'https';
   } = {},
 ): string {
-  const { orgId = 'admin', branch = 'master', revision, token } = options;
+  const {
+    orgId = 'admin',
+    branch = 'master',
+    revision,
+    token,
+    protocol,
+  } = options;
 
-  let url = `revisium://localhost:8082/${orgId}/${projectName}/${branch}`;
+  const scheme = protocol ? `revisium+${protocol}` : 'revisium';
+  let url = `${scheme}://localhost:8082/${orgId}/${projectName}/${branch}`;
 
   if (revision) {
     url += `:${revision}`;
