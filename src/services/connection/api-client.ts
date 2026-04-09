@@ -38,9 +38,13 @@ export class RevisiumApiClient {
   }
 
   private async authenticateWithApiKey(apikey: string): Promise<string> {
-    this.client.loginWithToken(apikey);
-    const me = await this.client.me();
-    return me.username || 'authenticated user';
+    this.client.loginWithApiKey(apikey);
+    try {
+      const me = await this.client.me();
+      return me.username || 'authenticated user';
+    } catch {
+      return 'service account';
+    }
   }
 
   private async authenticateWithPassword(
