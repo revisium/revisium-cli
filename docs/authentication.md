@@ -24,17 +24,20 @@ revisium schema save --folder ./schemas --url revisium://cloud.revisium.io/org/p
 
 ## API Key Authentication
 
-API key for automated access (future feature).
+API key for automated and programmatic access. Keys use the `rev_` prefix and are sent via the `X-Api-Key` header (recommended over Bearer for API keys).
 
 ### Usage
 
 ```bash
 # In URL query parameter
-revisium://cloud.revisium.io/org/proj?apikey=ak_xxx...
+revisium://cloud.revisium.io/org/proj?apikey=rev_xxxxxxxxxxxxxxxxxxxx
 
 # Via environment variable
-export REVISIUM_API_KEY=ak_xxx...
+export REVISIUM_API_KEY=rev_xxxxxxxxxxxxxxxxxxxx
 ```
+
+**Personal keys** are linked to a user account — `me()` returns the key owner.
+**Service keys** are not linked to a user — the CLI displays "service account" instead of a username.
 
 ## Password Authentication
 
