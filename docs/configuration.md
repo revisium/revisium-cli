@@ -10,7 +10,7 @@ All commands support configuration via environment variables.
 |----------|-------------|---------|
 | `REVISIUM_URL` | Revisium URL (see [URL Format](./url-format.md)) | `revisium://cloud.revisium.io/org/proj/main` |
 | `REVISIUM_TOKEN` | JWT authentication token | `eyJhbGciOiJIUzI1NiIs...` |
-| `REVISIUM_API_KEY` | API key (for automated access) | `ak_xxxxxxxxxxxxx` |
+| `REVISIUM_API_KEY` | API key (for automated access) | `rev_xxxxxxxxxxxxx` |
 | `REVISIUM_USERNAME` | Username (for password auth) | `admin` |
 | `REVISIUM_PASSWORD` | Password (for password auth) | `secret` |
 
