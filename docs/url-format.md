@@ -96,13 +96,13 @@ Get your token:
 API key in URL query parameter:
 
 ```bash
-revisium://cloud.revisium.io/myorg/myproject/master?apikey=ak_xxxxxxxxxxxxx
+revisium://cloud.revisium.io/myorg/myproject/master?apikey=rev_xxxxxxxxxxxxx
 ```
 
 API key via environment variable:
 
 ```bash
-export REVISIUM_API_KEY=ak_xxxxxxxxxxxxx
+export REVISIUM_API_KEY=rev_xxxxxxxxxxxxx
 revisium migrate apply --file ./migrations.json \
   --url revisium://cloud.revisium.io/myorg/myproject/master
 ```
