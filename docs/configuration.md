@@ -1,5 +1,22 @@
 # Configuration
 
+## Workspace Config
+
+Single-target commands can use a workspace config at `.revisium/revisium-cli.config.json` when no `--url` and no `REVISIUM_URL` are provided.
+
+```bash
+revisium instance add local --url revisium://localhost:9222 --auth none
+revisium context create dictionary-local \
+  --url revisium://localhost:9222/admin/dictionary/master
+revisium context use dictionary-local
+
+revisium schema save --folder ./schemas
+```
+
+The workspace config stores only non-secret instance and context data. Keep tokens, API keys, and passwords in environment variables or explicit URL/auth inputs.
+
+See [Workspace Config](./workspace-config.md).
+
 ## Environment Variables
 
 All commands support configuration via environment variables.
@@ -31,12 +48,14 @@ All commands support configuration via environment variables.
 
 ### Authentication Priority
 
-When using `--url`, authentication is resolved in this order:
+For explicit URLs and environment targets, authentication is resolved in this order:
 
 1. **URL query parameter** - `?token=...` or `?apikey=...`
 2. **URL credentials** - `user:pass@host`
 3. **Environment variable** - `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME/PASSWORD`
 4. **Interactive prompt** - if running in terminal
+
+When a workspace context is used, URL and environment auth still win. If the selected instance has `authMode: "none"`, the CLI sends no auth. `authMode: "stored"` currently requires URL or environment credentials until saved credential commands are implemented.
 
 **Important:** You can use `--url` to specify host/org/project/branch and provide credentials via environment:
 
@@ -99,9 +118,10 @@ revisium schema save --folder ./schemas \
 
 Configuration is resolved in this order (highest to lowest):
 
-1. **Command-line options** (`--url`)
+1. **Command-line target options** (`--url`, `--context`)
 2. **Environment variables** (`REVISIUM_URL`, `REVISIUM_TOKEN`, etc.)
-3. **Interactive prompts** (for missing values)
+3. **Current workspace context** (`.revisium/revisium-cli.config.json`)
+4. **Interactive prompts** (for missing values)
 
 ## Examples
 
@@ -142,4 +162,5 @@ env:
 ## See Also
 
 - [Authentication](./authentication.md) - Token, API key, and password auth
+- [Workspace Config](./workspace-config.md) - workspace instances and contexts
 - [URL Format](./url-format.md) - Revisium URL syntax

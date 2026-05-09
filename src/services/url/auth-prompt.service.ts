@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InteractiveService } from '../common';
 
-export type AuthMethod = 'token' | 'apikey' | 'password';
+export type AuthMethod = 'none' | 'token' | 'apikey' | 'password';
 
 export type AuthCredentials =
+  | { method: 'none' }
   | { method: 'token'; token: string }
   | { method: 'apikey'; apikey: string }
   | { method: 'password'; username: string; password: string };
@@ -26,6 +27,10 @@ export class AuthPromptService {
         { name: 'Username & Password', value: 'password' },
       ],
     );
+
+    if (authMethod === 'none') {
+      return { method: 'none' };
+    }
 
     if (authMethod === 'token') {
       const token = await this.interactive.promptPassword(

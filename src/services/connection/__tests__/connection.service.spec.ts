@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { ConnectionService } from '../connection.service';
 import { ConnectionFactoryService } from '../connection-factory.service';
 import { UrlBuilderService, RevisiumUrlComplete } from '../../url';
+import { WorkspaceConfigService } from '../../workspace';
+import { LoggerService } from '../../common';
 
 describe('ConnectionService', () => {
   let service: ConnectionService;
@@ -13,7 +15,12 @@ describe('ConnectionService', () => {
   let connectionFactoryFake: {
     createConnection: jest.Mock;
   };
+  let workspaceConfigFake: {
+    load: jest.Mock;
+    resolveConnection: jest.Mock;
+  };
   let configServiceFake: { get: jest.Mock };
+  let loggerServiceFake: { info: jest.Mock };
 
   const mockUrl: RevisiumUrlComplete = {
     baseUrl: 'https://cloud.revisium.io',
@@ -34,8 +41,17 @@ describe('ConnectionService', () => {
       createConnection: jest.fn(),
     };
 
+    workspaceConfigFake = {
+      load: jest.fn().mockResolvedValue(undefined),
+      resolveConnection: jest.fn(),
+    };
+
     configServiceFake = {
       get: jest.fn(),
+    };
+
+    loggerServiceFake = {
+      info: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +60,8 @@ describe('ConnectionService', () => {
         { provide: UrlBuilderService, useValue: urlBuilderServiceFake },
         { provide: ConnectionFactoryService, useValue: connectionFactoryFake },
         { provide: ConfigService, useValue: configServiceFake },
+        { provide: WorkspaceConfigService, useValue: workspaceConfigFake },
+        { provide: LoggerService, useValue: loggerServiceFake },
       ],
     }).compile();
 
@@ -118,6 +136,149 @@ describe('ConnectionService', () => {
         'api',
         expect.any(Object),
       );
+    });
+
+    it('uses workspace context when no url or env url is provided', async () => {
+      const workspace = {
+        path: '/repo/.revisium/revisium-cli.config.json',
+        config: {
+          version: 1,
+          currentContext: 'local',
+          instances: {
+            local: {
+              baseUrl: 'http://localhost:9222',
+              authMode: 'none',
+            },
+          },
+          contexts: {
+            local: {
+              instance: 'local',
+              organization: 'admin',
+              project: 'dictionary',
+            },
+          },
+        },
+      };
+      const workspaceUrl = {
+        ...mockUrl,
+        auth: { method: 'none' as const },
+      };
+
+      workspaceConfigFake.load.mockResolvedValue(workspace);
+      workspaceConfigFake.resolveConnection.mockReturnValue(workspaceUrl);
+      connectionFactoryFake.createConnection.mockResolvedValue(
+        createMockConnectionInfo(workspaceUrl),
+      );
+
+      await service.connect({ context: 'local' });
+
+      expect(urlBuilderServiceFake.parseAndComplete).not.toHaveBeenCalled();
+      expect(workspaceConfigFake.resolveConnection).toHaveBeenCalledWith(
+        workspace,
+        'local',
+        expect.any(Object),
+      );
+      expect(connectionFactoryFake.createConnection).toHaveBeenCalledWith(
+        workspaceUrl,
+        { createProject: undefined },
+      );
+      expect(loggerServiceFake.info).toHaveBeenCalledWith(
+        'Using context local (instance: local)',
+      );
+    });
+
+    it('prefers explicit context over REVISIUM_URL', async () => {
+      const workspace = {
+        path: '/repo/.revisium/revisium-cli.config.json',
+        config: {
+          version: 1,
+          currentContext: 'local',
+          instances: {
+            local: {
+              baseUrl: 'http://localhost:9222',
+              authMode: 'stored',
+            },
+          },
+          contexts: {
+            local: {
+              instance: 'local',
+              organization: 'admin',
+              project: 'dictionary',
+            },
+          },
+        },
+      };
+      const workspaceUrl = {
+        ...mockUrl,
+        auth: { method: 'token' as const, token: 'env-token' },
+      };
+
+      configServiceFake.get
+        .mockReturnValueOnce('revisium://env-host/admin/env-project')
+        .mockReturnValueOnce('env-token')
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce(undefined);
+      workspaceConfigFake.load.mockResolvedValue(workspace);
+      workspaceConfigFake.resolveConnection.mockReturnValue(workspaceUrl);
+      connectionFactoryFake.createConnection.mockResolvedValue(
+        createMockConnectionInfo(workspaceUrl),
+      );
+
+      await service.connect({ context: 'local' });
+
+      expect(urlBuilderServiceFake.parseAndComplete).not.toHaveBeenCalled();
+      expect(workspaceConfigFake.resolveConnection).toHaveBeenCalledWith(
+        workspace,
+        'local',
+        {
+          url: 'revisium://env-host/admin/env-project',
+          token: 'env-token',
+          apikey: undefined,
+          username: undefined,
+          password: undefined,
+        },
+      );
+      expect(loggerServiceFake.info).toHaveBeenCalledWith(
+        'Using context local (instance: local)',
+      );
+    });
+
+    it('prefers explicit url over workspace context', async () => {
+      const testUrl = 'revisium://test.com/org/proj';
+
+      workspaceConfigFake.load.mockResolvedValue({
+        path: '/repo/.revisium/revisium-cli.config.json',
+        config: {
+          version: 1,
+          currentContext: 'local',
+          instances: {},
+          contexts: {},
+        },
+      });
+      urlBuilderServiceFake.parseAndComplete.mockRejectedValue(
+        new Error('test error'),
+      );
+
+      await expect(
+        service.connect({ url: testUrl, context: 'local' }),
+      ).rejects.toThrow();
+
+      expect(workspaceConfigFake.load).not.toHaveBeenCalled();
+      expect(loggerServiceFake.info).not.toHaveBeenCalled();
+      expect(urlBuilderServiceFake.parseAndComplete).toHaveBeenCalledWith(
+        testUrl,
+        'api',
+        expect.any(Object),
+      );
+    });
+
+    it('fails when context is provided without workspace config', async () => {
+      await expect(service.connect({ context: 'missing' })).rejects.toThrow(
+        'No Revisium workspace config found for context "missing"',
+      );
+
+      expect(urlBuilderServiceFake.parseAndComplete).not.toHaveBeenCalled();
     });
 
     it('passes env config to parseAndComplete', async () => {

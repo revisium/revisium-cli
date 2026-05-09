@@ -144,10 +144,22 @@ revisium sync all \
 | `sync schema` | Sync schema between projects | [Sync Commands](docs/sync-commands.md) |
 | `sync data` | Sync data between projects | [Sync Commands](docs/sync-commands.md) |
 | `sync all` | Full sync (schema + data) | [Sync Commands](docs/sync-commands.md) |
+| `instance add/list/show/remove` | Manage workspace Revisium instances | [Workspace Config](docs/workspace-config.md) |
+| `context create/list/show/use/remove` | Manage workspace Revisium contexts | [Workspace Config](docs/workspace-config.md) |
 
 ## Configuration
 
-Configure via environment variables or `.env` file:
+Configure via workspace config, environment variables, or `.env` file:
+
+```bash
+# Workspace-local standalone example without auth
+revisium instance add local --url revisium://localhost:9222 --auth none
+revisium context create dictionary-local \
+  --url revisium://localhost:9222/admin/dictionary/master
+revisium context use dictionary-local
+```
+
+Then single-target commands can omit `--url` in that workspace.
 
 ```env
 # Recommended: URL + Token
@@ -178,6 +190,7 @@ See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) 
 ## Documentation
 
 - [Configuration](docs/configuration.md) - Environment variables and .env files
+- [Workspace Config](docs/workspace-config.md) - non-secret instances and contexts
 - [URL Format](docs/url-format.md) - Revisium URL syntax
 - [Authentication](docs/authentication.md) - Token, API key, and password auth
 - [Auth Contexts And Bootstrap Plan](docs/auth-contexts-and-bootstrap-plan.md) - proposed saved auth, contexts, and example bootstrap workflow

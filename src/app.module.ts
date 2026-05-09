@@ -1,7 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ApplyMigrationsCommand } from 'src/commands/migration/apply-migrations.command';
+import { ContextCommand } from 'src/commands/context/context.command';
+import { ContextCreateCommand } from 'src/commands/context/context-create.command';
+import { ContextListCommand } from 'src/commands/context/context-list.command';
+import { ContextRemoveCommand } from 'src/commands/context/context-remove.command';
+import { ContextShowCommand } from 'src/commands/context/context-show.command';
+import { ContextUseCommand } from 'src/commands/context/context-use.command';
 import { CreateMigrationsCommand } from 'src/commands/schema/create-migrations.command';
+import { InstanceAddCommand } from 'src/commands/instance/instance-add.command';
+import { InstanceCommand } from 'src/commands/instance/instance.command';
+import { InstanceListCommand } from 'src/commands/instance/instance-list.command';
+import { InstanceRemoveCommand } from 'src/commands/instance/instance-remove.command';
+import { InstanceShowCommand } from 'src/commands/instance/instance-show.command';
 import { MigrationCommand } from 'src/commands/migration/migration.command';
 import { RowsCommand } from 'src/commands/rows/rows.command';
 import { SaveMigrationsCommand } from 'src/commands/migration/save-migrations.command';
@@ -40,6 +51,7 @@ import {
   getEnvFilePath,
   shouldIgnoreEnvFile,
 } from 'src/utils/env-config.utils';
+import { WorkspaceConfigService } from 'src/services/workspace';
 
 @Module({
   imports: [
@@ -53,6 +65,17 @@ import {
     MigrationCommand,
     ApplyMigrationsCommand,
     SaveMigrationsCommand,
+    InstanceCommand,
+    InstanceAddCommand,
+    InstanceListCommand,
+    InstanceShowCommand,
+    InstanceRemoveCommand,
+    ContextCommand,
+    ContextCreateCommand,
+    ContextListCommand,
+    ContextShowCommand,
+    ContextUseCommand,
+    ContextRemoveCommand,
     SchemaCommand,
     SaveSchemaCommand,
     CreateMigrationsCommand,
@@ -78,6 +101,7 @@ import {
     UrlBuilderService,
     UrlParserService,
     AuthPromptService,
+    WorkspaceConfigService,
   ],
 })
 export class AppModule {}

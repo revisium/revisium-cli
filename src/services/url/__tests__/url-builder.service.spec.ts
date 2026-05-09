@@ -508,6 +508,23 @@ describe('UrlBuilderService', () => {
       );
     });
 
+    it('formats URL with no auth', () => {
+      const url = {
+        baseUrl: 'http://localhost:9222',
+        auth: {
+          method: 'none' as const,
+        },
+        organization: 'admin',
+        project: 'dictionary',
+        branch: 'master',
+        revision: 'draft',
+      };
+
+      expect(service.formatAsRevisiumUrl(url)).toBe(
+        'revisium://localhost:9222/admin/dictionary/master',
+      );
+    });
+
     it('formats URL with revision', () => {
       const url = {
         baseUrl: 'https://cloud.revisium.io',

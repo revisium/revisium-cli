@@ -9,6 +9,30 @@ describe('RevisiumApiClient', () => {
     apiClient = new RevisiumApiClient('http://localhost:8080');
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('authenticate with no auth', () => {
+    it('does not call login methods', async () => {
+      const loginWithTokenSpy = jest.spyOn(apiClient.client, 'loginWithToken');
+      const loginWithApiKeySpy = jest.spyOn(
+        apiClient.client,
+        'loginWithApiKey',
+      );
+      const loginSpy = jest.spyOn(apiClient.client, 'login');
+      const setConfigSpy = jest.spyOn(apiClient.client.client, 'setConfig');
+
+      const result = await apiClient.authenticate({ method: 'none' });
+
+      expect(result).toBe('no auth');
+      expect(loginWithTokenSpy).not.toHaveBeenCalled();
+      expect(loginWithApiKeySpy).not.toHaveBeenCalled();
+      expect(loginSpy).not.toHaveBeenCalled();
+      expect(setConfigSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('authenticateWithApiKey (via authenticate)', () => {
     it('calls loginWithApiKey on the underlying client', async () => {
       const loginWithApiKeySpy = jest
@@ -79,7 +103,8 @@ describe('RevisiumApiClient', () => {
   });
 
   describe('authenticateWithToken (via authenticate)', () => {
-    it('calls loginWithToken on the underlying client', async () => {
+    it('sets bearer token on the underlying client', async () => {
+      const setConfigSpy = jest.spyOn(apiClient.client.client, 'setConfig');
       const loginWithTokenSpy = jest
         .spyOn(apiClient.client, 'loginWithToken')
         .mockImplementation(() => {});
@@ -92,7 +117,13 @@ describe('RevisiumApiClient', () => {
         token: 'jwt-token-123',
       });
 
-      expect(loginWithTokenSpy).toHaveBeenCalledWith('jwt-token-123');
+      expect(loginWithTokenSpy).not.toHaveBeenCalled();
+      expect(setConfigSpy).toHaveBeenCalledWith({
+        auth: undefined,
+        headers: {
+          Authorization: 'Bearer jwt-token-123',
+        },
+      });
       expect(result).toBe('token-user');
     });
 
@@ -114,6 +145,100 @@ describe('RevisiumApiClient', () => {
       });
 
       expect(loginWithApiKeySpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('authenticateWithPassword (via authenticate)', () => {
+    it('logs in and stores the returned access token as bearer auth', async () => {
+      const setConfigSpy = jest.spyOn(apiClient.client.client, 'setConfig');
+      const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            accessToken: 'jwt-from-login',
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      );
+
+      const result = await apiClient.authenticate({
+        method: 'password',
+        username: 'admin',
+        password: 'admin',
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:8080/api/auth/login',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            emailOrUsername: 'admin',
+            password: 'admin',
+          }),
+        }),
+      );
+      const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+      expect(init.signal).toBeInstanceOf(AbortSignal);
+      expect(setConfigSpy).toHaveBeenCalledWith({
+        auth: undefined,
+        headers: {
+          Authorization: 'Bearer jwt-from-login',
+        },
+      });
+      expect(result).toBe('admin');
+    });
+
+    it('maps an aborted login request to a timeout error', async () => {
+      const abortError = new Error('aborted');
+      abortError.name = 'AbortError';
+      jest.spyOn(global, 'fetch').mockRejectedValue(abortError);
+
+      await expect(
+        apiClient.authenticate({
+          method: 'password',
+          username: 'admin',
+          password: 'admin',
+        }),
+      ).rejects.toThrow('Login request timed out after 10000ms');
+    });
+
+    it('rejects malformed login JSON', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        new Response('not-json', {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+
+      await expect(
+        apiClient.authenticate({
+          method: 'password',
+          username: 'admin',
+          password: 'admin',
+        }),
+      ).rejects.toThrow('Invalid login response: expected JSON');
+    });
+
+    it('rejects login responses without an access token', async () => {
+      const setConfigSpy = jest.spyOn(apiClient.client.client, 'setConfig');
+      jest.spyOn(global, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ accessToken: '' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      );
+
+      await expect(
+        apiClient.authenticate({
+          method: 'password',
+          username: 'admin',
+          password: 'admin',
+        }),
+      ).rejects.toThrow('Invalid login response: missing accessToken');
+      expect(setConfigSpy).not.toHaveBeenCalled();
     });
   });
 

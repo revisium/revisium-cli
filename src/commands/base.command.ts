@@ -2,6 +2,7 @@ import { CommandRunner, Option } from 'nest-commander';
 
 export type BaseOptions = {
   url?: string;
+  context?: string;
 };
 
 export abstract class BaseCommand extends CommandRunner {
@@ -12,6 +13,16 @@ export abstract class BaseCommand extends CommandRunner {
     required: false,
   })
   public parseUrl(value: string) {
+    return value;
+  }
+
+  @Option({
+    flags: '--context <name>',
+    description:
+      'Named workspace context from .revisium/revisium-cli.config.json (single-target commands)',
+    required: false,
+  })
+  public parseContext(value: string) {
     return value;
   }
 }
