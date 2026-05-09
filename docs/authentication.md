@@ -1,6 +1,6 @@
 # Authentication
 
-Revisium CLI supports three authentication methods (mutually exclusive).
+Revisium CLI supports three authentication methods for authenticated instances. Workspace contexts can also opt into explicit no-auth mode for local standalone demos.
 
 ## Token Authentication (Recommended)
 
@@ -54,6 +54,19 @@ export REVISIUM_USERNAME=admin
 export REVISIUM_PASSWORD=secret
 ```
 
+## No Auth For Local Standalone
+
+Use workspace config when a standalone instance runs with auth disabled:
+
+```bash
+revisium instance add local --url revisium://localhost:9222 --auth none
+revisium context create dictionary-local \
+  --url revisium://localhost:9222/admin/dictionary/master
+revisium context use dictionary-local
+```
+
+`authMode: "none"` sends no auth headers and bypasses prompts. Do not use it for cloud or shared authenticated instances.
+
 ## Interactive Mode
 
 If no credentials are provided, you'll be prompted:
@@ -95,9 +108,10 @@ Paste token: ****
 
 ## Priority
 
-1. **URL auth** (`?token=...` or `user:pass@host`)
+1. **URL auth** (`?token=...`, `?apikey=...`, or `user:pass@host`)
 2. **Environment variables** (`TOKEN` > `API_KEY` > `USERNAME/PASSWORD`)
-3. **Interactive prompts**
+3. **Workspace no-auth mode** (`authMode: "none"`)
+4. **Interactive prompts**
 
 ## Validation
 
@@ -159,3 +173,4 @@ revisium sync all \
 
 - [URL Format](./url-format.md) - URL syntax
 - [Configuration](./configuration.md) - Environment variables
+- [Workspace Config](./workspace-config.md) - no-auth local contexts

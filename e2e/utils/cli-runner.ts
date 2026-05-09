@@ -21,11 +21,13 @@ export async function runCli(
   const { env = {}, timeout = 60000, cwd = process.cwd() } = options;
 
   const isInstrumented = process.env.E2E_INSTRUMENTED === '1';
-  const mainPath = isInstrumented
-    ? 'dist-instrumented/src/main.js'
-    : 'dist/src/main.js';
+  const projectRoot = process.cwd();
+  const mainPath = path.join(
+    projectRoot,
+    isInstrumented ? 'dist-instrumented/src/main.js' : 'dist/src/main.js',
+  );
 
-  const nycOutputDir = path.join(cwd, '.nyc_output');
+  const nycOutputDir = path.join(projectRoot, '.nyc_output');
   if (isInstrumented && !fs.existsSync(nycOutputDir)) {
     fs.mkdirSync(nycOutputDir, { recursive: true });
   }

@@ -1,6 +1,5 @@
-import { Option } from 'nest-commander';
+import { CommandRunner, Option } from 'nest-commander';
 import { ConfigService } from '@nestjs/config';
-import { BaseCommand } from 'src/commands/base.command';
 import { SyncApiService, CommitRevisionService } from 'src/services/sync';
 import {
   RevisiumUrlComplete,
@@ -21,7 +20,7 @@ export interface DataSyncOptions extends BaseSyncOptions {
   batchSize?: number;
 }
 
-export abstract class BaseSyncCommand extends BaseCommand {
+export abstract class BaseSyncCommand extends CommandRunner {
   constructor(
     protected readonly configService: ConfigService,
     protected readonly urlBuilder: UrlBuilderService,

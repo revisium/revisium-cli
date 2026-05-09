@@ -39,6 +39,7 @@ export class ApplyMigrationsCommand extends BaseCommand {
 
     await this.connectionService.connect({
       url: options.url,
+      context: options.context,
       createProject: options.createProject,
     });
 

@@ -46,6 +46,10 @@ export class UrlBuilderService {
 
     const basePath = `revisium://${baseUrlWithoutProtocol}/${url.organization}/${url.project}${branchPart}`;
 
+    if (url.auth.method === 'none') {
+      return basePath;
+    }
+
     if (url.auth.method === 'token') {
       const tokenValue = maskSecrets ? '****' : url.auth.token;
       return `${basePath}?token=${tokenValue}`;
