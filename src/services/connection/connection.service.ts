@@ -41,12 +41,17 @@ export class ConnectionService {
   }
 
   public async connect(options: ConnectionOptions = {}): Promise<void> {
-    const env = this.getEnvConfig();
-    const url = await this.resolveUrl(options, env);
+    const url = await this.resolveTarget(options);
 
     this._connection = await this.connectionFactory.createConnection(url, {
       createProject: options.createProject,
     });
+  }
+
+  public async resolveTarget(
+    options: ConnectionOptions = {},
+  ): Promise<RevisiumUrlComplete> {
+    return this.resolveUrl(options, this.getEnvConfig());
   }
 
   private async resolveUrl(

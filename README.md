@@ -133,20 +133,23 @@ revisium sync all \
 
 ## Commands
 
-| Command                               | Description                         | Documentation                                |
-| ------------------------------------- | ----------------------------------- | -------------------------------------------- |
-| `schema save`                         | Export table schemas to JSON files  | [Schema Commands](docs/schema-commands.md)   |
-| `schema create-migrations`            | Convert schemas to migration format | [Schema Commands](docs/schema-commands.md)   |
-| `migrate save`                        | Export migrations to JSON file      | [Migrate Commands](docs/migrate-commands.md) |
-| `migrate apply`                       | Apply migrations from JSON file     | [Migrate Commands](docs/migrate-commands.md) |
-| `rows save`                           | Export table data to JSON files     | [Rows Commands](docs/rows-commands.md)       |
-| `rows upload`                         | Upload table data from JSON files   | [Rows Commands](docs/rows-commands.md)       |
-| `sync schema`                         | Sync schema between projects        | [Sync Commands](docs/sync-commands.md)       |
-| `sync data`                           | Sync data between projects          | [Sync Commands](docs/sync-commands.md)       |
-| `sync all`                            | Full sync (schema + data)           | [Sync Commands](docs/sync-commands.md)       |
-| `instance add/list/show/remove`       | Manage workspace Revisium instances | [Workspace Config](docs/workspace-config.md) |
-| `context create/list/show/use/remove` | Manage workspace Revisium contexts  | [Workspace Config](docs/workspace-config.md) |
-| `auth login/status/logout`            | Manage saved API-key credentials    | [Authentication](docs/authentication.md)     |
+| Command                               | Description                            | Documentation                                    |
+| ------------------------------------- | -------------------------------------- | ------------------------------------------------ |
+| `schema save`                         | Export table schemas to JSON files     | [Schema Commands](docs/schema-commands.md)       |
+| `schema create-migrations`            | Convert schemas to migration format    | [Schema Commands](docs/schema-commands.md)       |
+| `migrate save`                        | Export migrations to JSON file         | [Migrate Commands](docs/migrate-commands.md)     |
+| `migrate apply`                       | Apply migrations from JSON file        | [Migrate Commands](docs/migrate-commands.md)     |
+| `rows save`                           | Export table data to JSON files        | [Rows Commands](docs/rows-commands.md)           |
+| `rows upload`                         | Upload table data from JSON files      | [Rows Commands](docs/rows-commands.md)           |
+| `sync schema`                         | Sync schema between projects           | [Sync Commands](docs/sync-commands.md)           |
+| `sync data`                           | Sync data between projects             | [Sync Commands](docs/sync-commands.md)           |
+| `sync all`                            | Full sync (schema + data)              | [Sync Commands](docs/sync-commands.md)           |
+| `instance add/list/show/remove`       | Manage workspace Revisium instances    | [Workspace Config](docs/workspace-config.md)     |
+| `context create/list/show/use/remove` | Manage workspace Revisium contexts     | [Workspace Config](docs/workspace-config.md)     |
+| `auth login/status/logout`            | Manage saved API-key credentials       | [Authentication](docs/authentication.md)         |
+| `project ensure`                      | Ensure a project and branch exist      | [Bootstrap Commands](docs/bootstrap-commands.md) |
+| `endpoint ensure/list`                | Ensure or list generated endpoints     | [Bootstrap Commands](docs/bootstrap-commands.md) |
+| `example bootstrap`                   | Bootstrap example projects from config | [Bootstrap Commands](docs/bootstrap-commands.md) |
 
 ## Configuration
 
@@ -192,6 +195,7 @@ See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) 
 
 - [Configuration](docs/configuration.md) - Environment variables and .env files
 - [Workspace Config](docs/workspace-config.md) - non-secret instances and contexts
+- [Bootstrap Commands](docs/bootstrap-commands.md) - project, endpoint, and example bootstrap workflows
 - [URL Format](docs/url-format.md) - Revisium URL syntax
 - [Authentication](docs/authentication.md) - Token, API key, and password auth
 - [Auth Contexts And Bootstrap Plan](docs/auth-contexts-and-bootstrap-plan.md) - implementation tracker for saved auth, contexts, and example bootstrap workflow
