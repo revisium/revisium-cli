@@ -1,0 +1,85 @@
+name: Release Train
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Release train transition
+        required: true
+        type: choice
+        options:
+          - start-minor-alpha
+          - start-major-alpha
+          - start-minor-rc
+          - start-major-rc
+          - start-minor-stable
+          - start-major-stable
+          - alpha-bump
+          - promote-rc
+          - rc-bump
+          - stable
+          - patch
+          - patch-alpha-start
+          - patch-rc-start
+      dry_run:
+        description: Validate and show the computed release without pushing.
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.repository }}-release-train
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  release-train:
+    name: Release train
+    uses: revisium/revisium-actions/.github/workflows/release-train.yml@184b609dcbc1e23f14021141f29226d4e6a0f1ac # v0.3.6
+    with:
+      action: ${{ inputs.action }}
+      dry_run: ${{ inputs.dry_run }}
+      base_branch: master
+      node_version: 24.11.1
+      install_command: npm ci
+      validate_command: |
+        cleanup() {
+          status=$?
+          if [ -f .e2e-test.pid ]; then
+            kill "$(cat .e2e-test.pid)" 2>/dev/null || true
+            rm -f .e2e-test.pid
+          fi
+          rm -rf .e2e-test
+          if [ "$status" -ne 0 ] && [ -f revisium.log ]; then
+            cat revisium.log
+          fi
+          exit "$status"
+        }
+        trap cleanup EXIT
+
+        npm run lint:ci
+        npm run tsc
+        rm -rf dist
+
+        FILE_PLUGIN_PUBLIC_ENDPOINT=https://cdn.example.com npx @revisium/standalone --auth --port 8082 --data .e2e-test > revisium.log 2>&1 &
+        echo $! > .e2e-test.pid
+
+        for i in $(seq 1 300); do
+          if curl -sf http://localhost:8082/health/readiness > /dev/null 2>&1; then
+            echo "Revisium ready after ${i}s"
+            break
+          fi
+          if [ "$i" = 300 ]; then
+            echo "Timed out waiting for Revisium"
+            exit 1
+          fi
+          sleep 1
+        done
+
+        npm run test:all
+        npm run build
+    secrets:
+      RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
