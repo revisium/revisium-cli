@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { WorkspaceConfigService } from '../workspace-config.service';
 import { UrlParserService } from '../../url/url-parser.service';
+import { CredentialStoreService } from '../../credentials';
 
 describe('WorkspaceConfigService', () => {
   let service: WorkspaceConfigService;
@@ -159,6 +160,133 @@ describe('WorkspaceConfigService', () => {
     expect(url.auth).toEqual({ method: 'apikey', apikey: 'rev_test' });
   });
 
+  it('resolves saved credentials for stored workspace contexts', () => {
+    const credentialStore = {
+      getCredential: jest
+        .fn()
+        .mockReturnValue({ method: 'apikey', apikey: 'rev_saved' }),
+    } as unknown as CredentialStoreService;
+    service = new WorkspaceConfigService(
+      new UrlParserService(),
+      credentialStore,
+    );
+
+    const url = service.resolveConnection(
+      {
+        path: join(tempDir, '.revisium', 'revisium-cli.config.json'),
+        config: {
+          version: 1,
+          currentContext: 'cloud',
+          instances: {
+            cloud: {
+              baseUrl: 'https://cloud.revisium.io',
+              authMode: 'stored',
+            },
+          },
+          contexts: {
+            cloud: {
+              instance: 'cloud',
+              credential: 'admin',
+              organization: 'admin',
+              project: 'dictionary',
+            },
+          },
+        },
+      },
+      undefined,
+      {},
+    );
+
+    expect(url.auth).toEqual({ method: 'apikey', apikey: 'rev_saved' });
+    expect(credentialStore.getCredential).toHaveBeenCalledWith({
+      baseUrl: 'https://cloud.revisium.io',
+      credential: 'admin',
+    });
+  });
+
+  it('lets environment credentials override saved credentials', () => {
+    const credentialStore = {
+      getCredential: jest.fn(),
+    } as unknown as CredentialStoreService;
+    service = new WorkspaceConfigService(
+      new UrlParserService(),
+      credentialStore,
+    );
+
+    const url = service.resolveConnection(
+      {
+        path: join(tempDir, '.revisium', 'revisium-cli.config.json'),
+        config: {
+          version: 1,
+          currentContext: 'cloud',
+          instances: {
+            cloud: {
+              baseUrl: 'https://cloud.revisium.io',
+              authMode: 'stored',
+            },
+          },
+          contexts: {
+            cloud: {
+              instance: 'cloud',
+              credential: 'admin',
+              organization: 'admin',
+              project: 'dictionary',
+            },
+          },
+        },
+      },
+      undefined,
+      { apikey: 'rev_env' },
+    );
+
+    expect(url.auth).toEqual({ method: 'apikey', apikey: 'rev_env' });
+    expect(credentialStore.getCredential).not.toHaveBeenCalled();
+  });
+
+  it('fails with remediation when stored credentials cannot be read', () => {
+    const credentialStore = {
+      getCredential: jest.fn(() => {
+        throw new Error(
+          'Could not read Revisium credential "admin" for https://cloud.revisium.io: keyring unavailable',
+        );
+      }),
+    } as unknown as CredentialStoreService;
+    service = new WorkspaceConfigService(
+      new UrlParserService(),
+      credentialStore,
+    );
+
+    expect(() =>
+      service.resolveConnection(
+        {
+          path: join(tempDir, '.revisium', 'revisium-cli.config.json'),
+          config: {
+            version: 1,
+            currentContext: 'cloud',
+            instances: {
+              cloud: {
+                baseUrl: 'https://cloud.revisium.io',
+                authMode: 'stored',
+              },
+            },
+            contexts: {
+              cloud: {
+                instance: 'cloud',
+                credential: 'admin',
+                organization: 'admin',
+                project: 'dictionary',
+              },
+            },
+          },
+        },
+        undefined,
+        {},
+      ),
+    ).toThrow(
+      'No credentials found for context "cloud" credential "admin". Could not read the OS credential store',
+    );
+  });
+
   it('fails with remediation when stored credentials are required', () => {
     expect(() =>
       service.resolveConnection(
@@ -187,7 +315,7 @@ describe('WorkspaceConfigService', () => {
         {},
       ),
     ).toThrow(
-      'No credentials found for context "cloud" credential "admin". Set REVISIUM_API_KEY=...',
+      'No credentials found for context "cloud" credential "admin". Run: revisium auth login --instance cloud --credential admin --api-key.',
     );
   });
 

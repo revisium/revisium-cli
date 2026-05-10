@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AuthCommand } from 'src/commands/auth/auth.command';
+import { AuthLoginCommand } from 'src/commands/auth/auth-login.command';
+import { AuthLogoutCommand } from 'src/commands/auth/auth-logout.command';
+import { AuthStatusCommand } from 'src/commands/auth/auth-status.command';
 import { ApplyMigrationsCommand } from 'src/commands/migration/apply-migrations.command';
 import { ContextCommand } from 'src/commands/context/context.command';
 import { ContextCreateCommand } from 'src/commands/context/context-create.command';
@@ -52,6 +56,10 @@ import {
   shouldIgnoreEnvFile,
 } from 'src/utils/env-config.utils';
 import { WorkspaceConfigService } from 'src/services/workspace';
+import {
+  CredentialStoreService,
+  CredentialTargetService,
+} from 'src/services/credentials';
 
 @Module({
   imports: [
@@ -65,6 +73,10 @@ import { WorkspaceConfigService } from 'src/services/workspace';
     MigrationCommand,
     ApplyMigrationsCommand,
     SaveMigrationsCommand,
+    AuthCommand,
+    AuthLoginCommand,
+    AuthStatusCommand,
+    AuthLogoutCommand,
     InstanceCommand,
     InstanceAddCommand,
     InstanceListCommand,
@@ -102,6 +114,8 @@ import { WorkspaceConfigService } from 'src/services/workspace';
     UrlParserService,
     AuthPromptService,
     WorkspaceConfigService,
+    CredentialStoreService,
+    CredentialTargetService,
   ],
 })
 export class AppModule {}

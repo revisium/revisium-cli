@@ -1,11 +1,12 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, parse, resolve } from 'node:path';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
   AuthCredentials,
   RevisiumUrlComplete,
   UrlEnvConfig,
 } from 'src/services/url';
+import { CredentialStoreService } from 'src/services/credentials/credential-store.service';
 import { UrlParserService } from 'src/services/url/url-parser.service';
 
 export const WORKSPACE_CONFIG_DIR = '.revisium';
@@ -49,7 +50,10 @@ export interface LoadedWorkspaceContext {
 
 @Injectable()
 export class WorkspaceConfigService {
-  constructor(private readonly urlParser: UrlParserService) {}
+  constructor(
+    private readonly urlParser: UrlParserService,
+    @Optional() private readonly credentialStore?: CredentialStoreService,
+  ) {}
 
   async load(
     startDir = process.cwd(),
@@ -244,10 +248,48 @@ export class WorkspaceConfigService {
     }
 
     const credential = context.credential || DEFAULT_CREDENTIAL;
+    const credentialRef = {
+      baseUrl: instance.baseUrl,
+      credential,
+    };
+    const savedCredential = this.resolveSavedCredential(
+      credentialRef,
+      contextName,
+      context.instance,
+    );
+    if (savedCredential) {
+      return savedCredential;
+    }
+
     throw new Error(
       `No credentials found for context "${contextName}" credential "${credential}". ` +
-        'Set REVISIUM_API_KEY=... or REVISIUM_TOKEN=..., or configure the instance with authMode "none" for local standalone.',
+        `Run: revisium auth login --instance ${context.instance} --credential ${credential} --api-key. ` +
+        'Or set REVISIUM_API_KEY=... / REVISIUM_TOKEN=..., or configure the instance with authMode "none" for local standalone.',
     );
+  }
+
+  private resolveSavedCredential(
+    ref: {
+      baseUrl: string;
+      credential: string;
+    },
+    contextName: string,
+    instanceName: string,
+  ): AuthCredentials | undefined {
+    try {
+      return this.credentialStore?.getCredential(ref);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.startsWith('Could not read Revisium credential')) {
+        throw new Error(
+          `No credentials found for context "${contextName}" credential "${ref.credential}". ` +
+            `Could not read the OS credential store: ${message}. ` +
+            `Run: revisium auth login --instance ${instanceName} --credential ${ref.credential} --api-key. ` +
+            'Or set REVISIUM_API_KEY=... / REVISIUM_TOKEN=... for this run.',
+        );
+      }
+      throw error;
+    }
   }
 
   private resolveEnvAuth(env: UrlEnvConfig): AuthCredentials | undefined {

@@ -10,12 +10,14 @@ import { FIXTURES_PATH } from '../utils/constants';
 
 const REPO_ROOT = process.cwd();
 const MIGRATIONS_FILE = path.join(REPO_ROOT, FIXTURES_PATH, 'migrations.json');
+const E2E_CREDENTIAL_STORE_SERVICE = `revisium-cli-e2e-${process.pid}-${Date.now()}`;
 const CLEAR_REVISIUM_ENV = {
   REVISIUM_URL: '',
   REVISIUM_TOKEN: '',
   REVISIUM_API_KEY: '',
   REVISIUM_USERNAME: '',
   REVISIUM_PASSWORD: '',
+  REVISIUM_CREDENTIAL_STORE_SERVICE: E2E_CREDENTIAL_STORE_SERVICE,
 };
 
 interface WorkspaceConfig {

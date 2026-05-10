@@ -26,18 +26,42 @@ revisium schema save --folder ./schemas --url revisium://cloud.revisium.io/org/p
 
 API key for automated and programmatic access. Keys use the `rev_` prefix and are sent via the `X-Api-Key` header (recommended over Bearer for API keys).
 
-### Usage
+### Saved API Key
 
 ```bash
-# In URL query parameter
-revisium://cloud.revisium.io/org/proj?apikey=rev_xxxxxxxxxxxxxxxxxxxx
+revisium instance add cloud --url revisium://cloud.revisium.io --auth stored
+revisium context create dictionary-cloud \
+  --url revisium://cloud.revisium.io/org/proj/master \
+  --credential default
+revisium context use dictionary-cloud
 
-# Via environment variable
-export REVISIUM_API_KEY=rev_xxxxxxxxxxxxxxxxxxxx
+revisium auth login --instance cloud --api-key
+revisium schema save --folder ./schemas
 ```
 
-**Personal keys** are linked to a user account — `me()` returns the key owner.
-**Service keys** are not linked to a user — the CLI displays "service account" instead of a username.
+`auth login --api-key` prompts with hidden input and stores the key in the operating system credential store. The workspace config stores only the instance, context, and credential name. To script setup, use stdin:
+
+```bash
+printf '%s\n' "$REVISIUM_API_KEY" | \
+  revisium auth login --instance cloud --credential default --api-key-stdin
+```
+
+Use `auth status` to check whether a credential exists and `auth logout` to delete it:
+
+```bash
+revisium auth status --instance cloud
+revisium auth logout --instance cloud
+```
+
+### One-Off Usage
+
+```bash
+# In URL query parameter, useful for compatibility but avoid shell history leaks
+revisium://cloud.revisium.io/org/proj?apikey=rev_xxxxxxxxxxxxxxxxxxxx
+
+# Via environment variable, useful for CI
+export REVISIUM_API_KEY=rev_xxxxxxxxxxxxxxxxxxxx
+```
 
 ## Password Authentication
 
@@ -85,33 +109,34 @@ Paste token: ****
 
 ### For All Commands (Single Endpoint)
 
-| Variable | Description |
-|----------|-------------|
-| `REVISIUM_URL` | Default URL (e.g., `revisium://host/org/project/branch`) |
-| `REVISIUM_TOKEN` | JWT authentication token |
-| `REVISIUM_API_KEY` | API key (for automated access) |
-| `REVISIUM_USERNAME` | Username (for password auth) |
-| `REVISIUM_PASSWORD` | Password (for password auth) |
+| Variable            | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| `REVISIUM_URL`      | Default URL (e.g., `revisium://host/org/project/branch`) |
+| `REVISIUM_TOKEN`    | JWT authentication token                                 |
+| `REVISIUM_API_KEY`  | API key (for automated access)                           |
+| `REVISIUM_USERNAME` | Username (for password auth)                             |
+| `REVISIUM_PASSWORD` | Password (for password auth)                             |
 
 ### For Sync Commands (Source/Target)
 
-| Variable | Description |
-|----------|-------------|
-| `REVISIUM_SOURCE_TOKEN` | Source project token |
-| `REVISIUM_SOURCE_API_KEY` | Source project API key |
-| `REVISIUM_SOURCE_USERNAME` | Source username |
-| `REVISIUM_SOURCE_PASSWORD` | Source password |
-| `REVISIUM_TARGET_TOKEN` | Target project token |
-| `REVISIUM_TARGET_API_KEY` | Target project API key |
-| `REVISIUM_TARGET_USERNAME` | Target username |
-| `REVISIUM_TARGET_PASSWORD` | Target password |
+| Variable                   | Description            |
+| -------------------------- | ---------------------- |
+| `REVISIUM_SOURCE_TOKEN`    | Source project token   |
+| `REVISIUM_SOURCE_API_KEY`  | Source project API key |
+| `REVISIUM_SOURCE_USERNAME` | Source username        |
+| `REVISIUM_SOURCE_PASSWORD` | Source password        |
+| `REVISIUM_TARGET_TOKEN`    | Target project token   |
+| `REVISIUM_TARGET_API_KEY`  | Target project API key |
+| `REVISIUM_TARGET_USERNAME` | Target username        |
+| `REVISIUM_TARGET_PASSWORD` | Target password        |
 
 ## Priority
 
 1. **URL auth** (`?token=...`, `?apikey=...`, or `user:pass@host`)
 2. **Environment variables** (`TOKEN` > `API_KEY` > `USERNAME/PASSWORD`)
 3. **Workspace no-auth mode** (`authMode: "none"`)
-4. **Interactive prompts**
+4. **Saved workspace credential** (`authMode: "stored"`)
+5. **Interactive prompts**
 
 ## Validation
 
@@ -173,4 +198,4 @@ revisium sync all \
 
 - [URL Format](./url-format.md) - URL syntax
 - [Configuration](./configuration.md) - Environment variables
-- [Workspace Config](./workspace-config.md) - no-auth local contexts
+- [Workspace Config](./workspace-config.md) - workspace instances and contexts

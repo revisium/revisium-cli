@@ -133,19 +133,20 @@ revisium sync all \
 
 ## Commands
 
-| Command | Description | Documentation |
-|---------|-------------|---------------|
-| `schema save` | Export table schemas to JSON files | [Schema Commands](docs/schema-commands.md) |
-| `schema create-migrations` | Convert schemas to migration format | [Schema Commands](docs/schema-commands.md) |
-| `migrate save` | Export migrations to JSON file | [Migrate Commands](docs/migrate-commands.md) |
-| `migrate apply` | Apply migrations from JSON file | [Migrate Commands](docs/migrate-commands.md) |
-| `rows save` | Export table data to JSON files | [Rows Commands](docs/rows-commands.md) |
-| `rows upload` | Upload table data from JSON files | [Rows Commands](docs/rows-commands.md) |
-| `sync schema` | Sync schema between projects | [Sync Commands](docs/sync-commands.md) |
-| `sync data` | Sync data between projects | [Sync Commands](docs/sync-commands.md) |
-| `sync all` | Full sync (schema + data) | [Sync Commands](docs/sync-commands.md) |
-| `instance add/list/show/remove` | Manage workspace Revisium instances | [Workspace Config](docs/workspace-config.md) |
-| `context create/list/show/use/remove` | Manage workspace Revisium contexts | [Workspace Config](docs/workspace-config.md) |
+| Command                               | Description                         | Documentation                                |
+| ------------------------------------- | ----------------------------------- | -------------------------------------------- |
+| `schema save`                         | Export table schemas to JSON files  | [Schema Commands](docs/schema-commands.md)   |
+| `schema create-migrations`            | Convert schemas to migration format | [Schema Commands](docs/schema-commands.md)   |
+| `migrate save`                        | Export migrations to JSON file      | [Migrate Commands](docs/migrate-commands.md) |
+| `migrate apply`                       | Apply migrations from JSON file     | [Migrate Commands](docs/migrate-commands.md) |
+| `rows save`                           | Export table data to JSON files     | [Rows Commands](docs/rows-commands.md)       |
+| `rows upload`                         | Upload table data from JSON files   | [Rows Commands](docs/rows-commands.md)       |
+| `sync schema`                         | Sync schema between projects        | [Sync Commands](docs/sync-commands.md)       |
+| `sync data`                           | Sync data between projects          | [Sync Commands](docs/sync-commands.md)       |
+| `sync all`                            | Full sync (schema + data)           | [Sync Commands](docs/sync-commands.md)       |
+| `instance add/list/show/remove`       | Manage workspace Revisium instances | [Workspace Config](docs/workspace-config.md) |
+| `context create/list/show/use/remove` | Manage workspace Revisium contexts  | [Workspace Config](docs/workspace-config.md) |
+| `auth login/status/logout`            | Manage saved API-key credentials    | [Authentication](docs/authentication.md)     |
 
 ## Configuration
 
