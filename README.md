@@ -29,22 +29,20 @@ npx revisium --help          # ad-hoc
 
 ```bash
 # 1. In one terminal, boot a local Revisium with embedded PostgreSQL.
-npx -y @revisium/standalone --auth     # admin password printed on first run
+#    No --auth flag = no credentials needed for the rest of this quickstart.
+npx -y @revisium/standalone
 
-# 2. Save your API key once. (Mint a key in the Revisium UI first.)
-revisium auth login --url revisium://localhost:9222 --api-key-stdin
-
-# 3. Bootstrap a project + table + row + REST endpoint from one config file.
+# 2. Bootstrap a project + table + row + REST endpoint from one config file.
 revisium example bootstrap \
   --config ./bootstrap.config.json \
   --url revisium://localhost:9222/admin/hello/master \
   --commit
 
-# 4. Hit your fresh REST endpoint.
+# 3. Hit your fresh REST endpoint.
 curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
 ```
 
-Full walkthrough with the `bootstrap.config.json` example: [docs/quickstart.md](docs/quickstart.md).
+Full walkthrough with the `bootstrap.config.json` example: [docs/quickstart.md](docs/quickstart.md). For a Revisium that requires login, see [docs/authentication.md](docs/authentication.md).
 
 ## Use cases
 

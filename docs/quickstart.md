@@ -1,6 +1,6 @@
 # Quickstart
 
-Boots a local Revisium, creates a project with a table and a row, and exposes it as a REST endpoint — all from the CLI. Should take under five minutes from a clean checkout.
+Boots a local Revisium with no authentication, creates a project with a table and a row, and exposes it as a REST endpoint — all from the CLI. Should take under five minutes from a clean checkout.
 
 ## Prerequisites
 
@@ -9,34 +9,21 @@ Boots a local Revisium, creates a project with a table and a row, and exposes it
 
 The CLI itself is `npx`-friendly, so you don't need to install it globally to follow along.
 
-## 1. Boot a local Revisium
+## 1. Boot a local Revisium (no-auth)
 
 In one terminal:
 
 ```bash
-npx -y @revisium/standalone --auth
+npx -y @revisium/standalone
 ```
 
-`@revisium/standalone` is a self-contained Revisium with embedded PostgreSQL. The first run prints an admin password — copy it. Subsequent runs print the bound URL (default: `http://localhost:9222`).
+`@revisium/standalone` is a self-contained Revisium with embedded PostgreSQL. Without the `--auth` flag it runs in **no-auth mode**: anyone hitting `http://localhost:9222` can read and write. Perfect for kicking the tires; do not expose this to the internet.
 
-Leave this terminal running.
+Leave this terminal running. The bound URL appears in the banner once startup finishes.
 
-## 2. Save your API key
+For the auth-enabled path (`--auth` plus `revisium auth login`), see [docs/authentication.md](authentication.md).
 
-In a second terminal, log in once. The CLI stores the key in your OS keyring so later commands don't need it again:
-
-```bash
-# Open Revisium's UI in a browser, sign in with the admin password, and mint
-# a personal API key under "API Keys". Then:
-revisium auth login \
-  --url revisium://localhost:9222 \
-  --api-key-stdin
-# (paste the API key, then Enter)
-```
-
-`revisium auth status --url revisium://localhost:9222` will confirm the credential is saved.
-
-## 3. Bootstrap a project
+## 2. Bootstrap a project
 
 Save this as `bootstrap.config.json`:
 
@@ -82,7 +69,7 @@ The CLI:
 4. Generates a `REST_API` endpoint pointing at the new revision.
 5. Commits the draft, sealing the revision.
 
-## 4. Hit the REST endpoint
+## 3. Hit the REST endpoint
 
 ```bash
 curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
@@ -101,7 +88,8 @@ You're done. The same shape — bootstrap config + example bootstrap command —
 If you'll keep running the CLI in this directory, add a workspace context so commands can omit `--url`:
 
 ```bash
-revisium instance add local --url revisium://localhost:9222
+# --auth none matches the standalone we booted in step 1
+revisium instance add local --url revisium://localhost:9222 --auth none
 revisium context create hello-local \
   --url revisium://localhost:9222/admin/hello/master
 revisium context use hello-local
