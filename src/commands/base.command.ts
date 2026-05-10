@@ -3,6 +3,7 @@ import { CommandRunner, Option } from 'nest-commander';
 export type BaseOptions = {
   url?: string;
   context?: string;
+  token?: string;
 };
 
 export abstract class BaseCommand extends CommandRunner {
@@ -23,6 +24,16 @@ export abstract class BaseCommand extends CommandRunner {
     required: false,
   })
   public parseContext(value: string) {
+    return value;
+  }
+
+  @Option({
+    flags: '--token <token>',
+    description:
+      'JWT access token for this command. Overrides REVISIUM_TOKEN and REVISIUM_API_KEY.',
+    required: false,
+  })
+  public parseToken(value: string) {
     return value;
   }
 }

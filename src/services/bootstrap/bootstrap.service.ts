@@ -209,7 +209,7 @@ export class BootstrapService {
   ): Promise<ExampleBootstrapSummary> {
     const config = await this.loadBootstrapConfig(options.configPath);
     const { url, apiClient } = await this.createResolvedClient(options);
-    this.assertConfigMatchesTarget(config, url);
+    this.assertProjectNameMatchesTarget(config, url);
     this.assertWritableRevision(url);
 
     const dryRun = Boolean(options.dryRun);
@@ -218,7 +218,26 @@ export class BootstrapService {
         ? this.uniqueEndpoints(options.endpointOverrides)
         : config.endpoints;
 
+    // Fail fast on branchName mismatch in non-dry-run, before ensureProject
+    // can create a project/branch we'd then have to roll back.
+    if (!dryRun) {
+      this.assertBranchNameMatchesTarget(config, url, false);
+    }
+
     const project = await this.ensureProject(options, dryRun);
+
+    // In dry-run, allow a branchName mismatch only for the specific
+    // populated-rootBranch regression case: project already exists, target
+    // branch is missing, so we diff against the root branch's head. If the
+    // project itself is missing there's no rootBranch to diff against, so
+    // the mismatch must still surface.
+    this.assertBranchNameMatchesTarget(
+      config,
+      url,
+      dryRun &&
+        project.projectStatus === 'skipped' &&
+        project.branchStatus === 'created',
+    );
     const emptySummary = this.createEmptySummary(url, project, dryRun);
 
     if (dryRun && project.projectStatus === 'created') {
@@ -352,12 +371,27 @@ export class BootstrapService {
       const projectScope = apiClient.client
         .org(url.organization)
         .project(url.project);
-      const rootBranch = await projectScope.branch();
+      const rootBranch = (await projectScope.branch()) as {
+        branchName?: string;
+        name?: string;
+        headRevisionId?: string;
+        head?: { id?: string };
+      };
+      const rootBranchName = rootBranch.branchName ?? rootBranch.name;
+      const rootHeadRevisionId =
+        rootBranch.headRevisionId ?? rootBranch.head?.id;
+
+      if (!rootBranchName || !rootHeadRevisionId) {
+        throw new Error(
+          'Could not resolve root branch head revision for bootstrap dry-run diff',
+        );
+      }
+
       return apiClient.client.revision({
         org: url.organization,
         project: url.project,
-        branch: rootBranch.branchName,
-        revision: rootBranch.headRevisionId,
+        branch: rootBranchName,
+        revision: rootHeadRevisionId,
       });
     }
     return this.resolveRevisionScope(url, apiClient);
@@ -540,7 +574,7 @@ export class BootstrapService {
     }
   }
 
-  private assertConfigMatchesTarget(
+  private assertProjectNameMatchesTarget(
     config: ExampleBootstrapConfig,
     url: RevisiumUrlComplete,
   ): void {
@@ -549,9 +583,19 @@ export class BootstrapService {
         `Bootstrap config projectName "${config.projectName}" does not match target project "${url.project}"`,
       );
     }
+  }
 
+  private assertBranchNameMatchesTarget(
+    config: ExampleBootstrapConfig,
+    url: RevisiumUrlComplete,
+    allowMissingBranchDryRun: boolean,
+  ): void {
     const branchName = url.branch || 'master';
-    if (config.branchName && config.branchName !== branchName) {
+    if (
+      config.branchName &&
+      config.branchName !== branchName &&
+      !allowMissingBranchDryRun
+    ) {
       throw new Error(
         `Bootstrap config branchName "${config.branchName}" does not match target branch "${branchName}"`,
       );
