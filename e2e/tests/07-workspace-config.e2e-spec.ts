@@ -224,7 +224,9 @@ describe('Workspace config commands', () => {
     });
 
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('Using context current (instance: local)');
+    expect(result.stdout + result.stderr).toContain(
+      'Using context current (instance: local)',
+    );
     expect(result.stdout).toContain('Authenticated as admin');
     expect(fs.readdirSync(outputDir)).toHaveLength(14);
   });
@@ -257,7 +259,7 @@ describe('Workspace config commands', () => {
     );
 
     expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain(
+    expect(result.stdout + result.stderr).toContain(
       'Using context populated (instance: local)',
     );
     expect(result.stdout).toContain(`Project: admin/${populatedProject.name}`);
@@ -324,7 +326,7 @@ describe('Workspace config commands', () => {
     );
 
     expect(migrateResult.exitCode).toBe(0);
-    expect(migrateResult.stdout).toContain(
+    expect(migrateResult.stdout + migrateResult.stderr).toContain(
       'Using context demo (instance: local-no-auth)',
     );
     expect(migrateResult.stdout).toContain('Authenticated as no auth');
