@@ -166,7 +166,7 @@ describe('M09 — rows save / upload', () => {
         'upload',
         '--folder',
         folder,
-        '--batch',
+        '--batch-size',
         '5',
         '--commit',
         '--url',

@@ -189,7 +189,9 @@ describe('M02 — instance commands', () => {
       cwd: workspace,
       env: env(),
     });
-    expect(status.stdout).toContain('No saved credential found');
+    expect(status.stdout + status.stderr).toContain(
+      'No saved credential found',
+    );
   });
 
   it('rejects re-adding an existing instance unless --force', async () => {

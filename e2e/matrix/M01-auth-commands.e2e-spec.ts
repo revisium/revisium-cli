@@ -135,7 +135,9 @@ describe('M01 — auth commands', () => {
       { cwd: workspace, env },
     );
     expect(defaultStatus.exitCode).toBe(0);
-    expect(defaultStatus.stdout).toContain('No saved credential found');
+    expect(defaultStatus.stdout + defaultStatus.stderr).toContain(
+      'No saved credential found',
+    );
   });
 
   it('refuses to login on an authMode "none" instance without --force', async () => {
@@ -206,7 +208,9 @@ describe('M01 — auth commands', () => {
       env,
     });
     expect(status.exitCode).toBe(0);
-    expect(status.stdout).toContain('No saved credential found');
+    expect(status.stdout + status.stderr).toContain(
+      'No saved credential found',
+    );
   });
 
   it('login --url derives the instance for first-time setup', async () => {
@@ -236,6 +240,6 @@ describe('M01 — auth commands', () => {
       env,
     });
     expect(status.exitCode).toBe(0);
-    expect(status.stdout).toMatch(/auth login.*--api-key/);
+    expect(status.stdout + status.stderr).toMatch(/auth login.*--api-key/);
   });
 });

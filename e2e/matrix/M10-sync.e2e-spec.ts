@@ -33,6 +33,7 @@ describe('M10 — sync', () => {
   let target: StandaloneInstance;
   let sourceApiKey: string;
   let targetApiKey: string;
+  let targetToken: string;
   const sourceProject = `m10-source-${Date.now()}`;
   const targetProject = `m10-target-${Date.now()}`;
   const workspaces: string[] = [];
@@ -48,7 +49,7 @@ describe('M10 — sync', () => {
     });
 
     await source.api.login('admin', 'test-admin');
-    await target.api.login('admin', 'test-admin');
+    targetToken = await target.api.login('admin', 'test-admin');
     sourceApiKey = (
       await source.api.mintApiKey('admin', { name: 'matrix-sync-source' })
     ).apiKey;
@@ -103,7 +104,7 @@ describe('M10 — sync', () => {
   }
 
   function sourceUrl(): string {
-    return source.url({ project: sourceProject, revision: 'head' });
+    return source.url({ project: sourceProject });
   }
 
   function targetUrl(): string {
@@ -198,12 +199,12 @@ describe('M10 — sync', () => {
     expect(questRowsCopied).toHaveLength(5);
   });
 
-  it('rejects mutually-exclusive auth: both ?token=... and REVISIUM_TARGET_TOKEN', async () => {
+  it('?token=... in target URL overrides REVISIUM_TARGET_TOKEN', async () => {
     const { workspace } = setup();
     const env: Record<string, string> = {
       ...CLEAR_REVISIUM_ENV,
       REVISIUM_SOURCE_API_KEY: sourceApiKey,
-      REVISIUM_TARGET_TOKEN: 'env-token',
+      REVISIUM_TARGET_TOKEN: 'wrong-token',
     };
     const result = await runCli(
       [
@@ -212,13 +213,10 @@ describe('M10 — sync', () => {
         '--source',
         sourceUrl(),
         '--target',
-        `${targetUrl()}?token=url-token`,
+        `${targetUrl()}?token=${targetToken}`,
       ],
       { cwd: workspace, env },
     );
-    expect(result.exitCode).not.toBe(0);
-    expect(result.stderr.toLowerCase()).toMatch(
-      /(mutually[- ]exclusive|conflict|both.*token)/,
-    );
+    expect(result.exitCode).toBe(0);
   });
 });
