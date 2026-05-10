@@ -5,7 +5,10 @@ export interface AuthCommandTarget {
 }
 
 function quoteArg(value: string): string {
-  const escaped = value.replace(/'/g, `'\\''`);
+  if (process.platform === 'win32') {
+    return `"${value.replaceAll('"', '""')}"`;
+  }
+  const escaped = value.replaceAll("'", String.raw`'\''`);
   return `'${escaped}'`;
 }
 
