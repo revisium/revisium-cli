@@ -37,6 +37,8 @@ export class ExampleBootstrapCommand extends BaseCommand {
     const summary = await this.bootstrapService.bootstrapExample({
       url: options.url,
       context: options.context,
+      token: options.token,
+      skipAuth: options.skipAuth,
       configPath: options.config,
       commit: options.commit,
       dryRun: options.dryRun,

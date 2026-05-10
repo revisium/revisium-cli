@@ -64,8 +64,11 @@ Run it:
 revisium example bootstrap \
   --config ./bootstrap.config.json \
   --url revisium://localhost:9222/admin/hello/master \
+  --skip-auth \
   --commit
 ```
+
+`--skip-auth` tells the CLI not to look for credentials. Without it, the CLI assumes the target requires auth and prompts interactively (or fails in CI). Drop the flag the moment you point at a `--auth`-enabled Revisium.
 
 The CLI:
 
@@ -78,14 +81,24 @@ The CLI:
 ## 3. Hit the REST endpoint
 
 ```bash
-curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
+curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/tables/Note/row/first
 ```
 
-Expected response:
+Expected response (formatted):
 
 ```json
-{ "text": "hi" }
+{
+  "id": "first",
+  "data": { "text": "hi" },
+  "versionId": "…",
+  "createdAt": "…",
+  "updatedAt": "…",
+  "publishedAt": "…",
+  "readonly": true
+}
 ```
+
+The endpoint base URL is `<host>/endpoint/rest/<org>/<project>/<branch>/<revision>`. Underneath it, `/tables/<tableId>` lists rows and `/tables/<tableId>/row/<rowId>` returns one row.
 
 You're done. The same shape — bootstrap config + example bootstrap command — scales up to many tables, rows, and endpoints.
 

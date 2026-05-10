@@ -504,6 +504,24 @@ describe('BootstrapService', () => {
       );
     });
 
+    it('resolves the connection only once per bootstrap (no double prompt)', async () => {
+      const configPath = await writeBootstrapConfig({
+        tables: [],
+        rows: [],
+      });
+      revisionScopeFake.getEndpoints.mockResolvedValue([]);
+
+      await service.bootstrapExample({
+        url: 'revisium://local',
+        configPath,
+      });
+
+      // ensureProject is invoked internally with the already-resolved
+      // client, so connectionService.resolveTarget should fire exactly once
+      // even though both bootstrapExample and ensureProject normally call it.
+      expect(connectionServiceFake.resolveTarget).toHaveBeenCalledTimes(1);
+    });
+
     it('reports row conflicts and stops without writing', async () => {
       const configPath = await writeBootstrapConfig({
         tables: [],

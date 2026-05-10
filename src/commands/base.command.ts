@@ -1,9 +1,11 @@
 import { CommandRunner, Option } from 'nest-commander';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 export type BaseOptions = {
   url?: string;
   context?: string;
   token?: string;
+  skipAuth?: boolean;
 };
 
 export abstract class BaseCommand extends CommandRunner {
@@ -35,5 +37,15 @@ export abstract class BaseCommand extends CommandRunner {
   })
   public parseToken(value: string) {
     return value;
+  }
+
+  @Option({
+    flags: '--skip-auth [boolean]',
+    description:
+      'Treat the target as unauthenticated (e.g. a local @revisium/standalone booted without --auth). Skips the credential prompt.',
+    required: false,
+  })
+  public parseSkipAuth(value?: string): boolean {
+    return parseBooleanOption(value);
   }
 }

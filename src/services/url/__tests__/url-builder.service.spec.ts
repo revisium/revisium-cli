@@ -242,6 +242,18 @@ describe('UrlBuilderService', () => {
       }
     });
 
+    it('returns method "none" without prompting when env.noAuth is set', async () => {
+      const result = await service.parseAndComplete(
+        'revisium://localhost:9222/admin/hello/master',
+        'api',
+        { noAuth: true },
+      );
+
+      expect(result.auth.method).toBe('none');
+      expect(interactiveService.promptSelect).not.toHaveBeenCalled();
+      expect(interactiveService.promptPassword).not.toHaveBeenCalled();
+    });
+
     it('uses env credentials when not in URL', async () => {
       interactiveService.promptText.mockImplementation((message: string) => {
         if (message.includes('organization')) return Promise.resolve('org');

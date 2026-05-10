@@ -15,6 +15,7 @@ export interface ConnectionOptions {
   url?: string;
   context?: string;
   token?: string;
+  skipAuth?: boolean;
   createProject?: boolean;
 }
 
@@ -118,6 +119,11 @@ export class ConnectionService {
 
   private getEnvConfig(options: ConnectionOptions = {}): UrlEnvConfig {
     const url = this.configService.get<string>('REVISIUM_URL');
+
+    if (options.skipAuth) {
+      return { url, noAuth: true };
+    }
+
     const token =
       options.token ?? this.configService.get<string>('REVISIUM_TOKEN');
 
