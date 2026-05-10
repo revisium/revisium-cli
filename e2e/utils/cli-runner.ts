@@ -12,13 +12,15 @@ export interface CliOptions {
   env?: Record<string, string>;
   timeout?: number;
   cwd?: string;
+  /** Optional stdin payload written to the CLI process before EOF. */
+  stdin?: string;
 }
 
 export async function runCli(
   args: string[],
   options: CliOptions = {},
 ): Promise<CliResult> {
-  const { env = {}, timeout = 60000, cwd = process.cwd() } = options;
+  const { env = {}, timeout = 60000, cwd = process.cwd(), stdin } = options;
 
   const isInstrumented = process.env.E2E_INSTRUMENTED === '1';
   const projectRoot = process.cwd();
@@ -43,6 +45,13 @@ export async function runCli(
       },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
+
+    if (stdin !== undefined) {
+      child.stdin?.write(stdin);
+      child.stdin?.end();
+    } else {
+      child.stdin?.end();
+    }
 
     let stdout = '';
     let stderr = '';
