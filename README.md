@@ -95,7 +95,7 @@ Full precedence rules and every supported method: [docs/authentication.md](docs/
 
 ## Compatibility
 
-CLI 2.5.x targets `@revisium/standalone` 2.8.x and current `cloud.revisium.io`.
+The current CLI targets `@revisium/standalone` 2.8.x and current `cloud.revisium.io`.
 
 ## Development
 

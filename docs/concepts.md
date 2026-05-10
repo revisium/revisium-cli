@@ -44,11 +44,13 @@ currentContext: dictionary-local
 
 When you run `revisium <command>`, the CLI resolves a target in this precedence order:
 
-1. Explicit flags: `--url`, `--context`, `--token`, `--api-key`, `--api-key-stdin`.
+1. Explicit flags: `--url`, `--context`, `--token`.
 2. URL-embedded auth: `?token=…`, `?apikey=…`, `user:password@host`.
 3. Environment: `REVISIUM_URL`, `REVISIUM_TOKEN`, `REVISIUM_API_KEY`, `REVISIUM_USERNAME` / `REVISIUM_PASSWORD`.
 4. The current workspace context (if any), with its saved credential from the OS keyring.
 5. Interactive prompt — only when stdin is a TTY.
+
+(`--api-key` and `--api-key-stdin` are inputs to `auth login` itself — they tell the CLI which key to *save*, not which key the next command should use.)
 
 `auth login` saves a credential under `service: revisium-cli, account: instance:<baseUrl>|credential:<name>`. `auth logout` removes it.
 

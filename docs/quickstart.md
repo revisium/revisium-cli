@@ -7,7 +7,7 @@ Boots a local Revisium with no authentication, creates a project with a table an
 - Node.js 20 or later.
 - A free terminal window for the local Revisium server.
 
-The CLI itself is `npx`-friendly, so you don't need to install it globally to follow along.
+The CLI is `npx`-friendly, so you don't need to install it globally to follow along; if you don't install it, prefix the commands below with `npx`, for example `npx revisium example bootstrap …`.
 
 ## 1. Boot a local Revisium (no-auth)
 
