@@ -100,7 +100,14 @@ describe('M08 — schema', () => {
     );
     const out = workspaceFile(workspace, 'migration.json');
     const result = await runCli(
-      ['schema', 'create-migrations', '--folder', folder, '--output', out],
+      [
+        'schema',
+        'create-migrations',
+        '--schemas-folder',
+        folder,
+        '--file',
+        out,
+      ],
       { cwd: workspace, env, timeout: 60_000 },
     );
     expect(result.exitCode).toBe(0);
@@ -131,9 +138,9 @@ describe('M08 — schema', () => {
       [
         'schema',
         'create-migrations',
-        '--folder',
+        '--schemas-folder',
         folder,
-        '--output',
+        '--file',
         migration,
       ],
       { cwd: workspace, env, timeout: 60_000 },

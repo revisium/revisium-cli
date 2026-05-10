@@ -465,6 +465,45 @@ describe('BootstrapService', () => {
       );
     });
 
+    it('rejects branchName mismatch BEFORE creating a missing project (non-dry-run)', async () => {
+      projectScopeFake.get.mockRejectedValue(new Error('Project not found'));
+      const configPath = await writeBootstrapConfig({
+        branchName: 'other',
+        tables: [],
+        rows: [],
+      });
+
+      await expect(
+        service.bootstrapExample({ url: 'revisium://local', configPath }),
+      ).rejects.toThrow(
+        'Bootstrap config branchName "other" does not match target branch "master"',
+      );
+      expect(orgScopeFake.createProject).not.toHaveBeenCalled();
+      expect(projectScopeFake.createBranch).not.toHaveBeenCalled();
+    });
+
+    it('rejects dry-run branchName mismatch when project is fully missing', async () => {
+      projectScopeFake.get.mockRejectedValue(new Error('Project not found'));
+      const configPath = await writeBootstrapConfig({
+        branchName: 'other',
+        tables: [tableConfig()],
+        rows: [],
+      });
+
+      // Even in dry-run, a config branchName mismatch must fail when the
+      // project itself is missing — there's no rootBranch to diff against,
+      // so the bypass must NOT cover this case.
+      await expect(
+        service.bootstrapExample({
+          url: 'revisium://local',
+          configPath,
+          dryRun: true,
+        }),
+      ).rejects.toThrow(
+        'Bootstrap config branchName "other" does not match target branch "master"',
+      );
+    });
+
     it('reports row conflicts and stops without writing', async () => {
       const configPath = await writeBootstrapConfig({
         tables: [],
@@ -506,6 +545,7 @@ describe('BootstrapService', () => {
     it('plans created resources without writing in dry-run when project is missing', async () => {
       projectScopeFake.get.mockRejectedValue(new Error('Project not found'));
       const configPath = await writeBootstrapConfig({
+        branchName: 'master',
         endpoints: ['REST_API'],
         tables: [tableConfig()],
         rows: [rowConfig()],
@@ -536,7 +576,7 @@ describe('BootstrapService', () => {
         new Error('Branch not found'),
       );
       projectScopeFake.branch.mockResolvedValue({
-        branchName: 'master',
+        name: 'master',
         headRevisionId: 'root-head',
       });
       const rootHeadRevisionScope = {

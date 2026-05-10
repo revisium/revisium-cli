@@ -129,7 +129,9 @@ describe('M14 — multi-instance workspace', () => {
       ['auth', 'status', '--instance', 'primary'],
       { cwd: workspace, env },
     );
-    expect(primaryAfter.stdout).toContain('No saved credential found');
+    expect(primaryAfter.stdout + primaryAfter.stderr).toContain(
+      'No saved credential found',
+    );
 
     const secondaryAfter = await runCli(
       ['auth', 'status', '--instance', 'secondary'],
