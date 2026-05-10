@@ -58,7 +58,20 @@ revisium example bootstrap \
   --commit
 ```
 
-Config shape:
+### Config schema
+
+`bootstrap.config.json` describes a complete project bootstrap. All fields are optional except where marked.
+
+| Field           | Type                       | Notes                                                                                       |
+| --------------- | -------------------------- | ------------------------------------------------------------------------------------------- |
+| `projectName`   | string                     | Asserted against the target URL's `<project>` segment when set; mismatches fail fast.       |
+| `branchName`    | string                     | Same idea for the branch segment.                                                           |
+| `endpoints`     | array of `"REST_API"` / `"GRAPHQL"` | Endpoints to ensure on the target revision. `--endpoint` flags override this array. |
+| `tables`        | array of `{ id, schema }`  | `id`: non-empty string; `schema`: a JSON Schema object (`type: "object"` with properties).  |
+| `rows`          | array of `{ tableId, rowId, data }` | All three fields required and non-empty; `data` must be an object.                 |
+| `commitMessage` | string                     | Used as the revision message when `--commit` is passed.                                     |
+
+A complete example:
 
 ```json
 {
@@ -66,14 +79,35 @@ Config shape:
   "branchName": "master",
   "endpoints": ["REST_API", "GRAPHQL"],
   "tables": [
-    { "id": "FaqCategory", "schema": { "type": "object" } }
+    {
+      "id": "FaqCategory",
+      "schema": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "default": "" },
+          "summary": { "type": "string", "default": "" }
+        }
+      }
+    }
   ],
   "rows": [
-    { "tableId": "FaqCategory", "rowId": "billing", "data": { "name": "Billing" } }
+    {
+      "tableId": "FaqCategory",
+      "rowId": "billing",
+      "data": { "name": "Billing", "summary": "Payments and invoices" }
+    }
   ],
   "commitMessage": "Bootstrap dictionary example"
 }
 ```
+
+Notes on table schemas:
+
+- Revisium accepts JSON Schema with `type: "object"` at the root.
+- Use `type: "number"` for numeric fields — `type: "integer"` is rejected as "this type is not allowed".
+- `additionalProperties: false` and per-property `default` values are recommended; rows lacking a field will fail validation otherwise.
 
 Behavior:
 
