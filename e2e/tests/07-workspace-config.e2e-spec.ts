@@ -338,7 +338,7 @@ describe('Workspace config commands', () => {
     });
 
     expect(saveResult.exitCode).toBe(0);
-    expect(saveResult.stdout).toContain(
+    expect(saveResult.stdout + saveResult.stderr).toContain(
       'Using context demo (instance: local-no-auth)',
     );
     expect(saveResult.stdout).toContain('Authenticated as no auth');
@@ -357,11 +357,24 @@ async function createStoredWorkspaceContext(
   contextName: string,
   projectName: string,
 ): Promise<void> {
+  // --force so re-adding "local" across multiple createStoredWorkspaceContext
+  // calls in the same test workspace is a no-op rather than an error
+  // (instance add now rejects duplicates without --force).
   await expectSuccess(
-    runCli(['instance', 'add', 'local', '--url', 'revisium://localhost:8082'], {
-      cwd: workspace,
-      env: CLEAR_REVISIUM_ENV,
-    }),
+    runCli(
+      [
+        'instance',
+        'add',
+        'local',
+        '--url',
+        'revisium://localhost:8082',
+        '--force',
+      ],
+      {
+        cwd: workspace,
+        env: CLEAR_REVISIUM_ENV,
+      },
+    ),
   );
   await expectSuccess(
     runCli(['context', 'create', contextName, '--url', buildUrl(projectName)], {
