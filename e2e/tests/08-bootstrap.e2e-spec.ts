@@ -152,6 +152,150 @@ describe('Bootstrap commands', () => {
     ).toEqual(['GRAPHQL', 'REST_API']);
   }, 120000);
 
+  it('keeps project and endpoint ensure idempotent on re-run', async () => {
+    const workspace = createWorkspace();
+    const projectName = generateProjectName('e2e-bootstrap-idem');
+    createdProjects.push(projectName);
+
+    const env = {
+      ...CLEAR_REVISIUM_ENV,
+      REVISIUM_TOKEN: process.env.E2E_ADMIN_TOKEN!,
+    };
+    const targetUrl = buildUrl(projectName);
+
+    const firstProject = await runCli(
+      ['project', 'ensure', '--url', targetUrl],
+      { cwd: workspace, env },
+    );
+    expect(firstProject.exitCode).toBe(0);
+    expect(firstProject.stdout).toContain('Created project');
+
+    const secondProject = await runCli(
+      ['project', 'ensure', '--url', targetUrl],
+      { cwd: workspace, env },
+    );
+    expect(secondProject.exitCode).toBe(0);
+    expect(secondProject.stdout).toContain('Project exists');
+
+    const firstEndpoint = await runCli(
+      ['endpoint', 'ensure', '--url', targetUrl, '--type', 'GRAPHQL'],
+      { cwd: workspace, env },
+    );
+    expect(firstEndpoint.exitCode).toBe(0);
+    expect(firstEndpoint.stdout).toContain('Created endpoint');
+
+    const secondEndpoint = await runCli(
+      ['endpoint', 'ensure', '--url', targetUrl, '--type', 'GRAPHQL'],
+      { cwd: workspace, env },
+    );
+    expect(secondEndpoint.exitCode).toBe(0);
+    expect(secondEndpoint.stdout).toContain('Found endpoint');
+  }, 120000);
+
+  it('plans changes in dry-run without creating resources', async () => {
+    const workspace = createWorkspace();
+    const projectName = generateProjectName('e2e-bootstrap-dry');
+    createdProjects.push(projectName);
+
+    const env = {
+      ...CLEAR_REVISIUM_ENV,
+      REVISIUM_TOKEN: process.env.E2E_ADMIN_TOKEN!,
+    };
+    const targetUrl = buildUrl(projectName);
+
+    const dryRun = await runCli(
+      ['project', 'ensure', '--url', targetUrl, '--dry-run', '--json'],
+      { cwd: workspace, env },
+    );
+    expect(dryRun.exitCode).toBe(0);
+    const dryRunSummary = JSON.parse(dryRun.stdout) as {
+      projectStatus: string;
+      branchStatus: string;
+      dryRun: boolean;
+    };
+    expect(dryRunSummary).toMatchObject({
+      projectStatus: 'created',
+      branchStatus: 'created',
+      dryRun: true,
+    });
+
+    // Project should still not exist after a dry run.
+    const reRun = await runCli(
+      ['project', 'ensure', '--url', targetUrl, '--json'],
+      { cwd: workspace, env },
+    );
+    expect(reRun.exitCode).toBe(0);
+    const reRunSummary = JSON.parse(reRun.stdout) as {
+      projectStatus: string;
+    };
+    expect(reRunSummary.projectStatus).toBe('created');
+  }, 120000);
+
+  it('respects --endpoint overrides and --commit during example bootstrap', async () => {
+    const workspace = createWorkspace();
+    const projectName = generateProjectName('e2e-bootstrap-commit');
+    createdProjects.push(projectName);
+
+    const env = {
+      ...CLEAR_REVISIUM_ENV,
+      REVISIUM_TOKEN: process.env.E2E_ADMIN_TOKEN!,
+    };
+    const targetUrl = buildUrl(projectName);
+    const configPath = path.join(workspace, 'bootstrap.config.json');
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify(
+        {
+          projectName,
+          branchName: 'master',
+          endpoints: ['GRAPHQL'],
+          tables: [
+            {
+              id: 'Tag',
+              schema: {
+                type: 'object',
+                required: ['label'],
+                properties: { label: { type: 'string', default: '' } },
+                additionalProperties: false,
+              },
+            },
+          ],
+          rows: [{ tableId: 'Tag', rowId: 'one', data: { label: 'One' } }],
+          commitMessage: 'Bootstrap with overrides',
+        },
+        null,
+        2,
+      ),
+      'utf-8',
+    );
+
+    const result = await runCli(
+      [
+        'example',
+        'bootstrap',
+        '--config',
+        configPath,
+        '--url',
+        targetUrl,
+        '--endpoint',
+        'REST_API',
+        '--commit',
+        '--json',
+      ],
+      { cwd: workspace, env, timeout: 120000 },
+    );
+
+    expect(result.exitCode).toBe(0);
+    const summary = JSON.parse(result.stdout) as {
+      endpoints: { created: string[]; skipped: string[] };
+      commit: { status: string; revisionId?: string };
+    };
+    expect(summary.endpoints.created).toEqual(['REST_API']);
+    expect(summary.endpoints.skipped).toEqual([]);
+    expect(summary.commit.status).toBe('created');
+    expect(summary.commit.revisionId).toBeTruthy();
+  }, 180000);
+
   function createWorkspace(): string {
     const workspace = fs.mkdtempSync(path.join(os.tmpdir(), 'e2e-bootstrap-'));
     workspaces.push(workspace);

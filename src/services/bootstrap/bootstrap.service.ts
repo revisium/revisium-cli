@@ -279,7 +279,7 @@ export class BootstrapService {
     }
 
     if (!this.isObject(parsed)) {
-      throw new Error('Bootstrap config must be a JSON object');
+      throw new TypeError('Bootstrap config must be a JSON object');
     }
 
     return {
@@ -559,12 +559,14 @@ export class BootstrapService {
       return [];
     }
     if (!Array.isArray(value)) {
-      throw new Error(`Bootstrap config field "${fieldName}" must be an array`);
+      throw new TypeError(
+        `Bootstrap config field "${fieldName}" must be an array`,
+      );
     }
     return this.uniqueEndpoints(
       value.map((entry, index) => {
         if (typeof entry !== 'string') {
-          throw new Error(
+          throw new TypeError(
             `Bootstrap config field "${fieldName}[${index}]" must be a string`,
           );
         }
@@ -582,19 +584,21 @@ export class BootstrapService {
       return [];
     }
     if (!Array.isArray(value)) {
-      throw new Error('Bootstrap config field "tables" must be an array');
+      throw new TypeError('Bootstrap config field "tables" must be an array');
     }
     return value.map((entry, index) => {
       if (!this.isObject(entry)) {
-        throw new Error(`Bootstrap config tables[${index}] must be an object`);
+        throw new TypeError(
+          `Bootstrap config tables[${index}] must be an object`,
+        );
       }
       if (typeof entry.id !== 'string' || entry.id.trim() === '') {
-        throw new Error(
+        throw new TypeError(
           `Bootstrap config tables[${index}].id must be a non-empty string`,
         );
       }
       if (!this.isObject(entry.schema)) {
-        throw new Error(
+        throw new TypeError(
           `Bootstrap config tables[${index}].schema must be an object`,
         );
       }
@@ -607,24 +611,26 @@ export class BootstrapService {
       return [];
     }
     if (!Array.isArray(value)) {
-      throw new Error('Bootstrap config field "rows" must be an array');
+      throw new TypeError('Bootstrap config field "rows" must be an array');
     }
     return value.map((entry, index) => {
       if (!this.isObject(entry)) {
-        throw new Error(`Bootstrap config rows[${index}] must be an object`);
+        throw new TypeError(
+          `Bootstrap config rows[${index}] must be an object`,
+        );
       }
       if (typeof entry.tableId !== 'string' || entry.tableId.trim() === '') {
-        throw new Error(
+        throw new TypeError(
           `Bootstrap config rows[${index}].tableId must be a non-empty string`,
         );
       }
       if (typeof entry.rowId !== 'string' || entry.rowId.trim() === '') {
-        throw new Error(
+        throw new TypeError(
           `Bootstrap config rows[${index}].rowId must be a non-empty string`,
         );
       }
       if (!this.isObject(entry.data)) {
-        throw new Error(
+        throw new TypeError(
           `Bootstrap config rows[${index}].data must be an object`,
         );
       }
@@ -645,7 +651,9 @@ export class BootstrapService {
       return undefined;
     }
     if (typeof value !== 'string') {
-      throw new Error(`Bootstrap config field "${fieldName}" must be a string`);
+      throw new TypeError(
+        `Bootstrap config field "${fieldName}" must be a string`,
+      );
     }
     return value;
   }
