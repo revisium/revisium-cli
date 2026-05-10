@@ -101,6 +101,7 @@ export class BootstrapService {
     dryRun = false,
   ): Promise<ProjectEnsureResult> {
     const { url, apiClient } = await this.createResolvedClient(options);
+    this.assertWritableRevision(url);
     const branchName = url.branch || 'master';
     const orgScope = apiClient.client.org(url.organization);
     const projectScope = orgScope.project(url.project);

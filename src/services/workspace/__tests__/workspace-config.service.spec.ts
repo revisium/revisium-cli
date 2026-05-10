@@ -354,6 +354,17 @@ describe('WorkspaceConfigService', () => {
     );
   });
 
+  it('throws a parse error including the file path when JSON is broken', async () => {
+    const dir = join(tempDir, '.revisium');
+    await mkdir(dir, { recursive: true });
+    const path = join(dir, 'revisium-cli.config.json');
+    await writeFile(path, '{ broken json', 'utf-8');
+
+    await expect(service.load(tempDir)).rejects.toThrow(
+      /Failed to parse Revisium workspace config at .*revisium-cli\.config\.json/,
+    );
+  });
+
   it('writes only the workspace config file when saving', async () => {
     const loaded = await service.loadOrCreate(tempDir);
     loaded.config.instances.local = {

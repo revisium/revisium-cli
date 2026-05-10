@@ -4,16 +4,18 @@ import {
   WorkspaceAuthMode,
   WorkspaceConfigService,
 } from 'src/services/workspace';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
 
 interface Options {
   url?: string;
   auth?: WorkspaceAuthMode;
+  force?: boolean;
 }
 
 @SubCommand({
   name: 'add',
   arguments: '<name>',
-  description: 'Add or update a workspace Revisium instance',
+  description: 'Add a new workspace Revisium instance',
 })
 export class InstanceAddCommand extends CommandRunner {
   constructor(
@@ -36,6 +38,12 @@ export class InstanceAddCommand extends CommandRunner {
     const baseUrl = this.workspaceConfig.normalizeBaseUrl(options.url);
     const authMode = options.auth || 'stored';
     const existed = Boolean(loaded.config.instances[name]);
+
+    if (existed && !options.force) {
+      throw new Error(
+        `Revisium instance "${name}" already exists. Use --force to overwrite.`,
+      );
+    }
 
     loaded.config.instances[name] = {
       baseUrl,
@@ -68,5 +76,13 @@ export class InstanceAddCommand extends CommandRunner {
       throw new Error('Auth mode must be "stored" or "none"');
     }
     return value;
+  }
+
+  @Option({
+    flags: '--force [boolean]',
+    description: 'Overwrite an existing instance entry with the same name',
+  })
+  parseForce(value?: string): boolean {
+    return parseBooleanOption(value);
   }
 }
