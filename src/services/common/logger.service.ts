@@ -6,6 +6,15 @@ export class LoggerService {
     console.log(message);
   }
 
+  /**
+   * Diagnostic lines (e.g. "Using context X", "Connecting to ...") that should
+   * not pollute stdout when the user has asked for `--json` machine-readable
+   * output. Routed to stderr so JSON consumers can parse stdout cleanly.
+   */
+  progress(message: string): void {
+    console.error(message);
+  }
+
   success(message: string): void {
     console.log(`✅ ${message}`);
   }

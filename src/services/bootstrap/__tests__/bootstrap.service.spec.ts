@@ -301,7 +301,21 @@ describe('BootstrapService', () => {
     });
   });
 
-  describe('ensureProject dry-run', () => {
+  describe('ensureProject', () => {
+    it('rejects non-draft target before any project is created', async () => {
+      connectionServiceFake.resolveTarget.mockResolvedValue({
+        ...target,
+        revision: 'head',
+      });
+
+      await expect(
+        service.ensureProject({ url: 'revisium://local' }),
+      ).rejects.toThrow('requires a draft revision');
+
+      expect(orgScopeFake.createProject).not.toHaveBeenCalled();
+      expect(projectScopeFake.createBranch).not.toHaveBeenCalled();
+    });
+
     it('does not call createProject in dry-run mode when missing', async () => {
       projectScopeFake.get.mockRejectedValue(new Error('Project not found'));
 
