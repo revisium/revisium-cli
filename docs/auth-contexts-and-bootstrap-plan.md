@@ -1,6 +1,6 @@
 # Auth Contexts And Bootstrap Plan
 
-Status: Proposed
+Status: Active implementation tracker
 
 ## Problem
 
@@ -11,6 +11,33 @@ Revisium CLI currently resolves connection details from `--url`, environment var
 - Commands cannot rely on a named active context.
 - Missing connection data can unexpectedly trigger prompts in non-interactive environments.
 - `revisium-examples` still needs custom Node scripts to create projects, seed data, and create generated endpoints.
+
+## Current Implementation Snapshot
+
+This document started as a forward-looking plan. Keep this section updated as each phase lands so the next implementation step is visible from `master`.
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Workspace config path | Done | The CLI uses nearest `.revisium/revisium-cli.config.json`; there is no home-level CLI config. |
+| Instance commands | Done | `instance add/list/show/remove` manage non-secret workspace instance aliases. |
+| Context commands | Done | `context create/list/show/use/remove` manage default workspace targets and `currentContext`. |
+| Workspace target resolution | Done | Single-target commands can use `--context` or current workspace context when `--url` / `REVISIUM_URL` are absent. |
+| Explicit no-auth mode | Done | `authMode: "none"` supports local standalone examples without credentials. |
+| Stored auth mode shape | Partial | `authMode: "stored"` and optional context `credential` are reserved, but saved credentials are not implemented yet. |
+| Auth commands | Not started | `auth login/status/logout` still need an OS credential-store backed implementation. |
+| Credential-store abstraction | Not started | Needed before saving API keys or OAuth refresh material. |
+| Shared client error/ensure helpers | Not started | `@revisium/client` still needs reusable structured errors and idempotent ensure helpers. |
+| Project and endpoint ensure commands | Not started | `project ensure`, `endpoint ensure`, and `endpoint list` are still planned CLI work. |
+| Example bootstrap command | Not started | `example bootstrap` remains planned and should be added after or with reusable ensure helpers. |
+| Common output flags | Partial | `--context` exists for single-target commands; `--json`, `--quiet`, and `--no-input` still need consistent command-wide behavior. |
+| `revisium-examples` adoption | Blocked | Wait for released CLI support before replacing custom bootstrap scripts. |
+
+Recommended next PR sequence:
+
+1. Finish credential foundation in `revisium-cli`: credential-store abstraction plus `auth login/status/logout` for API keys.
+2. Add reusable structured errors and idempotent ensure helpers in `@revisium/client`.
+3. Add `project ensure`, `endpoint ensure/list`, and `example bootstrap` in `revisium-cli`, using client helpers where available.
+4. Update `revisium-examples` after the CLI commands are released.
 
 ## Goals
 
@@ -444,40 +471,40 @@ If endpoint service public URL differs from core base URL, the server should exp
 
 ### Phase 1: Foundation
 
-- Add structured API error type in `@revisium/client`.
-- Add client ensure helpers.
-- Add unit/integration tests for idempotency.
-- Add workspace CLI config service for non-secret instances and contexts at `.revisium/revisium-cli.config.json`.
-- Add credential-store abstraction with named credentials and an in-memory fake for tests.
-- Add explicit no-auth connection mode for local standalone workflows.
+- [ ] Add structured API error type in `@revisium/client`.
+- [ ] Add client ensure helpers.
+- [ ] Add unit/integration tests for idempotency.
+- [x] Add workspace CLI config service for non-secret instances and contexts at `.revisium/revisium-cli.config.json`.
+- [ ] Add credential-store abstraction with named credentials and an in-memory fake for tests.
+- [x] Add explicit no-auth connection mode for local standalone workflows.
 
 ### Phase 2: Auth And Context Commands
 
-- Implement `instance` commands.
-- Implement `auth login/status/logout` for API keys.
-- Implement `context` commands.
-- Add common `--context`, `--json`, `--quiet`, and `--no-input` behavior.
+- [x] Implement `instance` commands.
+- [ ] Implement `auth login/status/logout` for API keys.
+- [x] Implement `context` commands.
+- [ ] Add common `--context`, `--json`, `--quiet`, and `--no-input` behavior. `--context` is implemented for single-target commands; the output/non-interactive flags still need consistent handling.
 
 ### Phase 3: Ensure Commands
 
-- Implement `project ensure`.
-- Implement `endpoint ensure` and `endpoint list`.
-- Add endpoint URL hints.
-- Add docs and command table updates.
+- [ ] Implement `project ensure`.
+- [ ] Implement `endpoint ensure` and `endpoint list`.
+- [ ] Add endpoint URL hints.
+- [ ] Add docs and command table updates.
 
 ### Phase 4: Example Bootstrap
 
-- Implement `example bootstrap`.
-- Validate bootstrap config shape.
-- Add idempotency tests and invalid-config tests.
-- Update `revisium-examples` scripts only after the CLI feature is released.
+- [ ] Implement `example bootstrap`.
+- [ ] Validate bootstrap config shape.
+- [ ] Add idempotency tests and invalid-config tests.
+- [ ] Update `revisium-examples` scripts only after the CLI feature is released.
 
 ### Phase 5 (Optional Future): Human OAuth Login
 
-- Add browser login with PKCE loopback.
-- Add device login for SSH/headless terminals if the server supports OAuth device authorization grant.
-- Store refresh material in the credential store.
-- Add token refresh/revoke support.
+- [ ] Add browser login with PKCE loopback.
+- [ ] Add device login for SSH/headless terminals if the server supports OAuth device authorization grant.
+- [ ] Store refresh material in the credential store.
+- [ ] Add token refresh/revoke support.
 
 ## Validation Checklist
 
