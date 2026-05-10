@@ -7,12 +7,30 @@ jest.mock('@napi-rs/keyring', () => ({
     setPassword: jest.fn((password: string) => {
       keyringEntries.set(`${service}:${account}`, password);
     }),
-    getPassword: jest.fn(
-      () => keyringEntries.get(`${service}:${account}`) ?? null,
-    ),
-    deleteCredential: jest.fn(() =>
-      keyringEntries.delete(`${service}:${account}`),
-    ),
+    getPassword: jest.fn(() => {
+      if (account.includes('credential:missing-code')) {
+        const error = new Error('mock missing credential');
+        Object.assign(error, { code: 'NoEntry' });
+        throw error;
+      }
+
+      if (account.includes('credential:missing-name')) {
+        const error = new Error('mock missing credential');
+        error.name = 'NoEntry';
+        throw error;
+      }
+
+      return keyringEntries.get(`${service}:${account}`) ?? null;
+    }),
+    deleteCredential: jest.fn(() => {
+      if (account.includes('credential:missing-code')) {
+        const error = new Error('mock missing credential');
+        Object.assign(error, { code: 'NoEntry' });
+        throw error;
+      }
+
+      return keyringEntries.delete(`${service}:${account}`);
+    }),
   })),
 }));
 
@@ -85,5 +103,26 @@ describe('CredentialStoreService', () => {
     expect(() => service.getCredential(ref)).toThrow(
       'Saved Revisium credential "default" for https://cloud.revisium.io has an unsupported format',
     );
+  });
+
+  it('treats keyring NoEntry errors as missing credentials', () => {
+    expect(
+      service.getCredential({
+        baseUrl: 'https://cloud.revisium.io',
+        credential: 'missing-code',
+      }),
+    ).toBeUndefined();
+    expect(
+      service.getCredential({
+        baseUrl: 'https://cloud.revisium.io',
+        credential: 'missing-name',
+      }),
+    ).toBeUndefined();
+    expect(
+      service.deleteCredential({
+        baseUrl: 'https://cloud.revisium.io',
+        credential: 'missing-code',
+      }),
+    ).toBe(false);
   });
 });

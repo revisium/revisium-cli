@@ -126,8 +126,8 @@ For single-target commands, command target options win first: `--url` selects an
 
 Authentication remains explicit:
 
-1. Environment auth: `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME` / `REVISIUM_PASSWORD`
-2. URL auth, discouraged except for compatibility or emergencies: `?token=...`, `?apikey=...`, or `user:password@host`
+1. URL auth, discouraged except for compatibility or emergencies: `?token=...`, `?apikey=...`, or `user:password@host`
+2. Environment auth: `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME` / `REVISIUM_PASSWORD`
 3. Workspace `authMode: "none"`
 4. Stored API-key credentials when the instance uses `authMode: "stored"`
 5. Interactive prompt for non-workspace URL flows

@@ -4,6 +4,7 @@ import {
   CredentialTargetService,
 } from 'src/services/credentials';
 import { LoggerService } from 'src/services/common';
+import { formatAuthLoginHint } from './auth-command.utils';
 
 interface Options {
   url?: string;
@@ -31,7 +32,6 @@ export class AuthStatusCommand extends CommandRunner {
       baseUrl: target.baseUrl,
       credential: target.credential,
     };
-    const hasCredential = this.credentialStore.hasCredential(ref);
 
     if (target.contextName) {
       this.logger.info(`Context: ${target.contextName}`);
@@ -45,7 +45,10 @@ export class AuthStatusCommand extends CommandRunner {
 
     if ((target.authMode || 'stored') === 'none') {
       this.logger.info('Saved credentials are bypassed for authMode "none".');
+      return;
     }
+
+    const hasCredential = this.credentialStore.hasCredential(ref);
 
     if (hasCredential) {
       this.logger.success('Saved credential found');
@@ -56,19 +59,8 @@ export class AuthStatusCommand extends CommandRunner {
     }
 
     this.logger.warn(
-      `No saved credential found. Run: revisium auth login ${this.formatLoginHint(target)}`,
+      `No saved credential found. Run: revisium auth login ${formatAuthLoginHint(target)}`,
     );
-  }
-
-  private formatLoginHint(target: {
-    instanceName?: string;
-    baseUrl: string;
-    credential: string;
-  }): string {
-    const targetSelector = target.instanceName
-      ? `--instance ${target.instanceName}`
-      : `--url revisium://${target.baseUrl.replace(/^https?:\/\//, '')}`;
-    return `${targetSelector} --credential ${target.credential} --api-key`;
   }
 
   @Option({

@@ -5,6 +5,7 @@ import {
 } from 'src/services/credentials';
 import { InteractiveService, LoggerService } from 'src/services/common';
 import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
+import { formatAuthTarget } from './auth-command.utils';
 
 interface Options {
   url?: string;
@@ -61,7 +62,7 @@ export class AuthLoginCommand extends CommandRunner {
     );
 
     this.logger.success(
-      `Saved API key credential "${target.credential}" for ${this.formatTarget(target.instanceName, target.baseUrl)}`,
+      `Saved API key credential "${target.credential}" for ${formatAuthTarget(target.instanceName, target.baseUrl)}`,
     );
   }
 
@@ -93,13 +94,6 @@ export class AuthLoginCommand extends CommandRunner {
       throw new Error('API key cannot be empty');
     }
     return apiKey;
-  }
-
-  private formatTarget(
-    instanceName: string | undefined,
-    baseUrl: string,
-  ): string {
-    return instanceName ? `instance "${instanceName}" (${baseUrl})` : baseUrl;
   }
 
   @Option({

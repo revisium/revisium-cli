@@ -119,11 +119,16 @@ export class CredentialStoreService {
   }
 
   private isMissingCredentialError(error: unknown): boolean {
+    if (!(error instanceof Error)) {
+      return false;
+    }
+
+    const keyringError = error as Error & { code?: unknown };
+
     return (
-      error instanceof Error &&
-      (error.message.includes('NoEntry') ||
-        error.message.includes('not found') ||
-        error.message.includes('No matching entry'))
+      keyringError.code === 'NoEntry' ||
+      error.name === 'NoEntry' ||
+      error.message.includes('NoEntry')
     );
   }
 

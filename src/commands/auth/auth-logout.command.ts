@@ -4,6 +4,7 @@ import {
   CredentialTargetService,
 } from 'src/services/credentials';
 import { LoggerService } from 'src/services/common';
+import { formatAuthTarget } from './auth-command.utils';
 
 interface Options {
   url?: string;
@@ -34,21 +35,14 @@ export class AuthLogoutCommand extends CommandRunner {
 
     if (deleted) {
       this.logger.success(
-        `Deleted saved credential "${target.credential}" for ${this.formatTarget(target.instanceName, target.baseUrl)}`,
+        `Deleted saved credential "${target.credential}" for ${formatAuthTarget(target.instanceName, target.baseUrl)}`,
       );
       return;
     }
 
     this.logger.warn(
-      `No saved credential "${target.credential}" found for ${this.formatTarget(target.instanceName, target.baseUrl)}`,
+      `No saved credential "${target.credential}" found for ${formatAuthTarget(target.instanceName, target.baseUrl)}`,
     );
-  }
-
-  private formatTarget(
-    instanceName: string | undefined,
-    baseUrl: string,
-  ): string {
-    return instanceName ? `instance "${instanceName}" (${baseUrl})` : baseUrl;
   }
 
   @Option({

@@ -116,4 +116,16 @@ describe('AuthLoginCommand', () => {
       }),
     ).rejects.toThrow('Use only one credential input');
   });
+
+  it('parses command options', () => {
+    expect(command.parseUrl('revisium://cloud.revisium.io')).toBe(
+      'revisium://cloud.revisium.io',
+    );
+    expect(command.parseInstance('cloud')).toBe('cloud');
+    expect(command.parseCredential('admin')).toBe('admin');
+    expect(command.parseApiKey()).toBe(true);
+    expect(command.parseApiKeyStdin()).toBe(true);
+    expect(command.parseForce()).toBe(true);
+    expect(command.parseForce('false')).toBe(false);
+  });
 });
