@@ -13,7 +13,7 @@ revisium context use dictionary-local
 revisium schema save --folder ./schemas
 ```
 
-The workspace config stores only non-secret instance and context data. Keep tokens, API keys, and passwords in environment variables or explicit URL/auth inputs.
+The workspace config stores only non-secret instance and context data. API keys can be saved in the operating system credential store with `revisium auth login`; tokens and passwords should stay in environment variables or explicit URL/auth inputs.
 
 See [Workspace Config](./workspace-config.md).
 
@@ -23,28 +23,28 @@ All commands support configuration via environment variables.
 
 ### Single-Endpoint Commands (schema, migrate, rows)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `REVISIUM_URL` | Revisium URL (see [URL Format](./url-format.md)) | `revisium://cloud.revisium.io/org/proj/main` |
-| `REVISIUM_TOKEN` | JWT authentication token | `eyJhbGciOiJIUzI1NiIs...` |
-| `REVISIUM_API_KEY` | API key (for automated access) | `rev_xxxxxxxxxxxxx` |
-| `REVISIUM_USERNAME` | Username (for password auth) | `admin` |
-| `REVISIUM_PASSWORD` | Password (for password auth) | `secret` |
+| Variable            | Description                                      | Example                                      |
+| ------------------- | ------------------------------------------------ | -------------------------------------------- |
+| `REVISIUM_URL`      | Revisium URL (see [URL Format](./url-format.md)) | `revisium://cloud.revisium.io/org/proj/main` |
+| `REVISIUM_TOKEN`    | JWT authentication token                         | `eyJhbGciOiJIUzI1NiIs...`                    |
+| `REVISIUM_API_KEY`  | API key (for automated access)                   | `rev_xxxxxxxxxxxxx`                          |
+| `REVISIUM_USERNAME` | Username (for password auth)                     | `admin`                                      |
+| `REVISIUM_PASSWORD` | Password (for password auth)                     | `secret`                                     |
 
 ### Sync Commands (source/target)
 
-| Variable | Description |
-|----------|-------------|
-| `REVISIUM_SOURCE_URL` | Source project URL |
-| `REVISIUM_SOURCE_TOKEN` | Source JWT token |
-| `REVISIUM_SOURCE_API_KEY` | Source API key |
-| `REVISIUM_SOURCE_USERNAME` | Source username |
-| `REVISIUM_SOURCE_PASSWORD` | Source password |
-| `REVISIUM_TARGET_URL` | Target project URL |
-| `REVISIUM_TARGET_TOKEN` | Target JWT token |
-| `REVISIUM_TARGET_API_KEY` | Target API key |
-| `REVISIUM_TARGET_USERNAME` | Target username |
-| `REVISIUM_TARGET_PASSWORD` | Target password |
+| Variable                   | Description        |
+| -------------------------- | ------------------ |
+| `REVISIUM_SOURCE_URL`      | Source project URL |
+| `REVISIUM_SOURCE_TOKEN`    | Source JWT token   |
+| `REVISIUM_SOURCE_API_KEY`  | Source API key     |
+| `REVISIUM_SOURCE_USERNAME` | Source username    |
+| `REVISIUM_SOURCE_PASSWORD` | Source password    |
+| `REVISIUM_TARGET_URL`      | Target project URL |
+| `REVISIUM_TARGET_TOKEN`    | Target JWT token   |
+| `REVISIUM_TARGET_API_KEY`  | Target API key     |
+| `REVISIUM_TARGET_USERNAME` | Target username    |
+| `REVISIUM_TARGET_PASSWORD` | Target password    |
 
 ### Authentication Priority
 
@@ -55,7 +55,12 @@ For explicit URLs and environment targets, authentication is resolved in this or
 3. **Environment variable** - `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME/PASSWORD`
 4. **Interactive prompt** - if running in terminal
 
-When a workspace context is used, URL and environment auth still win. If the selected instance has `authMode: "none"`, the CLI sends no auth. `authMode: "stored"` currently requires URL or environment credentials until saved credential commands are implemented.
+When a workspace context is used, URL and environment auth still win. If the selected instance has `authMode: "none"`, the CLI sends no auth. If the selected instance has `authMode: "stored"`, the CLI reads the selected named API-key credential from the operating system credential store.
+
+```bash
+revisium auth login --instance cloud --credential default --api-key
+revisium auth status --instance cloud
+```
 
 **Important:** You can use `--url` to specify host/org/project/branch and provide credentials via environment:
 
@@ -121,7 +126,8 @@ Configuration is resolved in this order (highest to lowest):
 1. **Command-line target options** (`--url`, `--context`)
 2. **Environment variables** (`REVISIUM_URL`, `REVISIUM_TOKEN`, etc.)
 3. **Current workspace context** (`.revisium/revisium-cli.config.json`)
-4. **Interactive prompts** (for missing values)
+4. **Saved API-key credential** for stored workspace contexts
+5. **Interactive prompts** (for missing values)
 
 ## Examples
 

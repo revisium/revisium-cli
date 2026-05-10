@@ -16,28 +16,27 @@ Revisium CLI currently resolves connection details from `--url`, environment var
 
 This document started as a forward-looking plan. Keep this section updated as each phase lands so the next implementation step is visible from `master`.
 
-| Area | Status | Notes |
-| --- | --- | --- |
-| Workspace config path | Done | The CLI uses nearest `.revisium/revisium-cli.config.json`; there is no home-level CLI config. |
-| Instance commands | Done | `instance add/list/show/remove` manage non-secret workspace instance aliases. |
-| Context commands | Done | `context create/list/show/use/remove` manage default workspace targets and `currentContext`. |
-| Workspace target resolution | Done | Single-target commands can use `--context` or current workspace context when `--url` / `REVISIUM_URL` are absent. |
-| Explicit no-auth mode | Done | `authMode: "none"` supports local standalone examples without credentials. |
-| Stored auth mode shape | Partial | `authMode: "stored"` and optional context `credential` are reserved, but saved credentials are not implemented yet. |
-| Auth commands | Not started | `auth login/status/logout` still need an OS credential-store backed implementation. |
-| Credential-store abstraction | Not started | Needed before saving API keys or OAuth refresh material. |
-| Shared client error/ensure helpers | Not started | `@revisium/client` still needs reusable structured errors and idempotent ensure helpers. |
-| Project and endpoint ensure commands | Not started | `project ensure`, `endpoint ensure`, and `endpoint list` are still planned CLI work. |
-| Example bootstrap command | Not started | `example bootstrap` remains planned and should be added after or with reusable ensure helpers. |
-| Common output flags | Partial | `--context` exists for single-target commands; `--json`, `--quiet`, and `--no-input` still need consistent command-wide behavior. |
-| `revisium-examples` adoption | Blocked | Wait for released CLI support before replacing custom bootstrap scripts. |
+| Area                                 | Status            | Notes                                                                                                                             |
+| ------------------------------------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Workspace config path                | Done              | The CLI uses nearest `.revisium/revisium-cli.config.json`; there is no home-level CLI config.                                     |
+| Instance commands                    | Done              | `instance add/list/show/remove` manage non-secret workspace instance aliases.                                                     |
+| Context commands                     | Done              | `context create/list/show/use/remove` manage default workspace targets and `currentContext`.                                      |
+| Workspace target resolution          | Done              | Single-target commands can use `--context` or current workspace context when `--url` / `REVISIUM_URL` are absent.                 |
+| Explicit no-auth mode                | Done              | `authMode: "none"` supports local standalone examples without credentials.                                                        |
+| Stored auth mode shape               | Done for API keys | `authMode: "stored"` resolves named API-key credentials after explicit URL/env auth.                                              |
+| Auth commands                        | Done for API keys | `auth login/status/logout` manage saved API-key credentials. OAuth remains future scope.                                          |
+| Credential-store abstraction         | Done for API keys | API keys are stored in the OS credential store; OAuth refresh material remains future scope.                                      |
+| Shared client error/ensure helpers   | Not started       | `@revisium/client` still needs reusable structured errors and idempotent ensure helpers.                                          |
+| Project and endpoint ensure commands | Not started       | `project ensure`, `endpoint ensure`, and `endpoint list` are still planned CLI work.                                              |
+| Example bootstrap command            | Not started       | `example bootstrap` remains planned and should be added after or with reusable ensure helpers.                                    |
+| Common output flags                  | Partial           | `--context` exists for single-target commands; `--json`, `--quiet`, and `--no-input` still need consistent command-wide behavior. |
+| `revisium-examples` adoption         | Blocked           | Wait for released CLI support before replacing custom bootstrap scripts.                                                          |
 
 Recommended next PR sequence:
 
-1. Finish credential foundation in `revisium-cli`: credential-store abstraction plus `auth login/status/logout` for API keys.
-2. Add reusable structured errors and idempotent ensure helpers in `@revisium/client`.
-3. Add `project ensure`, `endpoint ensure/list`, and `example bootstrap` in `revisium-cli`, using client helpers where available.
-4. Update `revisium-examples` after the CLI commands are released.
+1. Add reusable structured errors and idempotent ensure helpers in `@revisium/client`.
+2. Add `project ensure`, `endpoint ensure/list`, and `example bootstrap` in `revisium-cli`, using client helpers where available.
+3. Update `revisium-examples` after the CLI commands are released.
 
 ## Goals
 
@@ -61,11 +60,11 @@ Recommended next PR sequence:
 
 Use three related concepts:
 
-| Concept | Meaning | Secret? | Example |
-| --- | --- | --- | --- |
-| Instance | Revisium server location | No | `local` -> `revisium://localhost:9222` |
-| Credential | Auth material for an instance | Yes | API key, OAuth refresh token |
-| Context | Default target path | No | `local/admin/dictionary/master:draft` |
+| Concept    | Meaning                       | Secret? | Example                                |
+| ---------- | ----------------------------- | ------- | -------------------------------------- |
+| Instance   | Revisium server location      | No      | `local` -> `revisium://localhost:9222` |
+| Credential | Auth material for an instance | Yes     | API key, OAuth refresh token           |
+| Context    | Default target path           | No      | `local/admin/dictionary/master:draft`  |
 
 Instances and contexts are stored in the workspace config. Credentials are stored outside the workspace in the OS credential store.
 
@@ -196,10 +195,10 @@ Credential-store unavailability should fail only when this precedence reaches a 
 
 For sync commands, preserve the source/target variants before falling back to saved credentials:
 
-| Endpoint | URL | Token | API key | Username | Password |
-| --- | --- | --- | --- | --- | --- |
-| Source | `REVISIUM_SOURCE_URL` | `REVISIUM_SOURCE_TOKEN` | `REVISIUM_SOURCE_API_KEY` | `REVISIUM_SOURCE_USERNAME` | `REVISIUM_SOURCE_PASSWORD` |
-| Target | `REVISIUM_TARGET_URL` | `REVISIUM_TARGET_TOKEN` | `REVISIUM_TARGET_API_KEY` | `REVISIUM_TARGET_USERNAME` | `REVISIUM_TARGET_PASSWORD` |
+| Endpoint | URL                   | Token                   | API key                   | Username                   | Password                   |
+| -------- | --------------------- | ----------------------- | ------------------------- | -------------------------- | -------------------------- |
+| Source   | `REVISIUM_SOURCE_URL` | `REVISIUM_SOURCE_TOKEN` | `REVISIUM_SOURCE_API_KEY` | `REVISIUM_SOURCE_USERNAME` | `REVISIUM_SOURCE_PASSWORD` |
+| Target   | `REVISIUM_TARGET_URL` | `REVISIUM_TARGET_TOKEN` | `REVISIUM_TARGET_API_KEY` | `REVISIUM_TARGET_USERNAME` | `REVISIUM_TARGET_PASSWORD` |
 
 If mutually exclusive auth methods are supplied, keep the current conflict handling and fail with a clear message instead of silently choosing a different credential.
 
@@ -336,11 +335,13 @@ Config shape:
   "projectName": "dictionary",
   "branchName": "master",
   "endpoints": ["REST_API", "GRAPHQL"],
-  "tables": [
-    { "id": "FaqCategory", "schema": { "type": "object" } }
-  ],
+  "tables": [{ "id": "FaqCategory", "schema": { "type": "object" } }],
   "rows": [
-    { "tableId": "FaqCategory", "rowId": "billing", "data": { "name": "Billing" } }
+    {
+      "tableId": "FaqCategory",
+      "rowId": "billing",
+      "data": { "name": "Billing" }
+    }
   ],
   "commitMessage": "Bootstrap dictionary example"
 }
@@ -436,7 +437,11 @@ Example JSON output:
   "context": "dictionary-local",
   "tables": { "created": 2, "skipped": 3, "conflicts": [] },
   "rows": { "created": 12, "skipped": 0, "conflicts": [] },
-  "endpoints": { "created": ["REST_API"], "skipped": ["GRAPHQL"], "conflicts": [] },
+  "endpoints": {
+    "created": ["REST_API"],
+    "skipped": ["GRAPHQL"],
+    "conflicts": []
+  },
   "commit": { "status": "created", "revisionId": "rev_123" }
 }
 ```
@@ -475,13 +480,13 @@ If endpoint service public URL differs from core base URL, the server should exp
 - [ ] Add client ensure helpers.
 - [ ] Add unit/integration tests for idempotency.
 - [x] Add workspace CLI config service for non-secret instances and contexts at `.revisium/revisium-cli.config.json`.
-- [ ] Add credential-store abstraction with named credentials and an in-memory fake for tests.
+- [x] Add credential-store abstraction with named credentials and test fakes.
 - [x] Add explicit no-auth connection mode for local standalone workflows.
 
 ### Phase 2: Auth And Context Commands
 
 - [x] Implement `instance` commands.
-- [ ] Implement `auth login/status/logout` for API keys.
+- [x] Implement `auth login/status/logout` for API keys.
 - [x] Implement `context` commands.
 - [ ] Add common `--context`, `--json`, `--quiet`, and `--no-input` behavior. `--context` is implemented for single-target commands; the output/non-interactive flags still need consistent handling.
 

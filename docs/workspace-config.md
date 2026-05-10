@@ -49,20 +49,27 @@ organization, project, branch, and revision. It should not contain credentials.
 
 ## Authenticated Instances
 
-For authenticated instances, keep secrets in environment variables for now. The workspace config should describe the target,
-while credentials come from the shell or CI secret store:
+For authenticated local use, keep the target in workspace config and save API keys in the operating system credential store:
 
 ```bash
 revisium instance add cloud --url revisium://cloud.revisium.io --auth stored
 revisium context create dictionary-cloud \
-  --url revisium://cloud.revisium.io/admin/dictionary/master
+  --url revisium://cloud.revisium.io/admin/dictionary/master \
+  --credential default
 revisium context use dictionary-cloud
 
-export REVISIUM_API_KEY=rev_xxxxxxxxxxxxxxxxxxxx
+revisium auth login --instance cloud --api-key
 revisium schema save --folder ./schemas
 ```
 
-`authMode: "stored"` reserves the workspace shape for named stored credentials, but this implementation does not save API keys to an OS credential store yet. If no URL or environment credentials are available, stored mode fails with a remediation message. The optional context `credential` field is written only when `--credential` is passed.
+`authMode: "stored"` resolves the selected named credential after explicit URL and environment credentials. The optional context `credential` field selects the saved credential name and defaults to `default` when omitted. API keys are stored outside the workspace under a key based on normalized instance base URL plus credential name, so workspace aliases can differ between projects without moving the secret.
+
+For CI, prefer environment variables instead of saved local credentials:
+
+```bash
+export REVISIUM_API_KEY=rev_xxxxxxxxxxxxxxxxxxxx
+revisium schema save --folder ./schemas
+```
 
 URL-embedded credentials such as `revisium://user:pass@host`, `?token=...`, and `?apikey=...` remain supported for compatibility
 and emergencies, but avoid them in normal usage because they can leak through shell history, process listings, and logs.
@@ -74,6 +81,10 @@ revisium instance add <name> --url <revisium-server-url> [--auth none|stored]
 revisium instance list
 revisium instance show <name>
 revisium instance remove <name>
+
+revisium auth login (--instance <name> | --url <revisium-url>) [--credential <name>] (--api-key | --api-key-stdin) [--force]
+revisium auth status [--instance <name> | --url <revisium-url>] [--credential <name>]
+revisium auth logout [--instance <name> | --url <revisium-url>] [--credential <name>]
 
 revisium context create <name> --url <revisium-url> [--instance <name>] [--credential <name>]
 revisium context create <name> --instance <name> --org <org> --project <project> [--branch <branch>] [--revision <revision>]
@@ -118,7 +129,7 @@ Authentication remains explicit:
 1. Environment auth: `REVISIUM_TOKEN` > `REVISIUM_API_KEY` > `REVISIUM_USERNAME` / `REVISIUM_PASSWORD`
 2. URL auth, discouraged except for compatibility or emergencies: `?token=...`, `?apikey=...`, or `user:password@host`
 3. Workspace `authMode: "none"`
-4. Stored credentials in a future implementation
+4. Stored API-key credentials when the instance uses `authMode: "stored"`
 5. Interactive prompt for non-workspace URL flows
 
 Sync commands still use `--source`, `--target`, and the `REVISIUM_SOURCE_*` / `REVISIUM_TARGET_*` environment variables.

@@ -16,6 +16,7 @@ const CLEAR_REVISIUM_ENV = {
   REVISIUM_API_KEY: '',
   REVISIUM_USERNAME: '',
   REVISIUM_PASSWORD: '',
+  REVISIUM_CREDENTIAL_STORE_SERVICE: 'revisium-cli-e2e',
 };
 
 interface WorkspaceConfig {
