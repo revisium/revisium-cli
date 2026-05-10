@@ -8,8 +8,12 @@ describe('UrlBuilderService', () => {
   let service: UrlBuilderService;
   let urlParser: UrlParserService;
   let interactiveService: jest.Mocked<InteractiveService>;
+  let originalIsTty: boolean | undefined;
 
   beforeEach(async () => {
+    originalIsTty = process.stdin.isTTY;
+    Object.assign(process.stdin, { isTTY: true });
+
     const mockInteractive = {
       promptText: jest.fn(),
       promptPassword: jest.fn(),
@@ -30,6 +34,10 @@ describe('UrlBuilderService', () => {
     urlParser = module.get<UrlParserService>(UrlParserService);
     interactiveService = module.get(InteractiveService);
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    Object.assign(process.stdin, { isTTY: originalIsTty });
   });
 
   describe('parse', () => {

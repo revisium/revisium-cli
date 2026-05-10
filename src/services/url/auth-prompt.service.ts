@@ -17,6 +17,12 @@ export class AuthPromptService {
     label: string,
     baseUrl: string,
   ): Promise<AuthCredentials> {
+    if (!process.stdin.isTTY) {
+      throw new Error(
+        `No credentials found and stdin is not a TTY. Set REVISIUM_API_KEY or REVISIUM_TOKEN, or run revisium auth login --url ${baseUrl}.`,
+      );
+    }
+
     const tokenPageUrl = this.getTokenPageUrl(baseUrl);
 
     const authMethod = await this.interactive.promptSelect<AuthMethod>(
