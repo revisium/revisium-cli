@@ -31,7 +31,7 @@ Primary command groups:
 | Build the binary  | `npm run build` (outputs `dist/src/main.js`)                                                     |
 | E2E (default)     | `npm run test:e2e` (expects standalone running on `localhost:8082`; bring it up with `test:e2e:up`/`test:e2e:down`) |
 | E2E matrix        | `npm run test:e2e:matrix` — opt-in; see `e2e/matrix/README.md`                                   |
-| E2E matrix (alpha) | `npm run test:e2e:matrix:alpha` — runs the matrix against a published alpha CLI (default `revisium@2.5.0-alpha.0`); override with `REVISIUM_CLI_PACKAGE=revisium@<version>` |
+| E2E matrix (alpha) | `npm run test:e2e:matrix:alpha` — runs the matrix against the latest published alpha CLI (resolved from the `revisium@alpha` dist-tag); override with `REVISIUM_CLI_PACKAGE=revisium@<version>` |
 
 Local CLI invocation: `node dist/src/main.js <command>` (the `revisium` shim points at the same file).
 
@@ -100,7 +100,7 @@ The matrix in `e2e/matrix/` boots a fresh `@revisium/standalone` per suite and e
 
 | Env var                | Effect                                                                                          |
 | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| `REVISIUM_CLI_PACKAGE` | invoke via `npx -y --package=<spec> revisium ...` (e.g. `revisium@2.5.0-alpha.0`)               |
+| `REVISIUM_CLI_PACKAGE` | invoke via `npx -y --package=<spec> revisium ...` — accepts a dist-tag (`revisium@alpha`, `revisium@latest`) or an exact version (`revisium@2.5.0-alpha.0`) |
 | `REVISIUM_CLI_BIN`     | invoke via `node <abs-path>` — useful for a side-checkout build                                 |
 
 Stable standalone is pinned via the `@revisium/standalone` `devDependency` in `package.json`; `startStandalone()` resolves it through `npx --yes`, so `npm ci` locks the version.
@@ -108,20 +108,20 @@ Stable standalone is pinned via the `@revisium/standalone` `devDependency` in `p
 ### Quick recipes
 
 ```sh
-# Run the entire matrix against the published 2.5.0-alpha.0 + pinned standalone
+# Run the entire matrix against whatever revisium@alpha currently resolves to
 npm run test:e2e:matrix:alpha
 
-# Pin to a different alpha tag for the same script
+# Pin to a specific alpha version for the same script
 REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.1 npm run test:e2e:matrix:alpha
 
 # Drive the matrix by hand against any spec
-REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.0 npm run test:e2e:matrix
+REVISIUM_CLI_PACKAGE=revisium@alpha npm run test:e2e:matrix
 
 # One suite only (useful for triage)
-REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.0 npm run test:e2e:matrix -- --testPathPattern=M06
+REVISIUM_CLI_PACKAGE=revisium@alpha npm run test:e2e:matrix -- --testPathPattern=M06
 
 # Stream standalone logs to stderr (debug startup or seeding issues)
-E2E_STANDALONE_LOGS=1 REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.0 npm run test:e2e:matrix
+E2E_STANDALONE_LOGS=1 REVISIUM_CLI_PACKAGE=revisium@alpha npm run test:e2e:matrix
 ```
 
 ### Prompt template for triaging an alpha matrix run

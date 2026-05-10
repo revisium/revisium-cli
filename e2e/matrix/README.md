@@ -356,7 +356,7 @@ The matrix is opt-in. Default `npm run test:e2e` keeps existing CI fast.
 
 | Env var                  | Meaning                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `REVISIUM_CLI_PACKAGE`   | npm spec to invoke via `npx -y --package=<spec> revisium ...` (e.g. `revisium@2.5.0-alpha.0`)              |
+| `REVISIUM_CLI_PACKAGE`   | npm spec to invoke via `npx -y --package=<spec> revisium ...` — accepts a dist-tag (`revisium@alpha`) or exact version (`revisium@2.5.0-alpha.0`) |
 | `REVISIUM_CLI_BIN`       | absolute path to a `main.js` to invoke via `node <bin>` (e.g. `/path/to/checkout/dist/src/main.js`)        |
 | _(neither set)_          | fall back to the locally-built `dist/src/main.js`; instrumented coverage uses `dist-instrumented/...`      |
 
@@ -374,12 +374,14 @@ To exercise a published alpha CLI against the pinned stable standalone:
 # 1. Make sure devDependencies (incl. stable @revisium/standalone) are installed.
 npm ci
 
-# 2. Run the matrix; the env var wins over the local dist.
-REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.0 npm run test:e2e:matrix
+# 2. Run the matrix; the env var wins over the local dist. The `alpha`
+#    dist-tag always resolves to the latest published alpha, so this stays
+#    fresh without bumping any pin in this repo.
+REVISIUM_CLI_PACKAGE=revisium@alpha npm run test:e2e:matrix
 
-# Or use the pre-wired script:
+# Or use the pre-wired script (defaults to revisium@alpha):
 npm run test:e2e:matrix:alpha
-# Override the alpha tag:
+# Pin to an exact alpha version when investigating a specific build:
 REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.1 npm run test:e2e:matrix:alpha
 ```
 

@@ -31,7 +31,7 @@
     "test:e2e:down": "if [ -f .e2e-test.pid ]; then kill $(cat .e2e-test.pid) 2>/dev/null; rm -f .e2e-test.pid; fi; rm -rf .e2e-test",
     "test:e2e:matrix": "npm run build && jest --config ./e2e/jest-matrix.json",
     "test:e2e:matrix:cov": "npm run build:instrumented && E2E_INSTRUMENTED=1 jest --config ./e2e/jest-matrix.json",
-    "test:e2e:matrix:alpha": "REVISIUM_CLI_PACKAGE=${REVISIUM_CLI_PACKAGE:-revisium@2.5.0-alpha.0} jest --config ./e2e/jest-matrix.json",
+    "test:e2e:matrix:alpha": "REVISIUM_CLI_PACKAGE=${REVISIUM_CLI_PACKAGE:-revisium@alpha} jest --config ./e2e/jest-matrix.json",
     "build:instrumented": "npm run build && rm -rf dist-instrumented && mkdir -p dist-instrumented && cp dist/package.json dist-instrumented/ && npx nyc instrument dist/src dist-instrumented/src --include='**/*.js'",
     "test:all": "npm run test:cov && npm run test:e2e:cov && npm run coverage:merge",
     "coverage:merge": "node scripts/merge-coverage.js"
