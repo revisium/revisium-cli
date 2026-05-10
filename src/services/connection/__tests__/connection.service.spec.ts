@@ -91,7 +91,7 @@ describe('ConnectionService', () => {
     it('reads environment config from ConfigService', async () => {
       configServiceFake.get
         .mockReturnValueOnce('revisium://host/org/proj')
-        .mockReturnValueOnce('test-token')
+        .mockReturnValueOnce(undefined)
         .mockReturnValueOnce('api-key')
         .mockReturnValueOnce('username')
         .mockReturnValueOnce('password');
@@ -302,10 +302,39 @@ describe('ConnectionService', () => {
         {
           url: 'env-url',
           token: 'env-token',
-          apikey: 'env-apikey',
-          username: 'env-username',
-          password: 'env-password',
+          apikey: undefined,
+          username: undefined,
+          password: undefined,
         },
+      );
+    });
+
+    it('uses explicit token instead of env credentials', async () => {
+      const testUrl = 'revisium://test.com/org/proj';
+      configServiceFake.get.mockReturnValueOnce('env-url');
+
+      urlBuilderServiceFake.parseAndComplete.mockRejectedValue(
+        new Error('test error'),
+      );
+
+      await expect(
+        service.connect({ url: testUrl, token: 'cli-token' }),
+      ).rejects.toThrow();
+
+      expect(urlBuilderServiceFake.parseAndComplete).toHaveBeenCalledWith(
+        testUrl,
+        'api',
+        {
+          url: 'env-url',
+          token: 'cli-token',
+          apikey: undefined,
+          username: undefined,
+          password: undefined,
+        },
+      );
+      expect(configServiceFake.get).not.toHaveBeenCalledWith('REVISIUM_TOKEN');
+      expect(configServiceFake.get).not.toHaveBeenCalledWith(
+        'REVISIUM_API_KEY',
       );
     });
 

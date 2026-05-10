@@ -14,6 +14,7 @@ export { ConnectionInfo } from './connection-factory.service';
 export interface ConnectionOptions {
   url?: string;
   context?: string;
+  token?: string;
   createProject?: boolean;
 }
 
@@ -51,7 +52,7 @@ export class ConnectionService {
   public async resolveTarget(
     options: ConnectionOptions = {},
   ): Promise<RevisiumUrlComplete> {
-    return this.resolveUrl(options, this.getEnvConfig());
+    return this.resolveUrl(options, this.getEnvConfig(options));
   }
 
   private async resolveUrl(
@@ -115,13 +116,23 @@ export class ConnectionService {
     );
   }
 
-  private getEnvConfig(): UrlEnvConfig {
+  private getEnvConfig(options: ConnectionOptions = {}): UrlEnvConfig {
+    const url = this.configService.get<string>('REVISIUM_URL');
+    const token =
+      options.token ?? this.configService.get<string>('REVISIUM_TOKEN');
+
     return {
-      url: this.configService.get<string>('REVISIUM_URL'),
-      token: this.configService.get<string>('REVISIUM_TOKEN'),
-      apikey: this.configService.get<string>('REVISIUM_API_KEY'),
-      username: this.configService.get<string>('REVISIUM_USERNAME'),
-      password: this.configService.get<string>('REVISIUM_PASSWORD'),
+      url,
+      token,
+      apikey: token
+        ? undefined
+        : this.configService.get<string>('REVISIUM_API_KEY'),
+      username: token
+        ? undefined
+        : this.configService.get<string>('REVISIUM_USERNAME'),
+      password: token
+        ? undefined
+        : this.configService.get<string>('REVISIUM_PASSWORD'),
     };
   }
 }

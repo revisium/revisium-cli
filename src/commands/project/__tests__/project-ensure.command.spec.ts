@@ -43,6 +43,21 @@ describe('ProjectEnsureCommand', () => {
     );
   });
 
+  it('forwards an explicit token to target resolution', async () => {
+    await command.run([], {
+      url: 'revisium://local/admin/dictionary/master',
+      token: 'jwt-token',
+    });
+
+    expect(bootstrapService.ensureProject).toHaveBeenCalledWith(
+      {
+        url: 'revisium://local/admin/dictionary/master',
+        token: 'jwt-token',
+      },
+      undefined,
+    );
+  });
+
   it('logs an "exists" message when the project is skipped', async () => {
     bootstrapService.ensureProject.mockResolvedValue({
       organization: 'admin',
@@ -115,5 +130,9 @@ describe('ProjectEnsureCommand', () => {
     expect(command.parseDryRun()).toBe(true);
     expect(command.parseJson('false')).toBe(false);
     expect(command.parseJson()).toBe(true);
+  });
+
+  it('parses inherited target auth options', () => {
+    expect(command.parseToken('jwt-token')).toBe('jwt-token');
   });
 });
