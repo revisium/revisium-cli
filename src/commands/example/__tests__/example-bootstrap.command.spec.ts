@@ -141,6 +141,5 @@ describe('ExampleBootstrapCommand', () => {
     expect(command.parseCommit()).toBe(true);
     expect(command.parseDryRun()).toBe(true);
     expect(command.parseJson()).toBe(true);
-    expect(command.parseNoInput()).toBe(true);
   });
 });

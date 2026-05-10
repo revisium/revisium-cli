@@ -209,6 +209,7 @@ export class BootstrapService {
     const config = await this.loadBootstrapConfig(options.configPath);
     const { url, apiClient } = await this.createResolvedClient(options);
     this.assertConfigMatchesTarget(config, url);
+    this.assertWritableRevision(url);
 
     const dryRun = Boolean(options.dryRun);
     const endpoints =
@@ -219,7 +220,7 @@ export class BootstrapService {
     const project = await this.ensureProject(options, dryRun);
     const emptySummary = this.createEmptySummary(url, project, dryRun);
 
-    if (dryRun && this.projectWouldBeCreated(project)) {
+    if (dryRun && project.projectStatus === 'created') {
       emptySummary.tables.created = config.tables.map((table) => table.id);
       emptySummary.rows.created = config.rows.map((row) =>
         this.formatRowId(row.tableId, row.rowId),
@@ -234,8 +235,12 @@ export class BootstrapService {
       return emptySummary;
     }
 
-    const revisionScope = await this.resolveRevisionScope(url, apiClient);
-    this.assertWritableRevision(url);
+    const revisionScope = await this.resolveDiffRevisionScope(
+      url,
+      apiClient,
+      project,
+      dryRun,
+    );
 
     for (const table of config.tables) {
       await this.ensureTable(revisionScope, table, emptySummary.tables, dryRun);
@@ -334,6 +339,27 @@ export class BootstrapService {
       branch: url.branch || 'master',
       revision: url.revision || 'draft',
     });
+  }
+
+  private async resolveDiffRevisionScope(
+    url: RevisiumUrlComplete,
+    apiClient: RevisiumApiClient,
+    project: ProjectEnsureResult,
+    dryRun: boolean,
+  ): Promise<RevisionScope> {
+    if (dryRun && project.branchStatus === 'created') {
+      const projectScope = apiClient.client
+        .org(url.organization)
+        .project(url.project);
+      const rootBranch = await projectScope.branch();
+      return apiClient.client.revision({
+        org: url.organization,
+        project: url.project,
+        branch: rootBranch.branchName,
+        revision: rootBranch.headRevisionId,
+      });
+    }
+    return this.resolveRevisionScope(url, apiClient);
   }
 
   private async findEndpoint(
@@ -502,12 +528,6 @@ export class BootstrapService {
       summary.tables.created.length +
       summary.rows.created.length +
       summary.endpoints.created.length
-    );
-  }
-
-  private projectWouldBeCreated(project: ProjectEnsureResult): boolean {
-    return (
-      project.projectStatus === 'created' || project.branchStatus === 'created'
     );
   }
 

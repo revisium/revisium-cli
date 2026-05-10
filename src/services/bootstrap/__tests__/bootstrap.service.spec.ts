@@ -517,6 +517,80 @@ describe('BootstrapService', () => {
       expect(revisionScopeFake.commit).not.toHaveBeenCalled();
     });
 
+    it('diffs against root branch head when only the branch is missing in dry-run', async () => {
+      apiClientFake.client.branch.mockRejectedValue(
+        new Error('Branch not found'),
+      );
+      projectScopeFake.branch.mockResolvedValue({
+        branchName: 'master',
+        headRevisionId: 'root-head',
+      });
+      const rootHeadRevisionScope = {
+        getTableSchema: jest.fn().mockResolvedValue(tableConfig().schema),
+        getRows: jest.fn().mockResolvedValue({
+          edges: [{ node: { id: 'billing', data: rowConfig().data } }],
+        }),
+        getEndpoints: jest
+          .fn()
+          .mockResolvedValue([{ id: 'rest', type: 'REST_API' }]),
+        createTable: jest.fn(),
+        createRow: jest.fn(),
+        createEndpoint: jest.fn(),
+        commit: jest.fn(),
+      };
+      apiClientFake.client.revision
+        .mockReset()
+        .mockImplementation(({ revision }: { revision: string }) =>
+          Promise.resolve(
+            revision === 'root-head'
+              ? rootHeadRevisionScope
+              : revisionScopeFake,
+          ),
+        );
+
+      const configPath = await writeBootstrapConfig({
+        endpoints: ['REST_API'],
+        tables: [tableConfig()],
+        rows: [rowConfig()],
+      });
+
+      const result = await service.bootstrapExample({
+        url: 'revisium://local/admin/dictionary/feature',
+        configPath,
+        dryRun: true,
+      });
+
+      expect(result.dryRun).toBe(true);
+      expect(result.project.branchStatus).toBe('created');
+      expect(result.tables.created).toEqual([]);
+      expect(result.tables.skipped).toEqual(['FaqCategory']);
+      expect(result.rows.created).toEqual([]);
+      expect(result.rows.skipped).toEqual(['FaqCategory/billing']);
+      expect(result.endpoints.created).toEqual([]);
+      expect(result.endpoints.skipped).toEqual(['REST_API']);
+      expect(rootHeadRevisionScope.createTable).not.toHaveBeenCalled();
+      expect(rootHeadRevisionScope.createRow).not.toHaveBeenCalled();
+      expect(projectScopeFake.createBranch).not.toHaveBeenCalled();
+    });
+
+    it('rejects non-draft target before any project is created', async () => {
+      connectionServiceFake.resolveTarget.mockResolvedValue({
+        ...target,
+        revision: 'head',
+      });
+      const configPath = await writeBootstrapConfig({
+        tables: [tableConfig()],
+        rows: [],
+      });
+
+      await expect(
+        service.bootstrapExample({ url: 'revisium://local', configPath }),
+      ).rejects.toThrow('requires a draft revision');
+
+      expect(orgScopeFake.createProject).not.toHaveBeenCalled();
+      expect(projectScopeFake.createBranch).not.toHaveBeenCalled();
+    });
+
     it('reports dry-run commit when there are pending changes', async () => {
       const configPath = await writeBootstrapConfig({
         tables: [tableConfig()],

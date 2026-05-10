@@ -14,7 +14,6 @@ type Options = BaseOptions & {
   commit?: boolean;
   dryRun?: boolean;
   json?: boolean;
-  noInput?: boolean;
   endpoint?: EndpointType[];
 };
 
@@ -106,14 +105,6 @@ export class ExampleBootstrapCommand extends BaseCommand {
     description: 'Print machine-readable JSON',
   })
   parseJson(value?: string): boolean {
-    return parseBooleanOption(value);
-  }
-
-  @Option({
-    flags: '--no-input [boolean]',
-    description: 'Disable interactive prompts',
-  })
-  parseNoInput(value?: string): boolean {
     return parseBooleanOption(value);
   }
 
