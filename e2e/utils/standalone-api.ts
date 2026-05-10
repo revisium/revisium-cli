@@ -11,8 +11,6 @@ export interface MintApiKeyOptions {
   name: string;
   /** ISO timestamp; omit for non-expiring keys. */
   expiresAt?: string;
-  /** Org-level role (e.g. `admin`, `developer`). */
-  role?: string;
 }
 
 export interface ApiKeyRecord {
@@ -67,24 +65,42 @@ export class StandaloneApiClient {
   }
 
   /**
-   * Mints a server API key scoped to the given organization. The exact
-   * REST shape is taken from the standalone OpenAPI; tests should not depend
-   * on internal field names beyond `apiKey`.
+   * Mints a personal API key scoped to the given organization via the
+   * `createPersonalApiKey` GraphQL mutation. Returns the secret string the
+   * CLI should send as `--api-key` / `REVISIUM_API_KEY`.
+   *
+   * Note: `@revisium/standalone` does not expose API-key minting via REST yet;
+   * the GraphQL mutation is the only public entry point as of 2.8.x.
    */
   async mintApiKey(
     organization: string,
     options: MintApiKeyOptions,
   ): Promise<ApiKeyRecord> {
-    const body: Record<string, unknown> = {
-      name: options.name,
-    };
-    if (options.expiresAt) body.expiresAt = options.expiresAt;
-    if (options.role) body.role = options.role;
-    return this.request<ApiKeyRecord>(
-      'POST',
-      `/api/organizations/${encodeURIComponent(organization)}/api-keys`,
-      body,
+    const data = await this.graphql<{
+      createPersonalApiKey: {
+        apiKey: { id: string; name: string };
+        secret: string;
+      };
+    }>(
+      `mutation($data: CreatePersonalApiKeyInput!) {
+        createPersonalApiKey(data: $data) {
+          apiKey { id name }
+          secret
+        }
+      }`,
+      {
+        data: {
+          name: options.name,
+          organizationId: organization,
+          ...(options.expiresAt ? { expiresAt: options.expiresAt } : {}),
+        },
+      },
     );
+    return {
+      id: data.createPersonalApiKey.apiKey.id,
+      apiKey: data.createPersonalApiKey.secret,
+      name: data.createPersonalApiKey.apiKey.name,
+    };
   }
 
   // --- projects -------------------------------------------------------------
@@ -136,19 +152,16 @@ export class StandaloneApiClient {
     branchName: string = 'master',
   ): Promise<string> {
     const data = await this.graphql<{
-      project: { branch: { draft: { id: string } } };
+      branch: { draft: { id: string } };
     }>(
-      `query($data: GetProjectInput!, $branch: String!) {
-        project(data: $data) {
-          branch(name: $branch) { draft { id } }
-        }
+      `query($data: GetBranchInput!) {
+        branch(data: $data) { draft { id } }
       }`,
       {
-        data: { organizationId: organization, projectName },
-        branch: branchName,
+        data: { organizationId: organization, projectName, branchName },
       },
     );
-    return data.project.branch.draft.id;
+    return data.branch.draft.id;
   }
 
   // --- tables / rows --------------------------------------------------------
@@ -160,7 +173,9 @@ export class StandaloneApiClient {
       input.branch,
     );
     await this.graphql(
-      `mutation($data: CreateTableInput!) { createTable(data: $data) { id } }`,
+      `mutation($data: CreateTableInput!) {
+        createTable(data: $data) { table { versionId } }
+      }`,
       {
         data: { revisionId, tableId: input.tableId, schema: input.schema },
       },
@@ -174,7 +189,9 @@ export class StandaloneApiClient {
       input.branch,
     );
     await this.graphql(
-      `mutation($data: CreateRowInput!) { createRow(data: $data) { id } }`,
+      `mutation($data: CreateRowInput!) {
+        createRow(data: $data) { row { versionId } }
+      }`,
       {
         data: {
           revisionId,
@@ -240,14 +257,14 @@ export class StandaloneApiClient {
       branchName,
     );
     const data = await this.graphql<{
-      endpoints: Array<{ id: string; type: string }>;
+      revision: { endpoints: Array<{ id: string; type: string }> };
     }>(
-      `query($revisionId: String!) {
-        endpoints(revisionId: $revisionId) { id type }
+      `query($data: GetRevisionInput!) {
+        revision(data: $data) { endpoints { id type } }
       }`,
-      { revisionId },
+      { data: { revisionId } },
     );
-    return data.endpoints;
+    return data.revision.endpoints;
   }
 
   // --- transports -----------------------------------------------------------

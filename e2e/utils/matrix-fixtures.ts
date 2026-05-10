@@ -56,7 +56,7 @@ export function questSchema(): object {
     additionalProperties: false,
     properties: {
       title: { type: 'string', default: '' },
-      points: { type: 'integer', default: 0 },
+      points: { type: 'number', default: 0 },
       published: { type: 'boolean', default: false },
     },
   });
