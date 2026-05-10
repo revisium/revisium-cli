@@ -128,7 +128,7 @@ E2E_STANDALONE_LOGS=1 REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.0 npm run test:e
 
 When a suite fails against `revisium@<alpha>`, paste this into your assistant:
 
-```
+```text
 Run `REVISIUM_CLI_PACKAGE=revisium@<alpha-version> npm run test:e2e:matrix -- --testPathPattern=<M0X>` from the revisium-cli repo root.
 
 Goal: figure out whether the failure is

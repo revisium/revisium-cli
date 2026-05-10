@@ -93,16 +93,22 @@ export async function startStandalone(
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
+  // Attach the drain immediately so the child never blocks on a full
+  // stdout/stderr pipe buffer while we wait on the URL banner or readiness
+  // probe. The port-tagged log forwarding upgrades from "<pending>" to the
+  // real port once the banner is parsed.
+  let resolvedPort: number | null = null;
+  attachLogPipes(child, () => resolvedPort);
+
   let port: number;
   try {
     port = await waitForBanner(child, readinessTimeoutMs);
+    resolvedPort = port;
     await waitForReady(`http://localhost:${port}/health/readiness`, 30_000);
   } catch (error) {
     await stopProcess(child, dataDir);
     throw error;
   }
-
-  attachLogPipes(child, port);
 
   const baseUrl = `http://localhost:${port}`;
   const api = new StandaloneApiClient(baseUrl);
@@ -271,19 +277,28 @@ function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
   });
 }
 
-function attachLogPipes(child: ChildProcess, port: number): void {
+function attachLogPipes(
+  child: ChildProcess,
+  getPort: () => number | null,
+): void {
+  const tag = (): string => {
+    const port = getPort();
+    return port === null ? '[standalone:<pending>]' : `[standalone:${port}]`;
+  };
   if (process.env.E2E_STANDALONE_LOGS === '1') {
-    const tag = `[standalone:${port}]`;
     child.stdout?.on('data', (chunk: Buffer) => {
-      process.stderr.write(`${tag} ${chunk.toString()}`);
+      process.stderr.write(`${tag()} ${chunk.toString()}`);
     });
     child.stderr?.on('data', (chunk: Buffer) => {
-      process.stderr.write(`${tag} ${chunk.toString()}`);
+      process.stderr.write(`${tag()} ${chunk.toString()}`);
     });
   } else {
-    // Drain so the process never blocks on a full pipe buffer.
-    child.stdout?.resume();
-    child.stderr?.resume();
+    // Drain so the process never blocks on a full pipe buffer. We attach a
+    // no-op `data` listener instead of `.resume()` because additional
+    // listeners (e.g. `waitForBanner`) attach later and we don't want to flip
+    // the stream into flowing mode prematurely.
+    child.stdout?.on('data', () => {});
+    child.stderr?.on('data', () => {});
   }
 }
 

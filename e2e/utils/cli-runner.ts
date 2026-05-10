@@ -34,14 +34,27 @@ export async function runCli(
     fs.mkdirSync(nycOutputDir, { recursive: true });
   }
 
-  const { command, commandArgs } = resolveCliInvocation(args, mainPath);
+  // Build the per-call environment once and use it both to resolve which
+  // binary to invoke and as the spawned child's env. This lets a test set
+  // `REVISIUM_CLI_PACKAGE: ''` (or any other override) via `runCli({ env })`
+  // and have it actually take effect — `process.env` alone would leak parent
+  // process state.
+  const effectiveEnv: Record<string, string | undefined> = {
+    ...process.env,
+    ...env,
+  };
+
+  const { command, commandArgs } = resolveCliInvocation(
+    args,
+    mainPath,
+    effectiveEnv,
+  );
 
   return new Promise((resolve, reject) => {
     const child = spawn(command, commandArgs, {
       cwd,
       env: {
-        ...process.env,
-        ...env,
+        ...effectiveEnv,
         // Pass NYC output dir for coverage collection
         ...(isInstrumented ? { NYC_OUTPUT_DIR: nycOutputDir } : {}),
       },
@@ -106,15 +119,16 @@ export async function runCli(
 function resolveCliInvocation(
   args: string[],
   defaultMainPath: string,
+  env: Record<string, string | undefined>,
 ): { command: string; commandArgs: string[] } {
-  const pkg = process.env.REVISIUM_CLI_PACKAGE;
+  const pkg = env.REVISIUM_CLI_PACKAGE;
   if (pkg && pkg.length > 0) {
     return {
       command: 'npx',
       commandArgs: ['-y', `--package=${pkg}`, 'revisium', ...args],
     };
   }
-  const bin = process.env.REVISIUM_CLI_BIN;
+  const bin = env.REVISIUM_CLI_BIN;
   if (bin && bin.length > 0) {
     return { command: 'node', commandArgs: [bin, ...args] };
   }
