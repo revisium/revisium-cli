@@ -8,201 +8,93 @@
 [![GitHub License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/revisium/revisium-cli/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/revisium/revisium-cli)](https://github.com/revisium/revisium-cli/releases)
 
-**Command-line interface for managing Revisium projects**
+**Command-line interface for Revisium** — manage migrations, seed data, and move projects between instances.
 
 </div>
 
-## Overview
+## What is Revisium?
 
-A CLI tool for interacting with Revisium instances, providing migration management, schema export, data export, and project synchronization capabilities.
+A versioned headless CMS / data platform with Git-like branches and revisions. See [revisium.io](https://revisium.io) and [docs.revisium.io](https://docs.revisium.io) for the product reference.
 
-## Features
+This CLI wraps the Revisium HTTP API for everyday CI/CD and developer flows.
 
-- **Migration Management** - Save and apply database migrations with auto-commit
-- **Schema Export/Import** - Export table schemas and convert to migrations
-- **Data Export/Upload** - Export and upload rows with smart dependency handling
-- **Project Sync** - Synchronize schema and data between Revisium projects
-- **Bulk Operations** - Efficient batch operations with configurable batch size
-- **Docker Deployment** - Containerized automation for CI/CD
-
-## Installation
+## Install
 
 ```bash
-# Install globally
-npm install -g revisium
-
-# Or use with npx
-npx revisium --help
+npm install -g revisium      # global
+npx revisium --help          # ad-hoc
 ```
 
-## Examples
-
-### CI/CD Migrations (Prisma-like Workflow)
-
-```
-┌─────────────┐      ┌─────────────┐      ┌─────────────┐
-│    DEV      │      │    GIT      │      │   CI/CD     │
-│             │      │             │      │             │
-│  Revisium   │ save │ migrations  │ push │   apply     │
-│    UI       │─────▶│   .json     │─────▶│  migrations │
-│             │      │   data/     │      │   + seed    │
-└─────────────┘      └─────────────┘      └─────────────┘
-```
-
-Like Prisma, save schema migrations locally and apply them in CI/CD:
+## Quickstart (60 seconds, local)
 
 ```bash
-# 1. Save migrations locally (during development)
-revisium migrate save --file ./revisium/migrations.json \
-  --url revisium://admin:admin@localhost:8080/myorg/myproject/master
+# 1. In one terminal, boot a local Revisium with embedded PostgreSQL.
+npx -y @revisium/standalone --auth     # admin password printed on first run
 
-# 2. Commit to git
-git add revisium/migrations.json
-git commit -m "Add new schema fields"
+# 2. Save your API key once. (Mint a key in the Revisium UI first.)
+revisium auth login --url revisium://localhost:9222 --api-key-stdin
 
-# 3. Apply in CI/CD (on deploy)
-revisium migrate apply --file ./revisium/migrations.json --commit \
-  --url revisium://cloud.revisium.io/myorg/myproject/master
-```
-
-Add to package.json scripts:
-
-```json
-{
-  "scripts": {
-    "revisium:save-migrations": "revisium migrate save --file ./revisium/migrations.json",
-    "revisium:apply-migrations": "revisium migrate apply --file ./revisium/migrations.json --commit",
-    "start:prod": "npm run revisium:apply-migrations && node dist/main"
-  }
-}
-```
-
-See [Docker Deployment](docs/docker-deployment.md) for complete CI/CD examples.
-
-### Export & Import (File-based)
-
-```
-┌─────────────┐                          ┌─────────────┐
-│   SOURCE    │    migrations.json       │   TARGET    │
-│  Revisium   │ ────────────────────▶    │  Revisium   │
-│             │        data/             │             │
-└─────────────┘                          └─────────────┘
-```
-
-Save project to files for backup or deployment to another instance:
-
-```bash
-# Export from source
-revisium migrate save --file ./migrations.json
-revisium rows save --folder ./data
-
-# Import to target
-revisium migrate apply --file ./migrations.json --commit \
-  --url revisium://target.example.com/org/proj/main
-revisium rows upload --folder ./data --commit \
-  --url revisium://target.example.com/org/proj/master
-```
-
-### Sync (Direct Transfer)
-
-```
-┌─────────────┐                          ┌─────────────┐
-│   SOURCE    │    schema + data         │   TARGET    │
-│  Revisium   │ ════════════════════▶    │  Revisium   │
-│             │       (direct)           │   :draft    │
-└─────────────┘                          └─────────────┘
-```
-
-Synchronize directly between two projects without intermediate files:
-
-```bash
-# With tokens in URL
-revisium sync all \
-  --source revisium://source.example.com/org/proj/master:head?token=xxx \
-  --target revisium://target.example.com/org/proj/master?token=yyy \
+# 3. Bootstrap a project + table + row + REST endpoint from one config file.
+revisium example bootstrap \
+  --config ./bootstrap.config.json \
+  --url revisium://localhost:9222/admin/hello/master \
   --commit
 
-# With tokens via environment (recommended for CI/CD)
-export REVISIUM_SOURCE_TOKEN=$SOURCE_TOKEN
-export REVISIUM_TARGET_TOKEN=$TARGET_TOKEN
-revisium sync all \
-  --source revisium://source.example.com/org/proj/master:head \
-  --target revisium://target.example.com/org/proj/master \
-  --commit
+# 4. Hit your fresh REST endpoint.
+curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
 ```
+
+Full walkthrough with the `bootstrap.config.json` example: [docs/quickstart.md](docs/quickstart.md).
+
+## Use cases
+
+- **Manage migrations and seeding in CI/CD** — `migrate save/apply` plus `rows upload` for seed data, driven from a JSON file in git. Walk: [docs.revisium.io/migrations/ci-cd](https://docs.revisium.io/migrations/ci-cd).
+- **Sync between live instances** — `sync schema/data/all` copies a project directly between two Revisium instances without intermediate files. Walk: [docs/workflows.md#2-sync-between-two-live-instances](docs/workflows.md#2-sync-between-two-live-instances).
+- **Download / upload (data portability)** — `schema save` / `rows save` / `migrate save` export to JSON; `migrate apply` / `rows upload` import. Useful for backups, fixtures, and air-gapped transfers. Walk: [docs/workflows.md#3-download--upload-data-portability](docs/workflows.md#3-download--upload-data-portability).
 
 ## Commands
 
 | Command                               | Description                            | Documentation                                    |
 | ------------------------------------- | -------------------------------------- | ------------------------------------------------ |
-| `schema save`                         | Export table schemas to JSON files     | [Schema Commands](docs/schema-commands.md)       |
-| `schema create-migrations`            | Convert schemas to migration format    | [Schema Commands](docs/schema-commands.md)       |
 | `migrate save`                        | Export migrations to JSON file         | [Migrate Commands](docs/migrate-commands.md)     |
 | `migrate apply`                       | Apply migrations from JSON file        | [Migrate Commands](docs/migrate-commands.md)     |
+| `schema save`                         | Export table schemas to JSON files     | [Schema Commands](docs/schema-commands.md)       |
+| `schema create-migrations`            | Convert schemas to migration format    | [Schema Commands](docs/schema-commands.md)       |
 | `rows save`                           | Export table data to JSON files        | [Rows Commands](docs/rows-commands.md)           |
 | `rows upload`                         | Upload table data from JSON files      | [Rows Commands](docs/rows-commands.md)           |
 | `sync schema`                         | Sync schema between projects           | [Sync Commands](docs/sync-commands.md)           |
 | `sync data`                           | Sync data between projects             | [Sync Commands](docs/sync-commands.md)           |
 | `sync all`                            | Full sync (schema + data)              | [Sync Commands](docs/sync-commands.md)           |
-| `instance add/list/show/remove`       | Manage workspace Revisium instances    | [Workspace Config](docs/workspace-config.md)     |
-| `context create/list/show/use/remove` | Manage workspace Revisium contexts     | [Workspace Config](docs/workspace-config.md)     |
-| `auth login/status/logout`            | Manage saved API-key credentials       | [Authentication](docs/authentication.md)         |
 | `project ensure`                      | Ensure a project and branch exist      | [Bootstrap Commands](docs/bootstrap-commands.md) |
 | `endpoint ensure/list`                | Ensure or list generated endpoints     | [Bootstrap Commands](docs/bootstrap-commands.md) |
-| `example bootstrap`                   | Bootstrap example projects from config | [Bootstrap Commands](docs/bootstrap-commands.md) |
+| `example bootstrap`                   | Bootstrap a project from config        | [Bootstrap Commands](docs/bootstrap-commands.md) |
+| `auth login/status/logout`            | Manage saved API-key credentials       | [Authentication](docs/authentication.md)         |
+| `instance add/list/show/remove`       | Manage workspace Revisium instances    | [Workspace Config](docs/workspace-config.md)     |
+| `context create/list/show/use/remove` | Manage workspace Revisium contexts     | [Workspace Config](docs/workspace-config.md)     |
 
 ## Configuration
 
-Configure via workspace config, environment variables, or `.env` file:
+Pick the auth method that matches the context:
 
-```bash
-# Workspace-local standalone example without auth
-revisium instance add local --url revisium://localhost:9222 --auth none
-revisium context create dictionary-local \
-  --url revisium://localhost:9222/admin/dictionary/master
-revisium context use dictionary-local
-```
+- **Saved API key** — recommended for local dev. Run `revisium auth login` once; the key lives in the OS keyring and is reused automatically.
+- **Environment variables** — recommended for CI. `REVISIUM_TOKEN` (or `REVISIUM_API_KEY`) plus `REVISIUM_URL`.
+- **Workspace contexts** — for multi-target setups. `revisium instance add` and `revisium context create` save non-secret config under `.revisium/revisium-cli.config.json`.
 
-Then single-target commands can omit `--url` in that workspace.
-
-```env
-# Recommended: URL + Token
-REVISIUM_URL=revisium://cloud.revisium.io/your_org/your_project/main
-REVISIUM_TOKEN=your_jwt_token
-
-# Alternative: URL + Username/Password
-REVISIUM_URL=revisium://cloud.revisium.io/your_org/your_project/main
-REVISIUM_USERNAME=your_username
-REVISIUM_PASSWORD=your_password
-```
-
-Or use command-line `--url` option with credentials via environment:
-
-```bash
-# Token in environment, target in URL
-export REVISIUM_TOKEN=$MY_TOKEN
-revisium schema save --folder ./schemas \
-  --url revisium://cloud.revisium.io/my-org/my-project/develop
-
-# Token in URL query parameter
-revisium schema save --folder ./schemas \
-  --url revisium://cloud.revisium.io/my-org/my-project/develop?token=$TOKEN
-```
-
-See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) for details.
+Full precedence rules and every supported method: [docs/authentication.md](docs/authentication.md), [docs/configuration.md](docs/configuration.md).
 
 ## Documentation
 
-- [Configuration](docs/configuration.md) - Environment variables and .env files
-- [Workspace Config](docs/workspace-config.md) - non-secret instances and contexts
-- [Bootstrap Commands](docs/bootstrap-commands.md) - project, endpoint, and example bootstrap workflows
-- [URL Format](docs/url-format.md) - Revisium URL syntax
-- [Authentication](docs/authentication.md) - Token, API key, and password auth
-- [Schema Commands](docs/schema-commands.md) - schema save, create-migrations
-- [Migrate Commands](docs/migrate-commands.md) - migrate save, apply
-- [Rows Commands](docs/rows-commands.md) - rows save, upload
-- [Sync Commands](docs/sync-commands.md) - sync schema, data, all
-- [Docker Deployment](docs/docker-deployment.md) - Docker, Kubernetes, CI/CD
+- [Quickstart](docs/quickstart.md) — run the CLI against a local Revisium in five minutes.
+- [Concepts](docs/concepts.md) — primitives the CLI works with.
+- [Common workflows](docs/workflows.md) — named recipes (CI/CD, sync, portability).
+- [Authentication](docs/authentication.md) · [Configuration](docs/configuration.md) · [URL Format](docs/url-format.md) · [Workspace Config](docs/workspace-config.md)
+- Per-command: [migrate](docs/migrate-commands.md) · [schema](docs/schema-commands.md) · [rows](docs/rows-commands.md) · [sync](docs/sync-commands.md) · [bootstrap](docs/bootstrap-commands.md)
+- [Docker deployment](docs/docker-deployment.md)
+- Product docs: [docs.revisium.io](https://docs.revisium.io)
+
+## Compatibility
+
+CLI 2.5.x targets `@revisium/standalone` 2.8.x and current `cloud.revisium.io`.
 
 ## Development
 
@@ -213,6 +105,8 @@ npm install
 npm run build
 ```
 
+Conventions and the verify checklist for contributors are in [AGENTS.md](AGENTS.md).
+
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
