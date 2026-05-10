@@ -21,7 +21,7 @@ describe('auth command formatting helpers', () => {
         baseUrl: 'https://cloud.revisium.io',
         credential: 'admin',
       }),
-    ).toBe('--instance "cloud" --credential "admin" --api-key');
+    ).toBe('--instance \'cloud\' --credential \'admin\' --api-key');
 
     expect(
       formatAuthLoginHint({
@@ -29,7 +29,7 @@ describe('auth command formatting helpers', () => {
         credential: 'default',
       }),
     ).toBe(
-      '--url "revisium://cloud.revisium.io" --credential "default" --api-key',
+      '--url \'revisium://cloud.revisium.io\' --credential \'default\' --api-key',
     );
   });
 

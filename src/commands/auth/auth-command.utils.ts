@@ -5,7 +5,8 @@ export interface AuthCommandTarget {
 }
 
 function quoteArg(value: string): string {
-  return JSON.stringify(value);
+  const escaped = value.replace(/'/g, `'\\''`);
+  return `'${escaped}'`;
 }
 
 export function formatAuthTarget(
