@@ -12,12 +12,19 @@ import { ContextRemoveCommand } from 'src/commands/context/context-remove.comman
 import { ContextShowCommand } from 'src/commands/context/context-show.command';
 import { ContextUseCommand } from 'src/commands/context/context-use.command';
 import { CreateMigrationsCommand } from 'src/commands/schema/create-migrations.command';
+import { EndpointCommand } from 'src/commands/endpoint/endpoint.command';
+import { EndpointEnsureCommand } from 'src/commands/endpoint/endpoint-ensure.command';
+import { EndpointListCommand } from 'src/commands/endpoint/endpoint-list.command';
+import { ExampleBootstrapCommand } from 'src/commands/example/example-bootstrap.command';
+import { ExampleCommand } from 'src/commands/example/example.command';
 import { InstanceAddCommand } from 'src/commands/instance/instance-add.command';
 import { InstanceCommand } from 'src/commands/instance/instance.command';
 import { InstanceListCommand } from 'src/commands/instance/instance-list.command';
 import { InstanceRemoveCommand } from 'src/commands/instance/instance-remove.command';
 import { InstanceShowCommand } from 'src/commands/instance/instance-show.command';
 import { MigrationCommand } from 'src/commands/migration/migration.command';
+import { ProjectCommand } from 'src/commands/project/project.command';
+import { ProjectEnsureCommand } from 'src/commands/project/project-ensure.command';
 import { RowsCommand } from 'src/commands/rows/rows.command';
 import { SaveMigrationsCommand } from 'src/commands/migration/save-migrations.command';
 import { SaveRowsCommand } from 'src/commands/rows/save-rows.command';
@@ -60,6 +67,7 @@ import {
   CredentialStoreService,
   CredentialTargetService,
 } from 'src/services/credentials';
+import { BootstrapService } from 'src/services/bootstrap';
 
 @Module({
   imports: [
@@ -88,6 +96,13 @@ import {
     ContextShowCommand,
     ContextUseCommand,
     ContextRemoveCommand,
+    ProjectCommand,
+    ProjectEnsureCommand,
+    EndpointCommand,
+    EndpointEnsureCommand,
+    EndpointListCommand,
+    ExampleCommand,
+    ExampleBootstrapCommand,
     SchemaCommand,
     SaveSchemaCommand,
     CreateMigrationsCommand,
@@ -116,6 +131,7 @@ import {
     WorkspaceConfigService,
     CredentialStoreService,
     CredentialTargetService,
+    BootstrapService,
   ],
 })
 export class AppModule {}

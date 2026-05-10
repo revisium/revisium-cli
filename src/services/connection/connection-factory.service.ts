@@ -90,9 +90,10 @@ export class ConnectionFactoryService {
           `Project "${url.project}" not found — creating automatically`,
         );
 
-        await client.client
-          .org(url.organization)
-          .createProject({ projectName: url.project });
+        await client.client.org(url.organization).createProject({
+          projectName: url.project,
+          branchName: url.branch || 'master',
+        });
 
         return client.client.branch(branchOptions);
       }

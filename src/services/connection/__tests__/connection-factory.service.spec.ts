@@ -159,6 +159,7 @@ describe('ConnectionFactoryService', () => {
 
       expect(mockOrgScope.createProject).toHaveBeenCalledWith({
         projectName: 'test-project',
+        branchName: 'main',
       });
       expect(result.revisionScope).toBe(mockDraftScope);
       expect(loggerFake.info).toHaveBeenCalledWith(
@@ -225,6 +226,7 @@ describe('ConnectionFactoryService', () => {
 
       expect(mockOrgScope.createProject).toHaveBeenCalledWith({
         projectName: 'test-project',
+        branchName: 'main',
       });
       expect(result.revisionScope).toBe(mockDraftScope);
     });
