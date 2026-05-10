@@ -1,0 +1,22 @@
+{
+  "projectName": "hello",
+  "branchName": "master",
+  "endpoints": ["REST_API"],
+  "tables": [
+    {
+      "id": "Note",
+      "schema": {
+        "type": "object",
+        "required": ["text"],
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string", "default": "" }
+        }
+      }
+    }
+  ],
+  "rows": [
+    { "tableId": "Note", "rowId": "first", "data": { "text": "hi" } }
+  ],
+  "commitMessage": "Quickstart bootstrap"
+}

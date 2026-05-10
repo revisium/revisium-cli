@@ -32,7 +32,7 @@ A workspace can hold many instances and contexts, with one **current context** t
 
 ## How they fit together
 
-```
+```text
 revisium-cli.config.json               OS keyring                  Revisium server
 ─────────────────────────               ──────────                  ───────────────
 instances.local                                                    revisium://localhost:9222
