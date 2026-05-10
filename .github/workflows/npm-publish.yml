@@ -6,84 +6,19 @@ on:
       - 'v*'
 
 jobs:
-  validate-and-publish:
-    runs-on: ubuntu-latest
+  publish:
     permissions:
       contents: write
       id-token: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Validate tag format
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          echo "📌 Publishing for tag: $TAG"
-
-          if [[ ! $TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
-            echo "❌ Invalid tag format: $TAG (expected: vX.Y.Z or vX.Y.Z-prerelease)"
-            exit 1
-          fi
-
-          VERSION=${TAG#v}
-          echo "version=$VERSION" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate package.json version matches tag
-        run: |
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          TAG_VERSION=${{ env.version }}
-
-          echo "📦 package.json version: $PACKAGE_VERSION"
-          echo "🏷️  Tag version: $TAG_VERSION"
-
-          if [[ "$PACKAGE_VERSION" != "$TAG_VERSION" ]]; then
-            echo "❌ Version mismatch: package.json ($PACKAGE_VERSION) != tag ($TAG_VERSION)"
-            exit 1
-          fi
-
-          echo "✅ Version validation passed"
-
-      - name: Determine npm tag
-        id: npm-tag
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          if [[ "$VERSION" =~ -alpha ]]; then
-            echo "tag=alpha" >> $GITHUB_OUTPUT
-          elif [[ "$VERSION" =~ -beta ]]; then
-            echo "tag=beta" >> $GITHUB_OUTPUT
-          elif [[ "$VERSION" =~ -rc ]]; then
-            echo "tag=rc" >> $GITHUB_OUTPUT
-          else
-            echo "tag=latest" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish to NPM
-        run: npm publish --provenance --access public --tag ${{ steps.npm-tag.outputs.tag }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            ## Changes in ${{ github.ref_name }}
-
-            This release was automatically generated from tag ${{ github.ref_name }}.
-
-            ### Installation
-            ```bash
-            npm install -g revisium@${{ env.version }}
-            ```
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: revisium/revisium-actions/.github/workflows/npm-publish.yml@184b609dcbc1e23f14021141f29226d4e6a0f1ac # v0.3.6
+    with:
+      node_version: 24.11.1
+      install_command: npm ci
+      pre_publish_commands: |
+        npm run tsc
+        npm run build
+      npm_access: public
+      publish_auth: token
+      create_github_release: true
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
