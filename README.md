@@ -28,21 +28,24 @@ npx revisium --help          # ad-hoc
 ## Quickstart (60 seconds, local)
 
 ```bash
-# 1. In one terminal, boot a local Revisium with embedded PostgreSQL.
+# 1. Boot a local Revisium with embedded PostgreSQL in another terminal.
 #    No --auth flag = no credentials needed for the rest of this quickstart.
 npx -y @revisium/standalone
 
-# 2. Bootstrap a project + table + row + REST endpoint from one config file.
+# 2. Grab the example bootstrap config (or write your own — see docs/quickstart.md).
+curl -O https://raw.githubusercontent.com/revisium/revisium-cli/master/examples/quickstart/bootstrap.config.json
+
+# 3. Bootstrap a project + table + row + REST endpoint.
 revisium example bootstrap \
   --config ./bootstrap.config.json \
   --url revisium://localhost:9222/admin/hello/master \
   --commit
 
-# 3. Hit your fresh REST endpoint.
+# 4. Hit your fresh REST endpoint.
 curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
 ```
 
-Full walkthrough with the `bootstrap.config.json` example: [docs/quickstart.md](docs/quickstart.md). For a Revisium that requires login, see [docs/authentication.md](docs/authentication.md).
+Full walkthrough: [docs/quickstart.md](docs/quickstart.md). For a Revisium that requires login, see [docs/authentication.md](docs/authentication.md).
 
 ## Use cases
 

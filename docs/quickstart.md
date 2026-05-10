@@ -25,7 +25,13 @@ For the auth-enabled path (`--auth` plus `revisium auth login`), see [docs/authe
 
 ## 2. Bootstrap a project
 
-Save this as `bootstrap.config.json`:
+Grab the example config from this repo:
+
+```bash
+curl -O https://raw.githubusercontent.com/revisium/revisium-cli/master/examples/quickstart/bootstrap.config.json
+```
+
+Or write your own — full schema in [bootstrap commands](bootstrap-commands.md#config-schema). For reference, the file you just downloaded:
 
 ```json
 {
@@ -48,7 +54,7 @@ Save this as `bootstrap.config.json`:
   "rows": [
     { "tableId": "Note", "rowId": "first", "data": { "text": "hi" } }
   ],
-  "commitMessage": "Initial bootstrap"
+  "commitMessage": "Quickstart bootstrap"
 }
 ```
 
