@@ -506,6 +506,7 @@ describe('BootstrapService', () => {
     it('plans created resources without writing in dry-run when project is missing', async () => {
       projectScopeFake.get.mockRejectedValue(new Error('Project not found'));
       const configPath = await writeBootstrapConfig({
+        branchName: 'master',
         endpoints: ['REST_API'],
         tables: [tableConfig()],
         rows: [rowConfig()],
@@ -536,7 +537,7 @@ describe('BootstrapService', () => {
         new Error('Branch not found'),
       );
       projectScopeFake.branch.mockResolvedValue({
-        branchName: 'master',
+        name: 'master',
         headRevisionId: 'root-head',
       });
       const rootHeadRevisionScope = {

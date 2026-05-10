@@ -23,7 +23,6 @@ import {
   faqRows,
   faqSchema,
   tagBootstrapConfig,
-  tagRows,
   tagSchema,
 } from '../utils/matrix-fixtures';
 import {
@@ -179,27 +178,24 @@ describe('M06 — example bootstrap', () => {
   it('--dry-run on an existing populated rootBranch reports skipped (regression)', async () => {
     const { workspace, env } = setup();
     const project = freshProject('m06-dry-existing');
-    await standalone.api.createProject('admin', project);
-    await standalone.api.seedTable({
-      organization: 'admin',
-      project,
-      tableId: 'Tag',
-      schema: tagSchema(),
-    });
-    for (const row of tagRows(3)) {
-      await standalone.api.seedRow({
-        organization: 'admin',
-        project,
-        tableId: row.tableId,
-        rowId: row.rowId,
-        data: row.data,
-      });
-    }
-
     const configPath = writeBootstrapConfigFile(
       workspace,
       tagBootstrapConfig(project),
     );
+    const seed = await runCli(
+      [
+        'example',
+        'bootstrap',
+        '--config',
+        configPath,
+        '--url',
+        standalone.url({ project }),
+        '--commit',
+      ],
+      { cwd: workspace, env, timeout: 180_000 },
+    );
+    expect(seed.exitCode).toBe(0);
+
     const result = await runCli(
       [
         'example',
