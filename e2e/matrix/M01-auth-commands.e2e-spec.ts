@@ -34,7 +34,6 @@ describe('M01 — auth commands', () => {
   let standalone: StandaloneInstance;
   let defaultApiKey: string;
   let automationApiKey: string;
-  let credentialStoreService: string;
   const workspaces: string[] = [];
 
   beforeAll(async () => {
@@ -49,13 +48,14 @@ describe('M01 — auth commands', () => {
     automationApiKey = (
       await standalone.api.mintApiKey('admin', { name: 'automation' })
     ).apiKey;
-    credentialStoreService = uniqueCredentialStoreService();
   }, 180_000);
 
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function newWorkspace(): string {
@@ -64,12 +64,14 @@ describe('M01 — auth commands', () => {
     return ws;
   }
 
+  /** Each test gets its own credential-store namespace so saved keys never
+   *  bleed between cases or with the developer's keyring. */
   function envWithStore(
     extra: Record<string, string> = {},
   ): Record<string, string> {
     return {
       ...CLEAR_REVISIUM_ENV,
-      REVISIUM_CREDENTIAL_STORE_SERVICE: credentialStoreService,
+      REVISIUM_CREDENTIAL_STORE_SERVICE: uniqueCredentialStoreService(),
       ...extra,
     };
   }

@@ -57,7 +57,9 @@ describe('M09 — rows save / upload', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function setup(): { workspace: string; env: Record<string, string> } {
@@ -101,7 +103,7 @@ describe('M09 — rows save / upload', () => {
       schema: questSchema(),
     });
 
-    await runCli(
+    const save = await runCli(
       [
         'rows',
         'save',
@@ -112,6 +114,7 @@ describe('M09 — rows save / upload', () => {
       ],
       { cwd: workspace, env, timeout: 180_000 },
     );
+    expect(save.exitCode).toBe(0);
     const upload = await runCli(
       [
         'rows',
@@ -138,7 +141,7 @@ describe('M09 — rows save / upload', () => {
       tableId: 'Quest',
       schema: questSchema(),
     });
-    await runCli(
+    const save = await runCli(
       [
         'rows',
         'save',
@@ -149,6 +152,7 @@ describe('M09 — rows save / upload', () => {
       ],
       { cwd: workspace, env, timeout: 180_000 },
     );
+    expect(save.exitCode).toBe(0);
 
     const upload = await runCli(
       [

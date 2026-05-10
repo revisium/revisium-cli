@@ -34,7 +34,7 @@ Each suite spins up a **fresh standalone** in a temp data directory, prepares it
 | --------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **AUTH-NONE**         | _no `--auth`_        | start standalone; CLI talks to it without credentials                                                              |
 | **AUTH-TOKEN**        | `--auth`             | log in as admin (`ADMIN_PASSWORD`); use returned JWT as `--token`/`REVISIUM_TOKEN`                                 |
-| **AUTH-APIKEY**       | `--auth`             | login → mint org-scoped API key via `POST /api/api-keys`; use as `--api-key`/`REVISIUM_API_KEY`                    |
+| **AUTH-APIKEY**       | `--auth`             | login → mint org-scoped API key via `POST /api/organizations/<org>/api-keys`; use as `--api-key`/`REVISIUM_API_KEY` |
 | **AUTH-PASSWORD**     | `--auth`             | use `REVISIUM_USERNAME` / `REVISIUM_PASSWORD` env (or `user:pass@host` URL form)                                   |
 | **AUTH-STORED**       | `--auth`             | `revisium auth login --api-key-stdin` saves to OS keyring under per-test service name; subsequent commands resolve |
 | **AUTH-URL-TOKEN**    | `--auth`             | embed `?token=...` in URL                                                                                          |
@@ -292,8 +292,8 @@ Each row below is implemented as one `*.e2e-spec.ts` file in `e2e/matrix/`. The 
 
 ```
 e2e/utils/
-  standalone-runner.ts   — spawns @revisium/standalone, waits for /health/readiness, returns { baseUrl, adminToken, stop() }
-  standalone-api.ts      — REST/GraphQL helpers: login, mintApiKey, createProject, seedTable, seedRows, getEndpoints, getRows
+  standalone-runner.ts   — spawns @revisium/standalone, waits for /health/readiness, returns { baseUrl, port, api, url(), stop() }
+  standalone-api.ts      — REST/GraphQL helpers: login, mintApiKey, createProject, projectExists, seedTable, seedRow, listTables, listEndpoints
   matrix-fixtures.ts     — pure fixture builders (tagSchema, faqSchema, questsRows, bootstrapConfig)
   matrix-workspace.ts    — tempdir + workspace-config helpers (writeConfig, withCredentialStoreNamespace)
 e2e/matrix/
@@ -347,7 +347,7 @@ The matrix is opt-in. Default `npm run test:e2e` keeps existing CI fast.
 
 - `npm run test:e2e:matrix` — run only `e2e/matrix/*.e2e-spec.ts` (suite per file, fresh standalone per file).
 - `npm run test:e2e:matrix -- --testPathPattern=M06` — run a single suite.
-- `npm run test:e2e:matrix:ci` — used by the alpha pipeline; pins `@revisium/standalone` to a known stable version.
+- `npm run test:e2e:matrix:cov` — instrumented build for coverage reporting; same suite set.
 
 ## Pinning
 

@@ -41,7 +41,9 @@ describe('M12 — error paths', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function newWorkspace(): string {
@@ -72,6 +74,9 @@ describe('M12 — error paths', () => {
       },
     );
     expect(result.exitCode).not.toBe(0);
+    expect(result.stderr.toLowerCase()).toMatch(
+      /unauthorized|forbidden|invalid|credential|api key|401|403/,
+    );
   });
 
   it('broken workspace config surfaces a parse error with the file path', async () => {

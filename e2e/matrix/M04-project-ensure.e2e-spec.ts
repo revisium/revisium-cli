@@ -16,6 +16,7 @@ import {
   CLEAR_REVISIUM_ENV,
   createWorkspace,
   removeWorkspace,
+  uniqueCredentialStoreService,
   writeWorkspaceConfig,
 } from '../utils/matrix-workspace';
 import {
@@ -44,7 +45,9 @@ describe('M04 — project ensure', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function freshProjectName(prefix: string = 'm04'): string {
@@ -179,26 +182,37 @@ describe('M04 — project ensure', () => {
     expect(result.exitCode).toBe(0);
   });
 
-  it('resolves saved credential via --instance / --context', async () => {
+  it('resolves saved credential via --context (no --token / REVISIUM_API_KEY)', async () => {
+    const project = freshProjectName();
     const workspace = newWorkspace();
     writeWorkspaceConfig(workspace, {
       instances: { local: { baseUrl: standalone.baseUrl, authMode: 'stored' } },
+      contexts: {
+        'local-default': {
+          instance: 'local',
+          organization: 'admin',
+          project,
+        },
+      },
     });
     const env: Record<string, string> = {
       ...CLEAR_REVISIUM_ENV,
-      REVISIUM_CREDENTIAL_STORE_SERVICE: 'revisium-cli-e2e-m04',
+      REVISIUM_CREDENTIAL_STORE_SERVICE: uniqueCredentialStoreService(),
     };
-    await runCli(['auth', 'login', '--instance', 'local', '--api-key-stdin'], {
-      cwd: workspace,
-      env,
-      stdin: apiKey + '\n',
-    });
+    const login = await runCli(
+      ['auth', 'login', '--instance', 'local', '--api-key-stdin'],
+      { cwd: workspace, env, stdin: apiKey + '\n' },
+    );
+    expect(login.exitCode).toBe(0);
 
-    const project = freshProjectName();
+    // No --url / --token / REVISIUM_API_KEY: target + credential resolve via
+    // the workspace --context entirely.
     const result = await runCli(
-      ['project', 'ensure', '--url', standalone.url({ project }), '--json'],
+      ['project', 'ensure', '--context', 'local-default', '--json'],
       { cwd: workspace, env },
     );
     expect(result.exitCode).toBe(0);
+    const summary = JSON.parse(result.stdout) as { project: string };
+    expect(summary.project).toBe(project);
   });
 });

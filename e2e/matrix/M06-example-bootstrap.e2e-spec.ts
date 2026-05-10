@@ -50,7 +50,9 @@ describe('M06 — example bootstrap', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function freshProject(prefix: string): string {
@@ -108,6 +110,7 @@ describe('M06 — example bootstrap', () => {
       ],
       { cwd: workspace, env, timeout: 120_000 },
     );
+    expect(second.exitCode).toBe(0);
     const secondSummary = JSON.parse(second.stdout) as {
       tables: { created: string[]; skipped: string[] };
       rows: { skipped: string[] };

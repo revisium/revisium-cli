@@ -47,7 +47,9 @@ describe('M03 — context commands', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   async function setupWorkspace(): Promise<{
@@ -140,7 +142,14 @@ describe('M03 — context commands', () => {
     expect(result.exitCode).toBe(0);
 
     const config = readConfig(workspace);
-    expect(config.contexts).toHaveProperty('dictionary-from-url');
+    expect(config.contexts).toMatchObject({
+      'dictionary-from-url': {
+        organization: 'admin',
+        project: 'dictionary',
+        branch: 'master',
+        revision: 'draft',
+      },
+    });
   });
 
   it('context list / show / use round-trip', async () => {
@@ -224,7 +233,9 @@ describe('M03 — context commands', () => {
       env,
     });
     expect(remove.exitCode).toBe(0);
-    expect(readConfig(workspace).currentContext).toBeUndefined();
+    const config = readConfig(workspace);
+    expect(config.currentContext).toBeUndefined();
+    expect(config.contexts ?? {}).not.toHaveProperty('dictionary-local');
   });
 
   it('rejects head/non-draft contexts when used by mutating commands', async () => {

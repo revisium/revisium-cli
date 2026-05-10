@@ -26,6 +26,7 @@ export const CLEAR_REVISIUM_ENV: Record<string, string> = {
   REVISIUM_TARGET_API_KEY: '',
   REVISIUM_TARGET_USERNAME: '',
   REVISIUM_TARGET_PASSWORD: '',
+  REVISIUM_ENV_FILE: '',
 };
 
 export interface WorkspaceInstanceConfig {

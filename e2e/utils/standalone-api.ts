@@ -120,8 +120,11 @@ export class StandaloneApiClient {
         { data: { organizationId: organization, projectName } },
       );
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -204,6 +207,28 @@ export class StandaloneApiClient {
     return data.tables.edges.map((edge) => edge.node);
   }
 
+  async listRows(
+    organization: string,
+    projectName: string,
+    tableId: string,
+    branchName: string = 'master',
+  ): Promise<Array<{ id: string; data: unknown }>> {
+    const revisionId = await this.getDraftRevisionId(
+      organization,
+      projectName,
+      branchName,
+    );
+    const data = await this.graphql<{
+      rows: { edges: Array<{ node: { id: string; data: unknown } }> };
+    }>(
+      `query($data: GetRowsInput!) {
+        rows(data: $data) { edges { node { id data } } }
+      }`,
+      { data: { revisionId, tableId, first: 1000 } },
+    );
+    return data.rows.edges.map((edge) => edge.node);
+  }
+
   async listEndpoints(
     organization: string,
     projectName: string,
@@ -279,4 +304,11 @@ export class StandaloneApiClient {
     }
     return result.data as T;
   }
+}
+
+function isNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return /not.?found|404/i.test(error.message);
 }

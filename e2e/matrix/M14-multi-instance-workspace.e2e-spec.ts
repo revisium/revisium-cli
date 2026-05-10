@@ -53,7 +53,10 @@ describe('M14 — multi-instance workspace', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await Promise.all([primary.stop(), secondary.stop()]);
+    await Promise.all([
+      primary ? primary.stop() : Promise.resolve(),
+      secondary ? secondary.stop() : Promise.resolve(),
+    ]);
   });
 
   function setup(): { workspace: string; env: Record<string, string> } {

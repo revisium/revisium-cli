@@ -43,7 +43,9 @@ describe('M11 — target & auth resolution', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function buildWorkspace(currentContext: string): string {

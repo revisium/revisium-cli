@@ -151,15 +151,23 @@ function buildRevisiumUrl(
 async function waitForReady(url: string, timeoutMs: number): Promise<void> {
   const start = Date.now();
   let lastError: unknown;
+  const perRequestTimeoutMs = 5_000;
   while (Date.now() - start < timeoutMs) {
+    const controller = new AbortController();
+    const abortTimer = setTimeout(
+      () => controller.abort(),
+      perRequestTimeoutMs,
+    );
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
       if (response.ok) {
         return;
       }
       lastError = new Error(`HTTP ${response.status}`);
     } catch (error) {
       lastError = error;
+    } finally {
+      clearTimeout(abortTimer);
     }
     await sleep(500);
   }
@@ -174,9 +182,14 @@ async function stopProcess(
 ): Promise<void> {
   if (!child.killed && child.exitCode === null) {
     child.kill('SIGTERM');
-    await waitForExit(child, 5_000).catch(() => {
+    try {
+      await waitForExit(child, 5_000);
+    } catch {
       child.kill('SIGKILL');
-    });
+      // Wait for the kernel to actually reap the process before deleting its
+      // data dir; otherwise embedded PostgreSQL may still be holding files.
+      await waitForExit(child, 5_000).catch(() => undefined);
+    }
   }
   await rm(dataDir, { recursive: true, force: true });
 }

@@ -83,7 +83,10 @@ describe('M10 — sync', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await Promise.all([source.stop(), target.stop()]);
+    await Promise.all([
+      source ? source.stop() : Promise.resolve(),
+      target ? target.stop() : Promise.resolve(),
+    ]);
   });
 
   function setup(): { workspace: string; env: Record<string, string> } {
@@ -128,7 +131,7 @@ describe('M10 — sync', () => {
 
   it('sync data copies rows once schemas match', async () => {
     const { workspace, env } = setup();
-    await runCli(
+    const schema = await runCli(
       [
         'sync',
         'schema',
@@ -140,6 +143,7 @@ describe('M10 — sync', () => {
       ],
       { cwd: workspace, env, timeout: 240_000 },
     );
+    expect(schema.exitCode).toBe(0);
     const result = await runCli(
       [
         'sync',
@@ -153,6 +157,19 @@ describe('M10 — sync', () => {
       { cwd: workspace, env, timeout: 240_000 },
     );
     expect(result.exitCode).toBe(0);
+
+    const tagRowsCopied = await target.api.listRows(
+      'admin',
+      targetProject,
+      'Tag',
+    );
+    const questRowsCopied = await target.api.listRows(
+      'admin',
+      targetProject,
+      'Quest',
+    );
+    expect(tagRowsCopied).toHaveLength(3);
+    expect(questRowsCopied).toHaveLength(5);
   });
 
   it('sync all --commit performs schema + data in one shot', async () => {
@@ -175,6 +192,10 @@ describe('M10 — sync', () => {
     expect(result.exitCode).toBe(0);
     const targetTables = await target.api.listTables('admin', fresh);
     expect(targetTables.map((t) => t.id).sort()).toEqual(['Quest', 'Tag']);
+    const tagRowsCopied = await target.api.listRows('admin', fresh, 'Tag');
+    const questRowsCopied = await target.api.listRows('admin', fresh, 'Quest');
+    expect(tagRowsCopied).toHaveLength(3);
+    expect(questRowsCopied).toHaveLength(5);
   });
 
   it('rejects mutually-exclusive auth: both ?token=... and REVISIUM_TARGET_TOKEN', async () => {

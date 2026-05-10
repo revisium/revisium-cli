@@ -57,7 +57,9 @@ describe('M07 — migrate', () => {
   afterAll(async () => {
     for (const workspace of workspaces) removeWorkspace(workspace);
     workspaces.length = 0;
-    await standalone.stop();
+    if (standalone) {
+      await standalone.stop();
+    }
   });
 
   function setup(): { workspace: string; env: Record<string, string> } {
