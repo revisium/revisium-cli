@@ -72,7 +72,7 @@ describe('AuthStatusCommand', () => {
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
-      'No saved credential found. Run: revisium auth login --url revisium://cloud.revisium.io --credential default --api-key',
+      'No saved credential found. Run: revisium auth login --url "revisium://cloud.revisium.io" --credential "default" --api-key',
     );
   });
 

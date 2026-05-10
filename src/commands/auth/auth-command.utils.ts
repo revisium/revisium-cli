@@ -4,6 +4,10 @@ export interface AuthCommandTarget {
   credential: string;
 }
 
+function quoteArg(value: string): string {
+  return JSON.stringify(value);
+}
+
 export function formatAuthTarget(
   instanceName: string | undefined,
   baseUrl: string,
@@ -13,12 +17,16 @@ export function formatAuthTarget(
 
 export function formatAuthLoginHint(target: AuthCommandTarget): string {
   const targetSelector = target.instanceName
-    ? `--instance ${target.instanceName}`
-    : `--url ${formatAuthRevisiumUrl(target.baseUrl)}`;
+    ? `--instance ${quoteArg(target.instanceName)}`
+    : `--url ${quoteArg(formatAuthRevisiumUrl(target.baseUrl))}`;
 
-  return `${targetSelector} --credential ${target.credential} --api-key`;
+  return `${targetSelector} --credential ${quoteArg(target.credential)} --api-key`;
 }
 
 export function formatAuthRevisiumUrl(baseUrl: string): string {
-  return `revisium://${baseUrl.replace(/^https?:\/\//, '')}`;
+  if (baseUrl.startsWith('http://')) {
+    return `revisium+http://${baseUrl.slice('http://'.length)}`;
+  }
+
+  return `revisium://${baseUrl.replace(/^https:\/\//, '')}`;
 }
