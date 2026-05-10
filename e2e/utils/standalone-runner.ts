@@ -205,16 +205,27 @@ function waitForBanner(
       );
     };
 
+    // 'error' fires for spawn / ENOENT failures before 'exit' is emitted at
+    // all; without this listener the promise hangs until the timeout.
+    const onError = (error: Error): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+
     function cleanup(): void {
       clearTimeout(timer);
       child.stdout?.off('data', onData);
       child.stderr?.off('data', onData);
       child.off('exit', onExit);
+      child.off('error', onError);
     }
 
     child.stdout?.on('data', onData);
     child.stderr?.on('data', onData);
     child.once('exit', onExit);
+    child.once('error', onError);
   });
 }
 
