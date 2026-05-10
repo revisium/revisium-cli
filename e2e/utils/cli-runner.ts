@@ -34,12 +34,27 @@ export async function runCli(
     fs.mkdirSync(nycOutputDir, { recursive: true });
   }
 
+  // Build the per-call environment once and use it both to resolve which
+  // binary to invoke and as the spawned child's env. This lets a test set
+  // `REVISIUM_CLI_PACKAGE: ''` (or any other override) via `runCli({ env })`
+  // and have it actually take effect — `process.env` alone would leak parent
+  // process state.
+  const effectiveEnv: Record<string, string | undefined> = {
+    ...process.env,
+    ...env,
+  };
+
+  const { command, commandArgs } = resolveCliInvocation(
+    args,
+    mainPath,
+    effectiveEnv,
+  );
+
   return new Promise((resolve, reject) => {
-    const child = spawn('node', [mainPath, ...args], {
+    const child = spawn(command, commandArgs, {
       cwd,
       env: {
-        ...process.env,
-        ...env,
+        ...effectiveEnv,
         // Pass NYC output dir for coverage collection
         ...(isInstrumented ? { NYC_OUTPUT_DIR: nycOutputDir } : {}),
       },
@@ -83,6 +98,41 @@ export async function runCli(
       reject(error);
     });
   });
+}
+
+/**
+ * Decide which binary the matrix uses to invoke the CLI.
+ *
+ * Precedence:
+ *  1. `REVISIUM_CLI_PACKAGE=<name>@<version>` — exec via `npx -y --package=<pkg> revisium ...`.
+ *     This is what the alpha-matrix script uses to run a published version
+ *     (e.g. `revisium@2.5.0-alpha.0`) without polluting the dev environment.
+ *  2. `REVISIUM_CLI_BIN=/abs/path/to/main.js` — exec via `node <bin>`. Useful
+ *     when you've installed the CLI globally or built it elsewhere.
+ *  3. Fall back to the locally-built `dist/src/main.js` (or instrumented copy).
+ *
+ * Note: instrumented coverage (`E2E_INSTRUMENTED=1`) only works against the
+ * local dist. When `REVISIUM_CLI_PACKAGE` / `REVISIUM_CLI_BIN` is set, the
+ * NYC output dir is still wired through so the published binary's own NYC
+ * setup can pick it up if it's instrumented.
+ */
+function resolveCliInvocation(
+  args: string[],
+  defaultMainPath: string,
+  env: Record<string, string | undefined>,
+): { command: string; commandArgs: string[] } {
+  const pkg = env.REVISIUM_CLI_PACKAGE;
+  if (pkg && pkg.length > 0) {
+    return {
+      command: 'npx',
+      commandArgs: ['-y', `--package=${pkg}`, 'revisium', ...args],
+    };
+  }
+  const bin = env.REVISIUM_CLI_BIN;
+  if (bin && bin.length > 0) {
+    return { command: 'node', commandArgs: [bin, ...args] };
+  }
+  return { command: 'node', commandArgs: [defaultMainPath, ...args] };
 }
 
 export function buildUrl(

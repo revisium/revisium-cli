@@ -345,10 +345,44 @@ describe('Mxx — <area>', () => {
 
 The matrix is opt-in. Default `npm run test:e2e` keeps existing CI fast.
 
-- `npm run test:e2e:matrix` — run only `e2e/matrix/*.e2e-spec.ts` (suite per file, fresh standalone per file).
+- `npm run test:e2e:matrix` — run against the locally-built CLI (`dist/src/main.js`), one fresh standalone per suite file.
 - `npm run test:e2e:matrix -- --testPathPattern=M06` — run a single suite.
 - `npm run test:e2e:matrix:cov` — instrumented build for coverage reporting; same suite set.
+- `npm run test:e2e:matrix:alpha` — run against a published alpha CLI release (default: `revisium@2.5.0-alpha.0`). See "Choosing the CLI under test" below.
 
-## Pinning
+## Choosing the CLI under test
 
-`package.json` keeps `@revisium/standalone` as a dev dependency at the **last stable** version. The alpha CI install step explicitly resolves that version so the matrix never runs against a moving target.
+`runCli()` honours two env vars to override which binary is exercised:
+
+| Env var                  | Meaning                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `REVISIUM_CLI_PACKAGE`   | npm spec to invoke via `npx -y --package=<spec> revisium ...` — accepts a dist-tag (`revisium@alpha`) or exact version (`revisium@2.5.0-alpha.0`) |
+| `REVISIUM_CLI_BIN`       | absolute path to a `main.js` to invoke via `node <bin>` (e.g. `/path/to/checkout/dist/src/main.js`)        |
+| _(neither set)_          | fall back to the locally-built `dist/src/main.js`; instrumented coverage uses `dist-instrumented/...`      |
+
+`REVISIUM_CLI_PACKAGE` wins over `REVISIUM_CLI_BIN`, which wins over the local dist.
+
+## Pinning the standalone
+
+`@revisium/standalone` is a `devDependency` pinned to a stable version in `package.json`. `startStandalone()` invokes it via `npx --yes @revisium/standalone`, so npm resolves it from the lockfile during `npm ci`. To pin to a specific release explicitly (e.g. for a published alpha matrix run), pass `version` to `startStandalone({ version: '2.8.1' })` or update the devDependency.
+
+## Alpha-vs-stable matrix run
+
+To exercise a published alpha CLI against the pinned stable standalone:
+
+```sh
+# 1. Make sure devDependencies (incl. stable @revisium/standalone) are installed.
+npm ci
+
+# 2. Run the matrix; the env var wins over the local dist. The `alpha`
+#    dist-tag always resolves to the latest published alpha, so this stays
+#    fresh without bumping any pin in this repo.
+REVISIUM_CLI_PACKAGE=revisium@alpha npm run test:e2e:matrix
+
+# Or use the pre-wired script (defaults to revisium@alpha):
+npm run test:e2e:matrix:alpha
+# Pin to an exact alpha version when investigating a specific build:
+REVISIUM_CLI_PACKAGE=revisium@2.5.0-alpha.1 npm run test:e2e:matrix:alpha
+```
+
+`npx` caches the package after the first download, so subsequent jest workers reuse it.
