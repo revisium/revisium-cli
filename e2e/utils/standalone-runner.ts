@@ -1,5 +1,4 @@
 import { ChildProcess, spawn } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -22,7 +21,7 @@ export interface StartStandaloneOptions {
    * Optional environment overrides forwarded to the standalone process.
    */
   env?: Record<string, string>;
-  /** Maximum time to wait for `/health/readiness` (ms, default 120s). */
+  /** Maximum time to wait for the startup banner (ms, default 180s). */
   readinessTimeoutMs?: number;
 }
 
@@ -31,8 +30,6 @@ export interface StandaloneInstance {
   baseUrl: string;
   /** Bound HTTP port. */
   port: number;
-  /** Embedded PostgreSQL port. */
-  pgPort: number;
   /** Whether the instance was started with `--auth`. */
   auth: boolean;
   /** Pre-bound REST/GraphQL helper for seeding. */
@@ -51,6 +48,13 @@ export interface StandaloneInstance {
   stop: () => Promise<void>;
 }
 
+/**
+ * `@revisium/standalone` since 2.8.x picks the next free HTTP and PostgreSQL
+ * ports automatically when neither is supplied — so we let it pick, parse the
+ * announced URL from its startup banner, and verify with a single readiness
+ * probe. This sidesteps the race where two parallel suites would otherwise
+ * "claim" the same preferred port milliseconds apart.
+ */
 export async function startStandalone(
   options: StartStandaloneOptions = {},
 ): Promise<StandaloneInstance> {
@@ -59,7 +63,7 @@ export async function startStandalone(
     adminPassword,
     version,
     env: extraEnv = {},
-    readinessTimeoutMs = 120_000,
+    readinessTimeoutMs = 180_000,
   } = options;
 
   if (auth && !adminPassword) {
@@ -69,16 +73,10 @@ export async function startStandalone(
   }
 
   const dataDir = await mkdtemp(join(tmpdir(), 'revisium-standalone-'));
-  const port = await pickFreePort(9222);
-  const pgPort = await pickFreePort(5440);
 
   const args = [
     '--yes',
     version ? `@revisium/standalone@${version}` : '@revisium/standalone',
-    '--port',
-    String(port),
-    '--pg-port',
-    String(pgPort),
     '--data',
     dataDir,
   ];
@@ -95,23 +93,30 @@ export async function startStandalone(
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
-  attachLogPipes(child, port);
+  // Attach the drain immediately so the child never blocks on a full
+  // stdout/stderr pipe buffer while we wait on the URL banner or readiness
+  // probe. The port-tagged log forwarding upgrades from "<pending>" to the
+  // real port once the banner is parsed.
+  let resolvedPort: number | null = null;
+  attachLogPipes(child, () => resolvedPort);
 
-  const baseUrl = `http://localhost:${port}`;
-  const api = new StandaloneApiClient(baseUrl);
-
+  let port: number;
   try {
-    await waitForReady(`${baseUrl}/health/readiness`, readinessTimeoutMs);
+    port = await waitForBanner(child, readinessTimeoutMs);
+    resolvedPort = port;
+    await waitForReady(`http://localhost:${port}/health/readiness`, 30_000);
   } catch (error) {
     await stopProcess(child, dataDir);
     throw error;
   }
 
+  const baseUrl = `http://localhost:${port}`;
+  const api = new StandaloneApiClient(baseUrl);
+
   let stopped = false;
   return {
     baseUrl,
     port,
-    pgPort,
     auth,
     api,
     url: (parts) => buildRevisiumUrl(port, parts),
@@ -146,6 +151,82 @@ function buildRevisiumUrl(
   const branch = parts.branch ?? 'master';
   const tail = parts.revision ? `:${parts.revision}` : '';
   return `revisium://${host}/${org}/${parts.project}/${branch}${tail}`;
+}
+
+/**
+ * Watches the child's stdout until standalone prints its banner with
+ * `URL:        http://localhost:NNNN`. Resolves with the parsed port.
+ *
+ * Both stdout and stderr are sampled because some npm versions route the
+ * package's own logs through stderr.
+ */
+function waitForBanner(
+  child: ChildProcess,
+  timeoutMs: number,
+): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    let buffer = '';
+    let settled = false;
+    const bannerRegex = /URL:\s+http:\/\/localhost:(\d+)/;
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        cleanup();
+        const tail = buffer.slice(-2_000) || '<no output>';
+        reject(
+          new Error(
+            `Standalone did not announce a URL within ${timeoutMs}ms. Tail: ${tail}`,
+          ),
+        );
+      }
+    }, timeoutMs);
+
+    const onData = (chunk: Buffer): void => {
+      if (settled) return;
+      buffer += chunk.toString();
+      const match = bannerRegex.exec(buffer);
+      if (match) {
+        settled = true;
+        cleanup();
+        resolve(Number(match[1]));
+      }
+    };
+
+    const onExit = (code: number | null): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      const tail = buffer.slice(-2_000) || '<no output>';
+      reject(
+        new Error(
+          `Standalone exited (code=${code ?? 'null'}) before announcing a URL. Tail: ${tail}`,
+        ),
+      );
+    };
+
+    // 'error' fires for spawn / ENOENT failures before 'exit' is emitted at
+    // all; without this listener the promise hangs until the timeout.
+    const onError = (error: Error): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+
+    function cleanup(): void {
+      clearTimeout(timer);
+      child.stdout?.off('data', onData);
+      child.stderr?.off('data', onData);
+      child.off('exit', onExit);
+      child.off('error', onError);
+    }
+
+    child.stdout?.on('data', onData);
+    child.stderr?.on('data', onData);
+    child.once('exit', onExit);
+    child.once('error', onError);
+  });
 }
 
 async function waitForReady(url: string, timeoutMs: number): Promise<void> {
@@ -207,51 +288,29 @@ function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
   });
 }
 
-function attachLogPipes(child: ChildProcess, port: number): void {
+function attachLogPipes(
+  child: ChildProcess,
+  getPort: () => number | null,
+): void {
+  const tag = (): string => {
+    const port = getPort();
+    return port === null ? '[standalone:<pending>]' : `[standalone:${port}]`;
+  };
   if (process.env.E2E_STANDALONE_LOGS === '1') {
-    const tag = `[standalone:${port}]`;
     child.stdout?.on('data', (chunk: Buffer) => {
-      process.stderr.write(`${tag} ${chunk.toString()}`);
+      process.stderr.write(`${tag()} ${chunk.toString()}`);
     });
     child.stderr?.on('data', (chunk: Buffer) => {
-      process.stderr.write(`${tag} ${chunk.toString()}`);
+      process.stderr.write(`${tag()} ${chunk.toString()}`);
     });
   } else {
-    // Drain so the process never blocks on a full pipe buffer.
-    child.stdout?.resume();
-    child.stderr?.resume();
+    // Drain so the process never blocks on a full pipe buffer. We attach a
+    // no-op `data` listener instead of `.resume()` because additional
+    // listeners (e.g. `waitForBanner`) attach later and we don't want to flip
+    // the stream into flowing mode prematurely.
+    child.stdout?.on('data', () => {});
+    child.stderr?.on('data', () => {});
   }
-}
-
-async function pickFreePort(preferred: number): Promise<number> {
-  // Best-effort: try preferred first, fall back to a random offset. Standalone
-  // handles port collisions internally with `--port`, but reusing a port
-  // across two parallel suites in the same Jest run causes flakes.
-  const candidates = [preferred, ...randomOffsets(preferred, 16)];
-  for (const candidate of candidates) {
-    if (await isPortFree(candidate)) {
-      return candidate;
-    }
-  }
-  return preferred;
-}
-
-function randomOffsets(base: number, count: number): number[] {
-  const offsets = new Set<number>();
-  while (offsets.size < count) {
-    offsets.add(base + (randomBytes(2).readUInt16LE() % 2_000));
-  }
-  return Array.from(offsets);
-}
-
-async function isPortFree(port: number): Promise<boolean> {
-  const net = await import('node:net');
-  return await new Promise<boolean>((resolve) => {
-    const server = net.createServer();
-    server.once('error', () => resolve(false));
-    server.once('listening', () => server.close(() => resolve(true)));
-    server.listen(port, '127.0.0.1');
-  });
 }
 
 function sleep(ms: number): Promise<void> {
