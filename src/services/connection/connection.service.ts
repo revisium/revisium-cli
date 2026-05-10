@@ -110,7 +110,7 @@ export class ConnectionService {
       return;
     }
 
-    this.logger.info(
+    this.logger.progress(
       `Using context ${selectedContext} (instance: ${context.instance})`,
     );
   }

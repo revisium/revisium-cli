@@ -20,7 +20,7 @@ describe('ConnectionService', () => {
     resolveConnection: jest.Mock;
   };
   let configServiceFake: { get: jest.Mock };
-  let loggerServiceFake: { info: jest.Mock };
+  let loggerServiceFake: { info: jest.Mock; progress: jest.Mock };
 
   const mockUrl: RevisiumUrlComplete = {
     baseUrl: 'https://cloud.revisium.io',
@@ -52,6 +52,7 @@ describe('ConnectionService', () => {
 
     loggerServiceFake = {
       info: jest.fn(),
+      progress: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -182,7 +183,7 @@ describe('ConnectionService', () => {
         workspaceUrl,
         { createProject: undefined },
       );
-      expect(loggerServiceFake.info).toHaveBeenCalledWith(
+      expect(loggerServiceFake.progress).toHaveBeenCalledWith(
         'Using context local (instance: local)',
       );
     });
@@ -239,7 +240,7 @@ describe('ConnectionService', () => {
           password: undefined,
         },
       );
-      expect(loggerServiceFake.info).toHaveBeenCalledWith(
+      expect(loggerServiceFake.progress).toHaveBeenCalledWith(
         'Using context local (instance: local)',
       );
     });

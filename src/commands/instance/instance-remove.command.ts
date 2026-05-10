@@ -1,6 +1,12 @@
-import { CommandRunner, SubCommand } from 'nest-commander';
+import { CommandRunner, Option, SubCommand } from 'nest-commander';
 import { LoggerService } from 'src/services/common';
+import { CredentialStoreService } from 'src/services/credentials';
 import { WorkspaceConfigService } from 'src/services/workspace';
+import { parseBooleanOption } from 'src/utils/parse-boolean.utils';
+
+interface Options {
+  withCredentials?: boolean;
+}
 
 @SubCommand({
   name: 'remove',
@@ -10,12 +16,13 @@ import { WorkspaceConfigService } from 'src/services/workspace';
 export class InstanceRemoveCommand extends CommandRunner {
   constructor(
     private readonly workspaceConfig: WorkspaceConfigService,
+    private readonly credentialStore: CredentialStoreService,
     private readonly logger: LoggerService,
   ) {
     super();
   }
 
-  async run(inputs: string[]): Promise<void> {
+  async run(inputs: string[], options: Options = {}): Promise<void> {
     const name = inputs[0];
     if (!name) {
       throw new Error('Error: instance name is required');
@@ -36,9 +43,29 @@ export class InstanceRemoveCommand extends CommandRunner {
       );
     }
 
+    const baseUrl = loaded.config.instances[name].baseUrl;
     delete loaded.config.instances[name];
     await this.workspaceConfig.save(loaded.path, loaded.config);
 
+    if (options.withCredentials) {
+      const removed = this.credentialStore.deleteCredential({
+        baseUrl,
+        credential: 'default',
+      });
+      if (removed) {
+        this.logger.info(`Removed saved credential for "${name}"`);
+      }
+    }
+
     this.logger.success(`Removed instance "${name}"`);
+  }
+
+  @Option({
+    flags: '--with-credentials [boolean]',
+    description:
+      'Also delete the saved "default" API-key credential for this instance from the OS keyring',
+  })
+  parseWithCredentials(value?: string): boolean {
+    return parseBooleanOption(value);
   }
 }

@@ -64,7 +64,15 @@ export class WorkspaceConfigService {
     }
 
     const raw = await readFile(configPath, 'utf-8');
-    const parsed = JSON.parse(raw) as unknown;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `Failed to parse Revisium workspace config at ${configPath}: ${message}`,
+      );
+    }
 
     return {
       path: configPath,
