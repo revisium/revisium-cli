@@ -69,7 +69,7 @@ export class WorkspaceConfigService {
       parsed = JSON.parse(raw);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(
+      throw new TypeError(
         `Failed to parse Revisium workspace config at ${configPath}: ${message}`,
       );
     }

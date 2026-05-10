@@ -48,12 +48,21 @@ export class InstanceRemoveCommand extends CommandRunner {
     await this.workspaceConfig.save(loaded.path, loaded.config);
 
     if (options.withCredentials) {
-      const removed = this.credentialStore.deleteCredential({
-        baseUrl,
-        credential: 'default',
-      });
-      if (removed) {
-        this.logger.info(`Removed saved credential for "${name}"`);
+      // Best-effort: instance is already deleted from workspace config, so a
+      // keyring failure here shouldn't make the whole command fail.
+      try {
+        const removed = this.credentialStore.deleteCredential({
+          baseUrl,
+          credential: 'default',
+        });
+        if (removed) {
+          this.logger.info(`Removed saved credential for "${name}"`);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `Instance "${name}" was removed, but the saved credential could not be deleted: ${message}`,
+        );
       }
     }
 

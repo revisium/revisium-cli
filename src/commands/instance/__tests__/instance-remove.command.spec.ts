@@ -6,7 +6,7 @@ import { WorkspaceConfigService } from 'src/services/workspace';
 describe('InstanceRemoveCommand', () => {
   let workspaceConfig: { load: jest.Mock; save: jest.Mock };
   let credentialStore: { deleteCredential: jest.Mock };
-  let logger: { info: jest.Mock; success: jest.Mock };
+  let logger: { info: jest.Mock; success: jest.Mock; warn: jest.Mock };
   let command: InstanceRemoveCommand;
 
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe('InstanceRemoveCommand', () => {
       save: jest.fn().mockResolvedValue(undefined),
     };
     credentialStore = { deleteCredential: jest.fn() };
-    logger = { info: jest.fn(), success: jest.fn() };
+    logger = { info: jest.fn(), success: jest.fn(), warn: jest.fn() };
     command = new InstanceRemoveCommand(
       workspaceConfig as unknown as WorkspaceConfigService,
       credentialStore as unknown as CredentialStoreService,
@@ -89,6 +89,21 @@ describe('InstanceRemoveCommand', () => {
     expect(logger.info).not.toHaveBeenCalledWith(
       expect.stringContaining('Removed saved credential'),
     );
+  });
+
+  it('--with-credentials warns but still succeeds when keyring throws', async () => {
+    loaded({ local: { baseUrl: 'http://a' } });
+    credentialStore.deleteCredential.mockImplementation(() => {
+      throw new Error('keyring offline');
+    });
+
+    await expect(
+      command.run(['local'], { withCredentials: true }),
+    ).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('saved credential could not be deleted'),
+    );
+    expect(logger.success).toHaveBeenCalledWith('Removed instance "local"');
   });
 
   it('parseWithCredentials parses boolean option', () => {
