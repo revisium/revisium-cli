@@ -218,11 +218,25 @@ export class BootstrapService {
         ? this.uniqueEndpoints(options.endpointOverrides)
         : config.endpoints;
 
+    // Fail fast on branchName mismatch in non-dry-run, before ensureProject
+    // can create a project/branch we'd then have to roll back.
+    if (!dryRun) {
+      this.assertBranchNameMatchesTarget(config, url, false);
+    }
+
     const project = await this.ensureProject(options, dryRun);
+
+    // In dry-run, allow a branchName mismatch only for the specific
+    // populated-rootBranch regression case: project already exists, target
+    // branch is missing, so we diff against the root branch's head. If the
+    // project itself is missing there's no rootBranch to diff against, so
+    // the mismatch must still surface.
     this.assertBranchNameMatchesTarget(
       config,
       url,
-      dryRun && project.branchStatus === 'created',
+      dryRun &&
+        project.projectStatus === 'skipped' &&
+        project.branchStatus === 'created',
     );
     const emptySummary = this.createEmptySummary(url, project, dryRun);
 
