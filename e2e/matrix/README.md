@@ -290,7 +290,7 @@ Each row below is implemented as one `*.e2e-spec.ts` file in `e2e/matrix/`. The 
 
 ## Helper layout
 
-```
+```text
 e2e/utils/
   standalone-runner.ts   — spawns @revisium/standalone, waits for /health/readiness, returns { baseUrl, port, api, url(), stop() }
   standalone-api.ts      — REST/GraphQL helpers: login, mintApiKey, createProject, projectExists, seedTable, seedRow, listTables, listEndpoints

@@ -127,12 +127,14 @@ describe('M01 — auth commands', () => {
       ['auth', 'status', '--instance', 'local', '--credential', 'automation'],
       { cwd: workspace, env },
     );
+    expect(automationStatus.exitCode).toBe(0);
     expect(automationStatus.stdout).toContain('Saved credential found');
 
     const defaultStatus = await runCli(
       ['auth', 'status', '--instance', 'local'],
       { cwd: workspace, env },
     );
+    expect(defaultStatus.exitCode).toBe(0);
     expect(defaultStatus.stdout).toContain('No saved credential found');
   });
 
@@ -187,11 +189,11 @@ describe('M01 — auth commands', () => {
     });
     const env = envWithStore();
 
-    await runCli(['auth', 'login', '--instance', 'local', '--api-key-stdin'], {
-      cwd: workspace,
-      env,
-      stdin: defaultApiKey + '\n',
-    });
+    const login = await runCli(
+      ['auth', 'login', '--instance', 'local', '--api-key-stdin'],
+      { cwd: workspace, env, stdin: defaultApiKey + '\n' },
+    );
+    expect(login.exitCode).toBe(0);
 
     const logout = await runCli(['auth', 'logout', '--instance', 'local'], {
       cwd: workspace,
@@ -203,6 +205,7 @@ describe('M01 — auth commands', () => {
       cwd: workspace,
       env,
     });
+    expect(status.exitCode).toBe(0);
     expect(status.stdout).toContain('No saved credential found');
   });
 
@@ -220,6 +223,7 @@ describe('M01 — auth commands', () => {
       cwd: workspace,
       env,
     });
+    expect(status.exitCode).toBe(0);
     expect(status.stdout).toContain('Saved credential found');
   });
 

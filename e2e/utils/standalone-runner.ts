@@ -63,7 +63,7 @@ export async function startStandalone(
   } = options;
 
   if (auth && !adminPassword) {
-    throw new Error(
+    throw new TypeError(
       'startStandalone: adminPassword is required when auth=true',
     );
   }

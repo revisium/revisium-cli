@@ -89,34 +89,53 @@ describe('M14 — multi-instance workspace', () => {
 
   it('saves independent credentials per instance', async () => {
     const { workspace, env } = setup();
-    await runCli(
+    const loginPrimary = await runCli(
       ['auth', 'login', '--instance', 'primary', '--api-key-stdin'],
-      {
-        cwd: workspace,
-        env,
-        stdin: primaryKey + '\n',
-      },
+      { cwd: workspace, env, stdin: primaryKey + '\n' },
     );
-    await runCli(
+    expect(loginPrimary.exitCode).toBe(0);
+    const loginSecondary = await runCli(
       ['auth', 'login', '--instance', 'secondary', '--api-key-stdin'],
-      {
-        cwd: workspace,
-        env,
-        stdin: secondaryKey + '\n',
-      },
+      { cwd: workspace, env, stdin: secondaryKey + '\n' },
     );
+    expect(loginSecondary.exitCode).toBe(0);
 
     const primaryStatus = await runCli(
       ['auth', 'status', '--instance', 'primary'],
       { cwd: workspace, env },
     );
+    expect(primaryStatus.exitCode).toBe(0);
     expect(primaryStatus.stdout).toContain('Saved credential found');
 
     const secondaryStatus = await runCli(
       ['auth', 'status', '--instance', 'secondary'],
       { cwd: workspace, env },
     );
+    expect(secondaryStatus.exitCode).toBe(0);
     expect(secondaryStatus.stdout).toContain('Saved credential found');
+
+    // Independence: each instance points at its own baseUrl, so the two
+    // status outputs should differ on the host portion. Removing one
+    // credential must not affect the other.
+    expect(primaryStatus.stdout).not.toEqual(secondaryStatus.stdout);
+
+    const logoutPrimary = await runCli(
+      ['auth', 'logout', '--instance', 'primary'],
+      { cwd: workspace, env },
+    );
+    expect(logoutPrimary.exitCode).toBe(0);
+
+    const primaryAfter = await runCli(
+      ['auth', 'status', '--instance', 'primary'],
+      { cwd: workspace, env },
+    );
+    expect(primaryAfter.stdout).toContain('No saved credential found');
+
+    const secondaryAfter = await runCli(
+      ['auth', 'status', '--instance', 'secondary'],
+      { cwd: workspace, env },
+    );
+    expect(secondaryAfter.stdout).toContain('Saved credential found');
   });
 
   it('context switching flips the target between instances', async () => {

@@ -63,7 +63,7 @@ describe('M03 — context commands', () => {
       REVISIUM_API_KEY: apiKey,
       REVISIUM_CREDENTIAL_STORE_SERVICE: credentialStoreService,
     };
-    await runCli(
+    const addInstance = await runCli(
       [
         'instance',
         'add',
@@ -75,7 +75,16 @@ describe('M03 — context commands', () => {
       ],
       { cwd: workspace, env },
     );
+    expect(addInstance.exitCode).toBe(0);
     return { workspace, env };
+  }
+
+  async function runCliExpectOk(
+    args: string[],
+    options: Parameters<typeof runCli>[1],
+  ): Promise<void> {
+    const result = await runCli(args, options);
+    expect(result.exitCode).toBe(0);
   }
 
   function readConfig(workspace: string): {
@@ -154,7 +163,7 @@ describe('M03 — context commands', () => {
 
   it('context list / show / use round-trip', async () => {
     const { workspace, env } = await setupWorkspace();
-    await runCli(
+    await runCliExpectOk(
       [
         'context',
         'create',
@@ -168,7 +177,7 @@ describe('M03 — context commands', () => {
       ],
       { cwd: workspace, env },
     );
-    await runCli(
+    await runCliExpectOk(
       [
         'context',
         'create',
@@ -204,12 +213,13 @@ describe('M03 — context commands', () => {
     expect(readConfig(workspace).currentContext).toBe('taxonomy-local');
 
     const show = await runCli(['context', 'show'], { cwd: workspace, env });
+    expect(show.exitCode).toBe(0);
     expect(show.stdout).toContain('taxonomy-local');
   });
 
   it('context remove drops the entry and clears currentContext when active', async () => {
     const { workspace, env } = await setupWorkspace();
-    await runCli(
+    await runCliExpectOk(
       [
         'context',
         'create',
@@ -223,7 +233,7 @@ describe('M03 — context commands', () => {
       ],
       { cwd: workspace, env },
     );
-    await runCli(['context', 'use', 'dictionary-local'], {
+    await runCliExpectOk(['context', 'use', 'dictionary-local'], {
       cwd: workspace,
       env,
     });
@@ -240,7 +250,7 @@ describe('M03 — context commands', () => {
 
   it('rejects head/non-draft contexts when used by mutating commands', async () => {
     const { workspace, env } = await setupWorkspace();
-    await runCli(
+    await runCliExpectOk(
       [
         'context',
         'create',

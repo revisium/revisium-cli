@@ -131,14 +131,16 @@ describe('M05 — endpoint commands', () => {
   it('endpoint list returns both endpoint types in JSON form', async () => {
     const workspace = newWorkspace();
     const url = standalone.url({ project: projectName });
-    await runCli(['endpoint', 'ensure', '--url', url, '--type', 'REST_API'], {
-      cwd: workspace,
-      env: env(),
-    });
-    await runCli(['endpoint', 'ensure', '--url', url, '--type', 'GRAPHQL'], {
-      cwd: workspace,
-      env: env(),
-    });
+    const ensureRest = await runCli(
+      ['endpoint', 'ensure', '--url', url, '--type', 'REST_API'],
+      { cwd: workspace, env: env() },
+    );
+    expect(ensureRest.exitCode).toBe(0);
+    const ensureGraphql = await runCli(
+      ['endpoint', 'ensure', '--url', url, '--type', 'GRAPHQL'],
+      { cwd: workspace, env: env() },
+    );
+    expect(ensureGraphql.exitCode).toBe(0);
 
     const list = await runCli(['endpoint', 'list', '--url', url, '--json'], {
       cwd: workspace,

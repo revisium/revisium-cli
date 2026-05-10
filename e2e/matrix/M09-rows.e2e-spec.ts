@@ -128,6 +128,12 @@ describe('M09 — rows save / upload', () => {
       { cwd: workspace, env, timeout: 240_000 },
     );
     expect(upload.exitCode).toBe(0);
+    const targetRows = await standalone.api.listRows(
+      'admin',
+      targetProject,
+      'Quest',
+    );
+    expect(targetRows).toHaveLength(50);
   });
 
   it('rows upload honours --batch <n>', async () => {
@@ -169,5 +175,11 @@ describe('M09 — rows save / upload', () => {
       { cwd: workspace, env, timeout: 240_000 },
     );
     expect(upload.exitCode).toBe(0);
+    const targetRows = await standalone.api.listRows(
+      'admin',
+      targetProject,
+      'Quest',
+    );
+    expect(targetRows).toHaveLength(50);
   });
 });

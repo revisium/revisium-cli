@@ -217,5 +217,8 @@ describe('M10 — sync', () => {
       { cwd: workspace, env },
     );
     expect(result.exitCode).not.toBe(0);
+    expect(result.stderr.toLowerCase()).toMatch(
+      /(mutually[- ]exclusive|conflict|both.*token)/,
+    );
   });
 });
