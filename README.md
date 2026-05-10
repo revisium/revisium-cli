@@ -193,7 +193,7 @@ See [Configuration](docs/configuration.md) and [URL Format](docs/url-format.md) 
 - [Workspace Config](docs/workspace-config.md) - non-secret instances and contexts
 - [URL Format](docs/url-format.md) - Revisium URL syntax
 - [Authentication](docs/authentication.md) - Token, API key, and password auth
-- [Auth Contexts And Bootstrap Plan](docs/auth-contexts-and-bootstrap-plan.md) - proposed saved auth, contexts, and example bootstrap workflow
+- [Auth Contexts And Bootstrap Plan](docs/auth-contexts-and-bootstrap-plan.md) - implementation tracker for saved auth, contexts, and example bootstrap workflow
 - [Schema Commands](docs/schema-commands.md) - schema save, create-migrations
 - [Migrate Commands](docs/migrate-commands.md) - migrate save, apply
 - [Rows Commands](docs/rows-commands.md) - rows save, upload
