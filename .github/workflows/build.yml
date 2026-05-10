@@ -13,7 +13,7 @@ jobs:
       image_name: ${{ github.event.repository.name }}
       context: .
       dockerfile: Dockerfile
-      emit_latest_tag: true
+      emit_latest_tag: ${{ startsWith(github.ref, 'refs/tags/v') }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -68,6 +68,11 @@ jobs:
         echo $! > .e2e-test.pid
 
         for i in $(seq 1 300); do
+          revisium_pid="$(cat .e2e-test.pid)"
+          if ! kill -0 "$revisium_pid" 2>/dev/null; then
+            echo "Revisium exited before becoming ready"
+            exit 1
+          fi
           if curl -sf http://localhost:8082/health/readiness > /dev/null 2>&1; then
             echo "Revisium ready after ${i}s"
             break
