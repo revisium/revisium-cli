@@ -22,7 +22,7 @@ export interface UrlEnvConfig {
   username?: string;
   password?: string;
   /** When true, skip auth resolution entirely and treat the target as
-   *  unauthenticated. Used by `--no-auth` against a no-auth standalone. */
+   *  unauthenticated. Used by `--skip-auth` against a no-auth standalone. */
   noAuth?: boolean;
 }
 
