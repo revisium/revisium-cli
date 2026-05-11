@@ -21,6 +21,9 @@ export interface UrlEnvConfig {
   apikey?: string;
   username?: string;
   password?: string;
+  /** When true, skip auth resolution entirely and treat the target as
+   *  unauthenticated. Used by `--skip-auth` against a no-auth standalone. */
+  noAuth?: boolean;
 }
 
 const DEFAULT_HTTP_PORT = 8080;
@@ -143,6 +146,10 @@ export class UrlBuilderService {
     label: string,
     baseUrl: string,
   ): Promise<AuthCredentials> {
+    if (env?.noAuth) {
+      return { method: 'none' };
+    }
+
     const token = parsed.token || env?.token;
     if (token) {
       return { method: 'token', token };
