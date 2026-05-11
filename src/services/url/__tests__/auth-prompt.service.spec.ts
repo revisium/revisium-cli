@@ -39,4 +39,24 @@ describe('AuthPromptService', () => {
     expect(interactive.promptPassword).not.toHaveBeenCalled();
     expect(interactive.promptText).not.toHaveBeenCalled();
   });
+
+  it('offers a No Auth choice that returns method "none" without prompting for secrets', async () => {
+    Object.assign(process.stdin, { isTTY: true });
+    interactive.promptSelect.mockResolvedValue('none');
+
+    const result = await service.promptForAuth('api', 'http://localhost:9222');
+
+    expect(result).toEqual({ method: 'none' });
+    expect(interactive.promptSelect).toHaveBeenCalledTimes(1);
+    const firstCall = interactive.promptSelect.mock.calls[0] as [
+      string,
+      Array<{ name: string; value: string }>,
+    ];
+    const options = firstCall[1];
+    const noAuth = options.find((o) => o.value === 'none');
+    expect(noAuth).toBeDefined();
+    expect(noAuth?.name).toMatch(/No Auth/i);
+    expect(interactive.promptPassword).not.toHaveBeenCalled();
+    expect(interactive.promptText).not.toHaveBeenCalled();
+  });
 });

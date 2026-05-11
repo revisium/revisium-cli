@@ -31,6 +31,10 @@ export class AuthPromptService {
         { name: `Token (copy from ${tokenPageUrl})`, value: 'token' },
         { name: 'API Key (for automated access)', value: 'apikey' },
         { name: 'Username & Password', value: 'password' },
+        {
+          name: 'No Auth (target does not require credentials)',
+          value: 'none',
+        },
       ],
     );
 
