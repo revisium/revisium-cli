@@ -84,6 +84,64 @@ describe('M13 — authMode none', () => {
     expect(result.exitCode).not.toBe(0);
   });
 
+  it('example bootstrap with --skip-auth + raw --url works without workspace context', async () => {
+    const workspace = newWorkspace();
+    const project = `m13-skipauth-${Date.now()}`;
+    const configPath = `${workspace}/bootstrap.config.json`;
+    const fs = await import('node:fs');
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        projectName: project,
+        endpoints: ['REST_API'],
+        tables: [],
+        rows: [],
+      }),
+      'utf-8',
+    );
+    const url = `${standalone.baseUrl.replace(/^https?:\/\//, 'revisium://')}/admin/${project}/master`;
+    const result = await runCli(
+      [
+        'example',
+        'bootstrap',
+        '--config',
+        configPath,
+        '--url',
+        url,
+        '--skip-auth',
+        '--json',
+      ],
+      { cwd: workspace, env: buildEnv(), timeout: 120_000 },
+    );
+    expect(result.exitCode).toBe(0);
+  });
+
+  it('example bootstrap without --skip-auth against a no-auth standalone fails because stdin is not a TTY', async () => {
+    const workspace = newWorkspace();
+    const project = `m13-noskip-${Date.now()}`;
+    const configPath = `${workspace}/bootstrap.config.json`;
+    const fs = await import('node:fs');
+    fs.writeFileSync(
+      configPath,
+      JSON.stringify({
+        projectName: project,
+        endpoints: ['REST_API'],
+        tables: [],
+        rows: [],
+      }),
+      'utf-8',
+    );
+    const url = `${standalone.baseUrl.replace(/^https?:\/\//, 'revisium://')}/admin/${project}/master`;
+    const result = await runCli(
+      ['example', 'bootstrap', '--config', configPath, '--url', url, '--json'],
+      { cwd: workspace, env: buildEnv(), timeout: 60_000 },
+    );
+    expect(result.exitCode).not.toBe(0);
+    expect(result.stderr).toMatch(
+      /No credentials found and stdin is not a TTY/,
+    );
+  });
+
   it('example bootstrap works without any credential', async () => {
     const workspace = newWorkspace();
     const project = `m13-bootstrap-${Date.now()}`;
