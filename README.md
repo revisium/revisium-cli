@@ -36,13 +36,15 @@ npx -y @revisium/standalone
 curl -O https://raw.githubusercontent.com/revisium/revisium-cli/master/examples/quickstart/bootstrap.config.json
 
 # 3. Bootstrap a project + table + row + REST endpoint.
+#    --skip-auth tells the CLI not to ask for credentials against this no-auth standalone.
 revisium example bootstrap \
   --config ./bootstrap.config.json \
   --url revisium://localhost:9222/admin/hello/master \
+  --skip-auth \
   --commit
 
 # 4. Hit your fresh REST endpoint.
-curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/Note/first
+curl http://localhost:9222/endpoint/rest/admin/hello/master/draft/tables/Note/row/first
 ```
 
 Full walkthrough: [docs/quickstart.md](docs/quickstart.md). For a Revisium that requires login, see [docs/authentication.md](docs/authentication.md).

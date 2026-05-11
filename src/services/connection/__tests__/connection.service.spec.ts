@@ -338,6 +338,31 @@ describe('ConnectionService', () => {
       );
     });
 
+    it('passes noAuth env when --skip-auth is set and ignores credential env vars', async () => {
+      const testUrl = 'revisium://localhost:9222/admin/hello/master';
+      configServiceFake.get.mockImplementation((key: string) =>
+        key === 'REVISIUM_URL' ? 'env-url' : 'env-token',
+      );
+
+      urlBuilderServiceFake.parseAndComplete.mockRejectedValue(
+        new Error('test error'),
+      );
+
+      await expect(
+        service.connect({ url: testUrl, skipAuth: true }),
+      ).rejects.toThrow();
+
+      expect(urlBuilderServiceFake.parseAndComplete).toHaveBeenCalledWith(
+        testUrl,
+        'api',
+        { url: 'env-url', noAuth: true },
+      );
+      expect(configServiceFake.get).not.toHaveBeenCalledWith('REVISIUM_TOKEN');
+      expect(configServiceFake.get).not.toHaveBeenCalledWith(
+        'REVISIUM_API_KEY',
+      );
+    });
+
     it('calls connectionFactory.createConnection with parsed url', async () => {
       urlBuilderServiceFake.parseAndComplete.mockResolvedValue(mockUrl);
       connectionFactoryFake.createConnection.mockResolvedValue(

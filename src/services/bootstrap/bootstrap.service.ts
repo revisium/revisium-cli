@@ -10,6 +10,8 @@ export type EndpointType = 'REST_API' | 'GRAPHQL';
 export interface TargetOptions {
   url?: string;
   context?: string;
+  token?: string;
+  skipAuth?: boolean;
 }
 
 export interface ProjectEnsureResult {
@@ -99,8 +101,10 @@ export class BootstrapService {
   async ensureProject(
     options: TargetOptions,
     dryRun = false,
+    resolved?: ResolvedClient,
   ): Promise<ProjectEnsureResult> {
-    const { url, apiClient } = await this.createResolvedClient(options);
+    const { url, apiClient } =
+      resolved ?? (await this.createResolvedClient(options));
     this.assertWritableRevision(url);
     const branchName = url.branch || 'master';
     const orgScope = apiClient.client.org(url.organization);
@@ -224,7 +228,12 @@ export class BootstrapService {
       this.assertBranchNameMatchesTarget(config, url, false);
     }
 
-    const project = await this.ensureProject(options, dryRun);
+    // Reuse the resolved client so we don't re-prompt for auth or re-resolve
+    // the workspace context in ensureProject.
+    const project = await this.ensureProject(options, dryRun, {
+      url,
+      apiClient,
+    });
 
     // In dry-run, allow a branchName mismatch only for the specific
     // populated-rootBranch regression case: project already exists, target
