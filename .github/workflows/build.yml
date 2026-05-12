@@ -24,9 +24,7 @@ permissions:
 
 jobs:
   build-and-push-image:
-    # TODO: bump to the merge commit on revisium-actions master once
-    # https://github.com/revisium/revisium-actions/pull/12 lands.
-    uses: revisium/revisium-actions/.github/workflows/docker-build.yml@730c5b9b817e5f225853939227107d811cfee18f # feat/docker-build-args
+    uses: revisium/revisium-actions/.github/workflows/docker-build.yml@4faefa5d526b0b3af826d650dae4f77d89ccd087 # v0.3.7
     with:
       image_name: ${{ github.event.repository.name }}
       context: .
