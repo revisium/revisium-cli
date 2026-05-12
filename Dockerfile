@@ -4,7 +4,7 @@ RUN apk add --no-cache bash ca-certificates curl tini \
   && update-ca-certificates
 
 ARG REVISIUM_VERSION
-RUN test -n "${REVISIUM_VERSION}" \
+RUN : "${REVISIUM_VERSION:?REVISIUM_VERSION build-arg is required (pass --build-arg REVISIUM_VERSION=<x.y.z>)}" \
  && npm i -g "revisium@${REVISIUM_VERSION}" \
  && revisium --version \
  && echo "Installed revisium@${REVISIUM_VERSION}"
