@@ -2,18 +2,36 @@ name: Build
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'revisium npm version to install (e.g. 2.5.0-alpha.5)'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'revisium npm version to install (without leading v)'
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 
 permissions:
   contents: read
 
 jobs:
   build-and-push-image:
-    uses: revisium/revisium-actions/.github/workflows/docker-build.yml@184b609dcbc1e23f14021141f29226d4e6a0f1ac # v0.3.6
+    uses: revisium/revisium-actions/.github/workflows/docker-build.yml@4faefa5d526b0b3af826d650dae4f77d89ccd087 # v0.3.7
     with:
       image_name: ${{ github.event.repository.name }}
       context: .
       dockerfile: Dockerfile
       emit_latest_tag: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      build_args: |
+        REVISIUM_VERSION=${{ inputs.version }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

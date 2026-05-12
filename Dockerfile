@@ -3,9 +3,11 @@ FROM node:22-alpine
 RUN apk add --no-cache bash ca-certificates curl tini \
   && update-ca-certificates
 
-RUN npm i -g revisium \
+ARG REVISIUM_VERSION
+RUN : "${REVISIUM_VERSION:?REVISIUM_VERSION build-arg is required (pass --build-arg REVISIUM_VERSION=<x.y.z>)}" \
+ && npm i -g "revisium@${REVISIUM_VERSION}" \
  && revisium --version \
- && echo "✅ Installed revisium successfully"
+ && echo "Installed revisium@${REVISIUM_VERSION}"
 
 WORKDIR /app
 RUN mkdir -p /app/data \
