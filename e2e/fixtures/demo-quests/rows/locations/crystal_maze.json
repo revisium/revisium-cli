@@ -8,7 +8,7 @@
   "readonly": true,
   "data": {
     "icon": {
-      "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/cf4d9e2bff71bdfbe2f186bc8d92b0da49b635be",
+      "url": "https://cdn.revisium.io/cf4d9e2bff71bdfbe2f186bc8d92b0da49b635be",
       "hash": "cf4d9e2bff71bdfbe2f186bc8d92b0da49b635be",
       "size": 2862025,
       "width": 1024,
@@ -28,7 +28,7 @@
       "points_of_interest": [
         {
           "icon": {
-            "url": "https://692fc936-0838-487e-a7b5-1aae5c653996.selstorage.ru/e88ab526025cca45fc023512e531e1d3b97c2e19",
+            "url": "https://cdn.revisium.io/e88ab526025cca45fc023512e531e1d3b97c2e19",
             "hash": "e88ab526025cca45fc023512e531e1d3b97c2e19",
             "size": 2725877,
             "width": 1024,
